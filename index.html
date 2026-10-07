@@ -729,6 +729,7 @@ textarea.field-control{resize:vertical;min-height:70px}
                   <tr>
                     <th>File Name</th>
                     <th>Category</th>
+                    <th>Document Type</th>
                     <th>Source</th>
                     <th>Uploaded By</th>
                     <th>Date &amp; Time</th>
@@ -953,7 +954,24 @@ textarea.field-control{resize:vertical;min-height:70px}
       <button class="modal-close" data-close-modal><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"></path></svg></button>
     </div>
     <div class="modal-body">
-      <div class="dropzone" id="dropzone">
+      <div class="form-field filled">
+        <label class="field-label">Category</label>
+        <select class="field-control" id="input-doc-category">
+          <option value="">Select category…</option>
+        </select>
+      </div>
+      <div class="form-field" id="doc-type-field" style="display:none">
+        <label class="field-label">Document Type</label>
+        <select class="field-control" id="input-doc-type">
+          <option value="">Select document type…</option>
+        </select>
+      </div>
+      <div class="form-field" id="doc-type-other-field" style="display:none">
+        <label class="field-label">Describe the document</label>
+        <input class="field-control" id="input-doc-type-other" placeholder="e.g. Pre-shipment inspection waiver">
+      </div>
+
+      <div class="dropzone" id="dropzone" style="margin-top:18px">
         <input type="file" id="file-input" multiple style="display:none">
         <svg width="30" height="30" fill="none" stroke="#023819" stroke-width="1.6" viewBox="0 0 24 24"><path d="M12 16V4M6 10l6-6 6 6M4 20h16" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         <div class="dz-title">Drag & drop files here</div>
@@ -964,18 +982,6 @@ textarea.field-control{resize:vertical;min-height:70px}
         <p class="field-hint">Maximum file size: 25 MB per file</p>
       </div>
       <div class="file-pill-list" id="file-pill-list"></div>
-
-      <div class="form-field" style="margin-top:22px">
-        <label class="field-label">Category (optional)</label>
-        <select class="field-control" id="input-doc-category">
-          <option value="">Select category…</option>
-          <option>Shipping</option>
-          <option>Finance</option>
-          <option>Customs</option>
-          <option>Compliance</option>
-          <option>General</option>
-        </select>
-      </div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-outline" data-close-modal>Cancel</button>
@@ -995,11 +1001,27 @@ textarea.field-control{resize:vertical;min-height:70px}
       <button class="modal-close" data-close-modal><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"></path></svg></button>
     </div>
     <div class="modal-body">
-      <div class="dropzone" id="dropzone-update">
+      <div class="form-field filled">
+        <label class="field-label">Category</label>
+        <select class="field-control" id="input-update-doc-category">
+          <option value="">Select category…</option>
+        </select>
+      </div>
+      <div class="form-field" id="update-doc-type-field" style="display:none">
+        <label class="field-label">Document Type</label>
+        <select class="field-control" id="input-update-doc-type">
+          <option value="">Select document type…</option>
+        </select>
+      </div>
+      <div class="form-field" id="update-doc-type-other-field" style="display:none">
+        <label class="field-label">Describe the document</label>
+        <input class="field-control" id="input-update-doc-type-other" placeholder="e.g. Pre-shipment inspection waiver">
+      </div>
+      <div class="dropzone" id="dropzone-update" style="margin-top:18px">
         <input type="file" id="file-input-update" style="display:none">
         <svg width="26" height="26" fill="none" stroke="#023819" stroke-width="1.6" viewBox="0 0 24 24"><path d="M12 16V4M6 10l6-6 6 6M4 20h16" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         <div class="dz-title" id="update-file-name">Select a replacement file</div>
-        <div class="dz-sub">Metadata stays the same — only the file changes</div>
+        <div class="dz-sub">The file changes — category and document type can be corrected here too</div>
       </div>
     </div>
     <div class="modal-foot">
@@ -1142,7 +1164,33 @@ function avatarFillStyle(fill){
   return 'background:var(--green-dark);color:var(--green-accent)';
 }
 
-const RESPONSIBILITIES = ['Operations Manager','Operations Officer','Documentation Officer','Finance Officer','QA Officer','CX Officer','Clearing Officer','Transport Coordinator'];
+const RESPONSIBILITIES = ['Operations Manager','Operations Officer','Documentation Officer','Finance Officer','QA Officer','CX Officer','Clearing Officer','Transport Officer','Customer Success'];
+
+// Document checklist — Ops Feedback doc (Back Office 2.0), sections 1-2.
+// Driven purely by shipment direction (Import/Export), not transport mode, so
+// the same checklist applies across Ocean, Air, Haulage, etc. Every category
+// also accepts "Others" for anything not catered for, captured with a free
+// text description rather than a silent free-text upload.
+const OTHERS_DOC_TYPE = 'Others';
+const DOCUMENT_TAXONOMY = {
+  Import: {
+    'Commercial & Shipping Documents': ['Commercial Invoice','Packing List','Bill of Lading (SWB or Telex)','Certificate of Origin','Air Waybill','CCVO','Insurance Certificate'],
+    'Regulatory & Customs Documents': ['Form M','PAAR','SONCAP / SON Documents','NAFDAC Documents','NESREA Documents','NCS-Required Permits/Approvals','End User Certificate','Product-Specific Regulatory Permits','Customs Duty Payment Evidence'],
+    'Importer/Consignee Documents': ['Importer Authorisation / Letter of Authority','Shipping Invoice','Shipping Receipt','Delivery Order','Terminal Invoice'],
+    'Clearing Documents': ['Terminal Receipt','Final Assessment','Inspection Act','Exit Note/Gate','TDO','EIR','Waybill'],
+  },
+  Export: {
+    'Commercial Documents': ['Proforma Invoice','Packing List','Commercial Invoice'],
+    'Regulatory & Export Documents': ['NXP Form','Clean Certificate of Inspection','Single Goods Declaration (SGD)','Inspection Act','Shipping Export Docs Acknowledgement','Vessel Plan Confirmation','Terminal Invoice','Terminal Receipt','Customs Examination/Release Documentation','EIR / Indemnity'],
+    'Shipping Documents': ['Booking Confirmation','Shipping Instruction','Bill of Lading / Sea Waybill','Shipping Invoice (Freight)','Shipping Payment (Freight)','Shipping Invoice (Local)','Shipping Receipt (Local)'],
+    'Post Shipment Documents': ['Certificate of Origin','Fumigation Certificate','Phytosanitary Certificate','SON/Export Regulatory Documents','Exporter Acknowledged Copy','Other Commodity-Specific Permits'],
+  },
+};
+function docCategoriesFor(direction){ return Object.keys(DOCUMENT_TAXONOMY[direction] || DOCUMENT_TAXONOMY.Import); }
+function docTypesFor(direction, category){
+  const types = (DOCUMENT_TAXONOMY[direction] && DOCUMENT_TAXONOMY[direction][category]) || [];
+  return [...types, OTHERS_DOC_TYPE];
+}
 
 const SLA_CONFIG = {
   'Healthy': {chip:'chip-success', dot:'var(--success)'},
@@ -1235,30 +1283,87 @@ function computeLiveSlaHealth(dueDate){
   return 'Healthy';
 }
 
+// Service Delivery task tables — Ops Feedback doc (Back Office 2.0), sections 3-5.
+// slaLabel is the real SLA/Timeline wording from that document, shown to users
+// verbatim; slaDays is only an approximate day-equivalent used where a number
+// is needed (e.g. the modal's due-date math), not a re-derivation of slaLabel.
+// Where a task named more than one possible owner, the first-listed role was
+// kept as the single accountable owner — except Ocean Import's "D/F
+// Assessment", deliberately assigned to Customer Success (the new role the
+// document introduces) rather than losing it to the tie-break.
 const OCEAN_EXPORT_TEMPLATE = [
-  {name:'Booking Placement', responsibility:'Operations Officer', slaDays:1},
-  {name:'Empty Container', responsibility:'Transport Coordinator', slaDays:2},
-  {name:'Clean CCI', responsibility:'Documentation Officer', slaDays:1},
-  {name:'Draft BL to Customer', responsibility:'Documentation Officer', slaDays:2},
-  {name:'Gate-In', responsibility:'Transport Coordinator', slaDays:1},
-  {name:'Inspection', responsibility:'QA Officer', slaDays:1},
-  {name:'Vessel Confirmation', responsibility:'Operations Manager', slaDays:1},
-  {name:'Sailing Confirmation', responsibility:'Operations Manager', slaDays:1},
-  {name:'OBL Issuance', responsibility:'Documentation Officer', slaDays:3},
-  {name:'Document Release', responsibility:'CX Officer', slaDays:2},
+  {name:'Booking', responsibility:'QA Officer', slaLabel:'1 working day', slaDays:1},
+  {name:'Empty Deployment', responsibility:'Transport Officer', slaLabel:'Within 48 hrs of booking', slaDays:2},
+  {name:'Stuffing', responsibility:'Clearing Officer', slaLabel:'48 hrs after arrival at warehouse', slaDays:2},
+  {name:'Gate-In', responsibility:'Clearing Officer', slaLabel:'48–72 hrs after stuffing', slaDays:3},
+  {name:'Terminal', responsibility:'Clearing Officer', slaLabel:'Same day', slaDays:1},
+  {name:'Customs', responsibility:'Clearing Officer', slaLabel:'1–2 working days after CCI issuance', slaDays:2},
+  {name:'Shipping Line', responsibility:'QA Officer', slaLabel:'Before shipping-line cut-off', slaDays:1},
+  {name:'Submit Export Docs', responsibility:'Clearing Officer', slaLabel:'Within 4 hrs of receipt', slaDays:1},
+  {name:'Vessel', responsibility:'QA Officer', slaLabel:'As per sailing schedule', slaDays:2},
+  {name:'Post-Shipment', responsibility:'Documentation Officer', slaLabel:'2–4 working days after liner payment', slaDays:3},
+  {name:'Closure', responsibility:'Clearing Officer', slaLabel:'Within 24 hrs', slaDays:1},
 ];
 const OCEAN_IMPORT_TEMPLATE = [
-  {name:'Pre-Alert Receipt', responsibility:'CX Officer', slaDays:1},
-  {name:'Form M Validation', responsibility:'Documentation Officer', slaDays:2},
-  {name:'PAAR Application', responsibility:'Clearing Officer', slaDays:2},
-  {name:'Draft Assessment', responsibility:'Clearing Officer', slaDays:2},
-  {name:'Final Assessment', responsibility:'Clearing Officer', slaDays:3},
-  {name:'THC Payment', responsibility:'Finance Officer', slaDays:1},
-  {name:'Delivery', responsibility:'Transport Coordinator', slaDays:2},
-  {name:'Empty Return', responsibility:'Transport Coordinator', slaDays:2},
-  {name:'Post Delivery Docs', responsibility:'Documentation Officer', slaDays:1},
-  {name:'Document Release', responsibility:'CX Officer', slaDays:2},
+  {name:'Pre-Arrival', responsibility:'QA Officer', slaLabel:'Before vessel arrival', slaDays:2},
+  {name:'Documentation', responsibility:'Clearing Officer', slaLabel:'Within 4 working hrs', slaDays:1},
+  {name:'Compliance', responsibility:'QA Officer', slaLabel:'14 days before arrival', slaDays:1},
+  {name:'Rotation No.', responsibility:'Clearing Officer', slaLabel:'5 working days before ATA', slaDays:2},
+  {name:'D/F Assessment', responsibility:'Customer Success', slaLabel:'24 hrs after rotation no.', slaDays:1},
+  {name:'Duty Payment', responsibility:'Clearing Officer', slaLabel:'Before arrival where possible', slaDays:2},
+  {name:'Arrival', responsibility:'Clearing Officer', slaLabel:'Same day', slaDays:1},
+  {name:'Shipping Payment', responsibility:'Finance Officer', slaLabel:'24 hrs after vessel arrival', slaDays:1},
+  {name:'Terminal', responsibility:'Finance Officer', slaLabel:'24 hrs after ATA', slaDays:1},
+  {name:'Examination', responsibility:'Clearing Officer', slaLabel:'Within terminal SLA', slaDays:2},
+  {name:'Customs Release', responsibility:'Clearing Officer', slaLabel:'48 hrs after examination', slaDays:2},
+  {name:'TDO', responsibility:'Clearing Officer', slaLabel:'12 hrs after NCS gate release', slaDays:1},
+  {name:'Haulage', responsibility:'Transport Officer', slaLabel:'24–48 hrs before TDO', slaDays:2},
+  {name:'Delivery', responsibility:'Transport Officer', slaLabel:'As scheduled', slaDays:1},
+  {name:'Empty Return', responsibility:'Transport Officer', slaLabel:'Within agreed shipping-line free period', slaDays:2},
+  {name:'Closure', responsibility:'QA Officer', slaLabel:'Within 24–48 hrs', slaDays:2},
 ];
+// Air tables in the source document carry no SLA/Timeline column — these
+// tasks show the computed due date only (same as today), no slaLabel text.
+const AIR_EXPORT_TEMPLATE = [
+  {name:'Receive Client Booking', responsibility:'Operations Officer', slaDays:1},
+  {name:'Validate Commercial Documents', responsibility:'Operations Manager', slaDays:1},
+  {name:'Confirm Cargo Details', responsibility:'QA Officer', slaDays:1},
+  {name:'Confirm Airline Schedule & Space', responsibility:'Clearing Officer', slaDays:1},
+  {name:'Obtain Booking Confirmation', responsibility:'QA Officer', slaDays:1},
+  {name:'Coordinate Cargo Pickup', responsibility:'Clearing Officer', slaDays:1},
+  {name:'Complete Export Documentation', responsibility:'Clearing Officer', slaDays:1},
+  {name:'Coordinate Customs Processing', responsibility:'Clearing Officer', slaDays:1},
+  {name:'Deliver Cargo to Airline/Terminal', responsibility:'Clearing Officer', slaDays:1},
+  {name:'Confirm AWB Issuance', responsibility:'Clearing Officer', slaDays:1},
+  {name:'Monitor Flight Departure', responsibility:'QA Officer', slaDays:1},
+  {name:'Send Pre-Alert / Shipping Documents', responsibility:'Documentation Officer', slaDays:1},
+  {name:'Update & Upload Docs', responsibility:'QA Officer', slaDays:1},
+  {name:'Close Shipment', responsibility:'QA Officer', slaDays:1},
+];
+const AIR_IMPORT_TEMPLATE = [
+  {name:'Receive Pre-Alert', responsibility:'Operations Officer', slaDays:1},
+  {name:'Review AWB & Shipment Documents', responsibility:'Operations Manager', slaDays:1},
+  {name:'Track Cargo Arrival', responsibility:'QA Officer', slaDays:1},
+  {name:'Sight Shipment', responsibility:'Clearing Officer', slaDays:1},
+  {name:'Coordinate Terminal Handling', responsibility:'Clearing Officer', slaDays:1},
+  {name:'Customs Clearance & Release', responsibility:'Clearing Officer', slaDays:1},
+  {name:'Confirm Shipment Out of Shed', responsibility:'Clearing Officer', slaDays:1},
+  {name:'Delivery', responsibility:'Clearing Officer', slaDays:1},
+  {name:'Waybill', responsibility:'QA Officer', slaDays:1},
+  {name:'Reconcile Shipment Costs', responsibility:'QA Officer', slaDays:1},
+  {name:'Update & Upload Docs', responsibility:'QA Officer', slaDays:1},
+  {name:'Close Shipment', responsibility:'QA Officer', slaDays:1},
+];
+
+// Picks the Service Delivery task table for a shipment by transport mode AND
+// direction (previously this only branched on Export vs Import, so every Air
+// shipment silently received the Ocean template).
+function milestoneTemplateOf(s){
+  const isExport = s.mode.includes('Export');
+  const isAir = s.mode.includes('Air');
+  if(isAir) return isExport ? AIR_EXPORT_TEMPLATE : AIR_IMPORT_TEMPLATE;
+  return isExport ? OCEAN_EXPORT_TEMPLATE : OCEAN_IMPORT_TEMPLATE;
+}
 
 const PHYSICAL_TRACKING_TEMPLATE = [
   {label:'Container Gated In · Origin Terminal', loc:'Shanghai Yangshan Port', source:'Terminal'},
@@ -1312,7 +1417,7 @@ function buildShipmentDetail(base, seed){
     });
   }
 
-  const template = base.mode.includes('Export') ? OCEAN_EXPORT_TEMPLATE : OCEAN_IMPORT_TEMPLATE;
+  const template = milestoneTemplateOf(base);
   const etdDate = parseDisplayDate(base.etd);
   const etaDate = parseDisplayDate(base.eta);
   const span = etaDate.getTime() - etdDate.getTime();
@@ -1355,6 +1460,7 @@ function buildShipmentDetail(base, seed){
       name: t.name,
       responsibility: t.responsibility,
       slaDays: t.slaDays,
+      slaLabel: t.slaLabel || null,
       status: isDone ? 'Completed' : 'Not Started',
       dueDate,
       completedBy,
@@ -1376,20 +1482,24 @@ function buildShipmentDetail(base, seed){
     done: i < trackedCount,
   }));
 
-  const docSeedNames = [
-    ['Bill_of_Lading.pdf','Shipping'],
-    ['Commercial_Invoice.pdf','Finance'],
-    ['Packing_List.xlsx','Shipping'],
-    ['Certificate_of_Origin.pdf','Compliance'],
-  ];
-  const docCount = 1 + (seed % docSeedNames.length);
+  // Seeded against the real Import/Export document checklist so demo
+  // shipments show realistic categories and document types, not generic
+  // placeholders.
+  const docDirection = shipmentTypeOf(base) === 'Export' ? 'Export' : 'Import';
+  const docCategories = docCategoriesFor(docDirection);
+  const docCount = 2 + (seed % 3);
   const documents = [];
   for(let i=0;i<docCount;i++){
-    const d = docSeedNames[i];
+    const category = docCategories[(i+seed) % docCategories.length];
+    const typesInCategory = docTypesFor(docDirection, category).filter(t=>t!==OTHERS_DOC_TYPE);
+    const docType = typesInCategory[(i+seed*2) % typesInCategory.length];
+    const fileSlug = docType.replace(/[^A-Za-z0-9]+/g,'_').replace(/^_+|_+$/g,'');
     documents.push({
       id: makeId('doc'),
-      name: d[0],
-      category: d[1],
+      name: `${fileSlug}.pdf`,
+      category,
+      docType,
+      docTypeOther: '',
       uploadedBy: teamMember(shipTeamIds[(i+seed)%shipTeamIds.length]).name,
       uploadedOn: new Date(Date.now() - (docCount-i)*86400000*2 - i*3600000*7),
       isMock: true,
@@ -1989,6 +2099,11 @@ function sourceChipHtml(d){
   return `<span class="chip chip-neutral">Manual</span>`;
 }
 
+function docTypeDisplay(d){
+  if(!d.docType) return '<span style="color:var(--silver-light)">—</span>';
+  if(d.docType === 'Others') return escapeHtml('Others' + (d.docTypeOther ? ' — ' + d.docTypeOther : ''));
+  return escapeHtml(d.docType);
+}
 function renderDocuments(){
   const s = currentShipment();
   el('doc-total-count').textContent = s.documents.length;
@@ -2000,7 +2115,8 @@ function renderDocuments(){
           <b style="color:var(--green-dark);font-weight:600">${d.name}</b>
         </div>
       </td>
-      <td>${d.category ? `<span class="chip chip-neutral">${d.category}</span>` : '<span style="color:var(--silver-light)">—</span>'}</td>
+      <td>${d.category ? `<span class="chip chip-neutral">${escapeHtml(d.category)}</span>` : '<span style="color:var(--silver-light);font-style:italic">Uncategorized</span>'}</td>
+      <td>${docTypeDisplay(d)}</td>
       <td>${sourceChipHtml(d)}</td>
       <td>${d.uploadedBy}</td>
       <td>${formatDateTime(d.uploadedOn)}</td>
@@ -2016,7 +2132,7 @@ function renderDocuments(){
         </div>
       </td>
     </tr>
-  `).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--silver-light);padding:30px">No documents uploaded yet.</td></tr>`;
+  `).join('') || `<tr><td colspan="7" style="text-align:center;color:var(--silver-light);padding:30px">No documents uploaded yet.</td></tr>`;
 }
 
 /* ==========================================================================
@@ -2447,7 +2563,7 @@ function renderMilestoneModal(){
   el('ms-history-chip').innerHTML = historyChip;
   const flagCount = (m.flagHistory||[]).length;
   el('ms-flag-chip').innerHTML = m.flagged ? `<span class="chip chip-error">${ICON_FLAG} ${flagCount} Flag${flagCount===1?'':'s'}</span>` : '';
-  el('ms-sla-label').textContent = m.slaDays ? `SLA: ${m.slaDays} working day${m.slaDays===1?'':'s'}` : '';
+  el('ms-sla-label').textContent = m.slaLabel ? `SLA: ${m.slaLabel}` : (m.slaDays ? `SLA: ${m.slaDays} working day${m.slaDays===1?'':'s'}` : '');
 
   const ownerTeam = isDone ? TEAM.find(t=>t.name===m.completedBy) : null;
   el('ms-info-grid').innerHTML = `
@@ -2526,12 +2642,41 @@ function formatBytes(bytes){
   return (bytes/(1024*1024)).toFixed(1) + ' MB';
 }
 
+function populateDocCategorySelect(selectEl, direction, selected){
+  const categories = docCategoriesFor(direction);
+  selectEl.innerHTML = `<option value="">Select category…</option>` +
+    categories.map(c=>`<option value="${escapeHtml(c)}" ${c===selected?'selected':''}>${escapeHtml(c)}</option>`).join('');
+}
+function populateDocTypeSelect(selectEl, direction, category, selected){
+  const types = category ? docTypesFor(direction, category) : [];
+  selectEl.innerHTML = `<option value="">Select document type…</option>` +
+    types.map(t=>`<option value="${escapeHtml(t)}" ${t===selected?'selected':''}>${escapeHtml(t)}</option>`).join('');
+}
+
 function openUploadDocsModal(){
   state.pendingFiles = [];
-  el('input-doc-category').value = '';
+  const direction = shipmentTypeOf(currentShipment()) === 'Export' ? 'Export' : 'Import';
+  populateDocCategorySelect(el('input-doc-category'), direction, '');
+  el('doc-type-field').style.display = 'none';
+  el('doc-type-other-field').style.display = 'none';
+  el('input-doc-type-other').value = '';
   renderFilePillList();
   openModal('modal-upload-docs');
 }
+el('input-doc-category').addEventListener('change', ()=>{
+  const direction = shipmentTypeOf(currentShipment()) === 'Export' ? 'Export' : 'Import';
+  const category = el('input-doc-category').value;
+  populateDocTypeSelect(el('input-doc-type'), direction, category, '');
+  el('doc-type-field').style.display = category ? '' : 'none';
+  el('doc-type-other-field').style.display = 'none';
+  el('input-doc-type-other').value = '';
+  renderFilePillList();
+});
+el('input-doc-type').addEventListener('change', ()=>{
+  el('doc-type-other-field').style.display = el('input-doc-type').value === OTHERS_DOC_TYPE ? '' : 'none';
+  renderFilePillList();
+});
+el('input-doc-type-other').addEventListener('input', renderFilePillList);
 
 const dropzone = el('dropzone');
 const fileInput = el('file-input');
@@ -2564,17 +2709,29 @@ function renderFilePillList(){
       <button class="frm" data-remove-file="${i}"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"></path></svg></button>
     </div>
   `).join('');
-  el('save-upload-docs').disabled = state.pendingFiles.length===0;
+  el('save-upload-docs').disabled = !canSaveUploadDocs();
+}
+function canSaveUploadDocs(){
+  if(state.pendingFiles.length===0) return false;
+  const category = el('input-doc-category').value;
+  const docType = el('input-doc-type').value;
+  if(!category || !docType) return false;
+  if(docType === OTHERS_DOC_TYPE && !el('input-doc-type-other').value.trim()) return false;
+  return true;
 }
 
 el('save-upload-docs').addEventListener('click', ()=>{
   const s = currentShipment();
   const category = el('input-doc-category').value;
+  const docType = el('input-doc-type').value;
+  const docTypeOther = docType === OTHERS_DOC_TYPE ? el('input-doc-type-other').value.trim() : '';
   state.pendingFiles.forEach(f=>{
     s.documents.push({
       id: makeId('doc'),
       name: f.name,
       category: category,
+      docType: docType,
+      docTypeOther: docTypeOther,
       uploadedBy: CURRENT_USER,
       uploadedOn: new Date(),
       isMock:false,
@@ -2607,12 +2764,38 @@ function downloadDocument(id){
 function openUpdateFileModal(id){
   state.activeDocUpdate = id;
   const d = findDoc(id);
+  const direction = shipmentTypeOf(currentShipment()) === 'Export' ? 'Export' : 'Import';
   el('update-file-sub').textContent = `Replacing file for "${d.name}"`;
   el('update-file-name').textContent = 'Select a replacement file';
-  el('save-update-file').disabled = true;
+  populateDocCategorySelect(el('input-update-doc-category'), direction, d.category || '');
+  if(d.category){
+    populateDocTypeSelect(el('input-update-doc-type'), direction, d.category, d.docType || '');
+    el('update-doc-type-field').style.display = '';
+  } else {
+    el('input-update-doc-type').innerHTML = `<option value="">Select document type…</option>`;
+    el('update-doc-type-field').style.display = 'none';
+  }
+  el('update-doc-type-other-field').style.display = d.docType === OTHERS_DOC_TYPE ? '' : 'none';
+  el('input-update-doc-type-other').value = d.docTypeOther || '';
   pendingReplacementFile = null;
+  updateSaveUpdateFileState();
   openModal('modal-update-file');
 }
+el('input-update-doc-category').addEventListener('change', ()=>{
+  const direction = shipmentTypeOf(currentShipment()) === 'Export' ? 'Export' : 'Import';
+  const category = el('input-update-doc-category').value;
+  populateDocTypeSelect(el('input-update-doc-type'), direction, category, '');
+  el('update-doc-type-field').style.display = category ? '' : 'none';
+  el('update-doc-type-other-field').style.display = 'none';
+  el('input-update-doc-type-other').value = '';
+  updateSaveUpdateFileState();
+});
+el('input-update-doc-type').addEventListener('change', ()=>{
+  el('update-doc-type-other-field').style.display = el('input-update-doc-type').value === OTHERS_DOC_TYPE ? '' : 'none';
+  updateSaveUpdateFileState();
+});
+el('input-update-doc-type-other').addEventListener('input', updateSaveUpdateFileState);
+
 const dropzoneUpdate = el('dropzone-update');
 const fileInputUpdate = el('file-input-update');
 dropzoneUpdate.addEventListener('click', ()=> fileInputUpdate.click());
@@ -2627,7 +2810,14 @@ function handleUpdateFile(file){
   if(file.size > MAX_FILE_SIZE_MB*1024*1024){ showToast(`File exceeds the ${MAX_FILE_SIZE_MB}MB limit`, 'error'); return; }
   pendingReplacementFile = file;
   el('update-file-name').textContent = file.name;
-  el('save-update-file').disabled = false;
+  updateSaveUpdateFileState();
+}
+function updateSaveUpdateFileState(){
+  const category = el('input-update-doc-category').value;
+  const docType = el('input-update-doc-type').value;
+  let ok = !!pendingReplacementFile && !!category && !!docType;
+  if(docType === OTHERS_DOC_TYPE && !el('input-update-doc-type-other').value.trim()) ok = false;
+  el('save-update-file').disabled = !ok;
 }
 el('save-update-file').addEventListener('click', ()=>{
   const d = findDoc(state.activeDocUpdate);
@@ -2637,6 +2827,9 @@ el('save-update-file').addEventListener('click', ()=>{
   d.size = pendingReplacementFile.size;
   d.uploadedOn = new Date();
   d.uploadedBy = CURRENT_USER;
+  d.category = el('input-update-doc-category').value;
+  d.docType = el('input-update-doc-type').value;
+  d.docTypeOther = d.docType === OTHERS_DOC_TYPE ? el('input-update-doc-type-other').value.trim() : '';
   pendingReplacementFile = null;
   renderDocuments();
   closeModal('modal-update-file');
