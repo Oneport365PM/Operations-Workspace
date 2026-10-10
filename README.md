@@ -210,12 +210,20 @@ sequence (section 43):
     *fresh* store — run `MilestoneStore.resetDemoData()` from the console
     (either app) to reseed and pick them up.
 - **Documents** — tied to a shipment, not a milestone/task (a shipment can
-  have documents before any milestone exists). Flow: **Select Job** (your
-  own shipments only — anywhere you're Owner or Supporting on the team,
-  via `MilestoneStore.getMyShipments`) → **Category** → **Type** (options
-  filtered by the chosen category) → **Upload File**. The same screen then
-  shows the **latest 3 documents** for that shipment, newest first. No
-  bulk upload, no edit/delete, and no dedicated notification for a new
+  have documents before any milestone exists). Two sub-tabs, a segmented
+  pill control at the top of the screen:
+  - **Upload** — pick which of your own shipments to upload for (anywhere
+    you're Owner or Supporting on the team, via
+    `MilestoneStore.getMyShipments`), which opens **Category** → **Type**
+    (options filtered by the chosen category) → **Upload File**. After a
+    successful upload, the app lands back on Documents with History active
+    so the new document is immediately visible as confirmation.
+  - **History** — every document uploaded across all of your shipments,
+    flat and newest first, each one clearly labeled with its job number
+    (same card style as the Tasks list). There's no detail page for a
+    document — tapping a card opens its file preview if one is available
+    on this device, otherwise does nothing.
+  No bulk upload, no edit/delete, and no dedicated notification for a new
   document in this MVP — uploading and reviewing is the full scope here.
   Documents are shared with the Admin Portal through `MilestoneStore`
   (`addDocument` / `getDocumentsForShipment`), the same pattern as

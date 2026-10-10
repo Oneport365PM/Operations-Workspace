@@ -146,6 +146,14 @@ input,textarea{font-family:var(--font-body)}
 .comment-item .comment-text.empty{ color:var(--silver-light); font-style:italic; }
 .empty-note{ font-size:13px; color:var(--silver-light); margin:8px 2px 0; }
 
+/* ---- Segmented tabs (e.g. Documents: Upload / History) ---- */
+.segmented-tabs{ display:flex; gap:4px; background:var(--white); border:1px solid var(--border-tint); border-radius:999px; padding:4px; margin:0 16px 12px; }
+.segmented-tab{ flex:1; display:flex; align-items:center; justify-content:center; gap:7px; background:none; border:none; border-radius:999px; padding:10px 6px; font-family:var(--font-display); font-weight:600; font-size:13.5px; color:var(--silver-dark); }
+.segmented-tab .seg-badge{ display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; border-radius:999px; background:var(--green-light-surface); color:var(--silver-dark); font-size:11px; font-weight:700; }
+.segmented-tab.active{ background:var(--green-dark); color:var(--cream); }
+.segmented-tab.active .seg-badge{ background:var(--green-accent); color:var(--green-dark); }
+.docs-helper-text{ color:var(--silver-light); font-size:13px; margin:0 0 10px; padding:0 2px; }
+
 /* ---- Notifications ---- */
 .notif-item{
   background:var(--white); border:1px solid var(--border-tint); border-radius:var(--radius-lg);
@@ -321,8 +329,12 @@ select.field-input{ background-image:url('data:image/svg+xml;utf8,<svg xmlns="ht
       </div>
       <div class="page-head"><h1>Documents</h1></div>
     </div>
+    <div class="segmented-tabs">
+      <button class="segmented-tab" id="docs-tab-upload-btn"><span>Upload</span><span class="seg-badge" id="docs-tab-upload-badge">0</span></button>
+      <button class="segmented-tab" id="docs-tab-history-btn"><span>History</span><span class="seg-badge" id="docs-tab-history-badge">0</span></button>
+    </div>
     <div id="docs-banner"></div>
-    <div class="list" id="docs-job-list"></div>
+    <div class="list" id="docs-pane"></div>
   </div>
 
   <!-- ============== DOCUMENT UPLOAD (drill-down) ============== -->
@@ -455,11 +467,12 @@ const state = {
   commentTarget: null, // { id, source: 'detail' } — comment sheet
   completing: false,
   myShipments: [],
+  docHistory: [],
+  docsActiveTab: 'upload',
   currentDocShipmentRef: null,
   docCategory: '',
   docType: '',
   pendingDocFile: null,
-  latestDocs: [],
   uploadingDoc: false,
 };
 
@@ -727,31 +740,63 @@ el('todos-list').addEventListener('click', (e)=>{
 });
 
 /* ==========================================================================
-   Documents — tied to a shipment, not a milestone/task. Select Job ->
-   Category -> Type -> Upload File, then see the latest 3 documents for
-   that shipment. Shared with the Admin Portal via MilestoneStore; no
-   edit/delete from this app and no dedicated notification (product
-   decision for this MVP).
+   Documents — tied to a shipment, not a milestone/task. Two sub-tabs:
+   Upload (pick which of your shipments to upload a document for, then
+   Category -> Type -> File) and History (every document you've ever
+   uploaded, across all your shipments, flat and newest first — no
+   per-document detail page, just the list). Shared with the Admin Portal
+   via MilestoneStore; no edit/delete from this app and no dedicated
+   notification (product decision for this MVP).
    ========================================================================== */
 function goToDocs(){
   showScreen('screen-docs');
-  loadMyShipmentsForDocs();
+  renderDocsTabs();
+  loadDocsData();
 }
-function loadMyShipmentsForDocs(){
+function setDocsTab(tab){
+  if(state.docsActiveTab === tab) return;
+  state.docsActiveTab = tab;
+  renderDocsTabs();
+  renderDocsPane();
+}
+function renderDocsTabs(){
+  el('docs-tab-upload-btn').classList.toggle('active', state.docsActiveTab === 'upload');
+  el('docs-tab-history-btn').classList.toggle('active', state.docsActiveTab === 'history');
+}
+el('docs-tab-upload-btn').addEventListener('click', ()=>setDocsTab('upload'));
+el('docs-tab-history-btn').addEventListener('click', ()=>setDocsTab('history'));
+
+// Loads both the shipment list (Upload tab) and the full document history
+// (History tab) up front, so switching tabs is instant and both badge
+// counts are always accurate regardless of which tab is showing.
+function loadDocsData(){
   el('docs-banner').innerHTML = '';
-  el('docs-job-list').innerHTML = `<div class="skeleton-card"></div>`;
+  el('docs-pane').innerHTML = `<div class="skeleton-card"></div>`;
   MilestoneStore.getMyShipments(state.me.id).then(shipments=>{
     state.myShipments = shipments;
-    renderDocsJobList();
+    return Promise.all(shipments.map(s=>MilestoneStore.getDocumentsForShipment(s.jobRef))).then(lists=>{
+      const flat = [];
+      shipments.forEach((s, i)=> lists[i].forEach(d=> flat.push({ doc: d, shipment: s })));
+      flat.sort((a, b)=> new Date(b.doc.uploadedAt) - new Date(a.doc.uploadedAt));
+      state.docHistory = flat;
+    });
+  }).then(()=>{
+    el('docs-tab-upload-badge').textContent = state.myShipments.length;
+    el('docs-tab-history-badge').textContent = state.docHistory.length;
+    renderDocsPane();
   }).catch(err=>{
-    console.error('loadMyShipmentsForDocs failed:', err);
-    el('docs-job-list').innerHTML = '';
-    el('docs-banner').innerHTML = bannerHtml('error', 'Unable to load your shipments. Please check your connection and try again.');
+    console.error('loadDocsData failed:', err);
+    el('docs-pane').innerHTML = '';
+    el('docs-banner').innerHTML = bannerHtml('error', 'Unable to load documents. Please check your connection and try again.');
   });
 }
-function renderDocsJobList(){
+function renderDocsPane(){
+  if(state.docsActiveTab === 'history') renderDocHistoryPane();
+  else renderDocsUploadPane();
+}
+function renderDocsUploadPane(){
   if(!state.myShipments.length){
-    el('docs-job-list').innerHTML = `
+    el('docs-pane').innerHTML = `
       <div class="empty-state">
         <div class="icon">${ICON_DOC}</div>
         <h3>No shipments yet</h3>
@@ -759,22 +804,68 @@ function renderDocsJobList(){
       </div>`;
     return;
   }
-  el('docs-job-list').innerHTML = state.myShipments.map(s=>`
-    <div class="ms-card" data-open-job="${s.jobRef}">
+  el('docs-pane').innerHTML = `
+    <p class="docs-helper-text">Select the shipment you'd like to upload a document for.</p>
+    ${state.myShipments.map(s=>`
+      <div class="ms-card" data-open-job="${s.jobRef}">
+        <div class="row1">
+          <span class="ms-name">${s.customer}</span>
+          <span class="ship-ref">${s.jobRef}</span>
+        </div>
+        <div class="meta-row">
+          <span>${transportLabelOf(s)}</span>
+          <span>·</span>
+          <span>${ICON_PIN}${s.route}</span>
+        </div>
+      </div>`).join('')}
+  `;
+}
+// A document's fileUrl is a browser blob: URL — it only resolves in the
+// tab/origin that created it, so a document uploaded from another
+// device/tab (including the Admin Portal) shows a "preview unavailable"
+// note here instead of a broken link, same as the Admin Portal already
+// does for its own mock seed documents. No per-document detail page —
+// tapping a card either opens that preview or does nothing.
+function renderDocHistoryPane(){
+  if(!state.docHistory.length){
+    el('docs-pane').innerHTML = `
+      <div class="empty-state">
+        <div class="icon">${ICON_DOC}</div>
+        <h3>No documents yet</h3>
+        <p>Documents you upload will show up here.</p>
+      </div>`;
+    return;
+  }
+  el('docs-pane').innerHTML = state.docHistory.map(({doc: d, shipment: s})=>{
+    const uploader = MilestoneStore.getUserById(d.uploadedBy);
+    const who = escapeHtml(uploader ? uploader.name : (d.uploadedBy || 'Unknown'));
+    const when = d.uploadedAt ? new Date(d.uploadedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '';
+    return `
+    <div class="ms-card" data-view-doc="${d.id}" style="cursor:${d.fileUrl ? 'pointer' : 'default'}">
       <div class="row1">
-        <span class="ms-name">${s.customer}</span>
+        <span class="ms-name">${escapeHtml(d.fileName)}</span>
         <span class="ship-ref">${s.jobRef}</span>
       </div>
+      <div class="customer-line">${escapeHtml(d.category || 'Uncategorized')}${d.docType ? ' · ' + escapeHtml(d.docType) : ''}</div>
       <div class="meta-row">
-        <span>${transportLabelOf(s)}</span>
+        <span>${who}</span>
         <span>·</span>
-        <span>${ICON_PIN}${s.route}</span>
+        <span>${when}</span>
+        ${d.fileUrl ? '' : '<span>· Preview unavailable on this device</span>'}
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
-el('docs-job-list').addEventListener('click', (e)=>{
-  const card = e.target.closest('[data-open-job]');
-  if(card) openDocUpload(card.dataset.openJob);
+el('docs-pane').addEventListener('click', (e)=>{
+  const jobCard = e.target.closest('[data-open-job]');
+  if(jobCard){ openDocUpload(jobCard.dataset.openJob); return; }
+  const histCard = e.target.closest('[data-view-doc]');
+  if(histCard){
+    const entry = state.docHistory.find(h=>h.doc.id === histCard.dataset.viewDoc);
+    if(!entry) return;
+    if(entry.doc.fileUrl) window.open(entry.doc.fileUrl, '_blank');
+    else showToast('Preview unavailable — this document was uploaded from another device/tab', 'error');
+  }
 });
 
 function currentDocShipment(){
@@ -785,11 +876,9 @@ function openDocUpload(jobRef){
   state.docCategory = '';
   state.docType = '';
   state.pendingDocFile = null;
-  state.latestDocs = [];
   showScreen('screen-doc-detail');
   el('doc-detail-banner').innerHTML = '';
   renderDocUploadForm();
-  loadLatestDocs();
 }
 el('btn-back-doc-detail').addEventListener('click', goToDocs);
 
@@ -830,9 +919,6 @@ function renderDocUploadForm(){
     <p class="empty-note" id="doc-file-name">${state.pendingDocFile ? escapeHtml(state.pendingDocFile.name) : 'No file selected'}</p>
 
     <button class="btn btn-primary" id="btn-submit-doc-upload" style="margin-top:16px">${ICON_CHECK} Upload Document</button>
-
-    <div class="section-label" style="margin-top:24px">Latest 3 Documents</div>
-    <div id="latest-docs-list"></div>
   `;
 
   el('doc-category-select').addEventListener('change', (e)=>{
@@ -849,52 +935,7 @@ function renderDocUploadForm(){
   });
   el('btn-submit-doc-upload').addEventListener('click', submitDocUpload);
   updateSubmitDocState();
-  renderLatestDocsList();
 }
-
-function loadLatestDocs(){
-  const jobRef = state.currentDocShipmentRef;
-  MilestoneStore.getDocumentsForShipment(jobRef, 3).then(docs=>{
-    state.latestDocs = docs;
-    renderLatestDocsList();
-  }).catch(err=>{
-    console.error('loadLatestDocs failed:', err);
-    const wrap = el('latest-docs-list');
-    if(wrap) wrap.innerHTML = bannerHtml('error', 'Unable to load documents. Please check your connection and try again.');
-  });
-}
-// A document's fileUrl is a browser blob: URL — it only resolves in the
-// tab/origin that created it, so a document uploaded from another
-// device/tab (including the Admin Portal) shows a "preview unavailable"
-// note here instead of a broken link, same as the Admin Portal already
-// does for its own mock seed documents.
-function renderLatestDocsList(){
-  const wrap = el('latest-docs-list');
-  if(!wrap) return;
-  if(!state.latestDocs.length){
-    wrap.innerHTML = `<p class="empty-note">No documents uploaded yet for this shipment.</p>`;
-    return;
-  }
-  wrap.innerHTML = state.latestDocs.map(d=>{
-    const uploader = MilestoneStore.getUserById(d.uploadedBy);
-    const who = escapeHtml(uploader ? uploader.name : (d.uploadedBy || 'Unknown'));
-    const when = d.uploadedAt ? new Date(d.uploadedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '';
-    return `
-    <div class="comment-item" data-view-doc="${d.id}" style="cursor:${d.fileUrl ? 'pointer' : 'default'}">
-      <div class="comment-meta">${escapeHtml(d.category || 'Uncategorized')}${d.docType ? ' · ' + escapeHtml(d.docType) : ''}</div>
-      <div class="comment-text">${escapeHtml(d.fileName)}</div>
-      <div class="comment-meta" style="margin-top:4px">${who} · ${when}${d.fileUrl ? '' : ' · Preview unavailable on this device'}</div>
-    </div>`;
-  }).join('');
-}
-el('doc-detail-body').addEventListener('click', (e)=>{
-  const item = e.target.closest('[data-view-doc]');
-  if(!item) return;
-  const doc = state.latestDocs.find(d=>d.id===item.dataset.viewDoc);
-  if(!doc) return;
-  if(doc.fileUrl) window.open(doc.fileUrl, '_blank');
-  else showToast('Preview unavailable — this document was uploaded from another device/tab', 'error');
-});
 
 function submitDocUpload(){
   if(!canSubmitDocUpload()) return;
@@ -921,11 +962,11 @@ function submitDocUpload(){
       return;
     }
     showToast('Document uploaded');
-    state.docCategory = '';
-    state.docType = '';
-    state.pendingDocFile = null;
-    loadLatestDocs();
-    renderDocUploadForm();
+    // Land back on Documents with History active, so the upload that was
+    // just made is immediately visible as confirmation — rather than
+    // leaving the user on a reset upload form with no feedback.
+    state.docsActiveTab = 'history';
+    goToDocs();
   }).catch(err=>{
     state.uploadingDoc = false;
     console.error('addDocument failed:', err);
@@ -1299,8 +1340,7 @@ MilestoneStore.subscribe(()=>{
   if(el('screen-todos').classList.contains('active')) loadTodos();
   if(el('screen-detail').classList.contains('active')) loadMilestoneDetail();
   if(el('screen-notifications').classList.contains('active')){ state.notifPage = 1; loadNotifications(); }
-  if(el('screen-docs').classList.contains('active')) loadMyShipmentsForDocs();
-  if(el('screen-doc-detail').classList.contains('active')) loadLatestDocs();
+  if(el('screen-docs').classList.contains('active')) loadDocsData();
 });
 
 /* ==========================================================================
