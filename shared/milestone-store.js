@@ -64,20 +64,37 @@
   function isAdmin(userId) { const u = getUserById(userId); return !!(u && u.isAdmin); }
 
   // ------------------------------------------------------------------
-  // Document Category / Type taxonomy
+  // Document Category / Type taxonomy — from "Back Office 2.0 — Operations
+  // Feedback" (sections 1 & 2: Documents Required for Import / Export).
+  // Import and Export have different category sets, so which one applies
+  // depends on the shipment's own mode (e.g. "Ocean Import" vs "Ocean
+  // Export") — see getDocTaxonomyForShipment() below, the one place both
+  // apps should read categories/types from once a shipment is known.
+  // Every category ends with "Others": picking it is meant to reveal a
+  // free-text field in the UI so the real document name can be captured,
+  // rather than being a document type in its own right.
   // ------------------------------------------------------------------
-  // PLACEHOLDER VALUES. Categories reuse the Admin Portal's existing
-  // upload-modal list; Doc Types are illustrative stand-ins only. Swap
-  // this object out for the real taxonomy once it's supplied — nothing
-  // else in either app needs to change, both Admin and Field Channel read
-  // category/type options from here.
   const DOC_TAXONOMY = {
-    Shipping: ['Bill of Lading', 'Packing List', 'Booking Confirmation'],
-    Finance: ['Commercial Invoice', 'Debit Note', 'Payment Receipt'],
-    Customs: ['Form M', 'PAAR', 'Customs Assessment'],
-    Compliance: ['Certificate of Origin', 'SONCAP Certificate', 'Insurance Certificate'],
-    General: ['Other'],
+    Import: {
+      'Commercial & Shipping Documents': ['Commercial Invoice', 'Packing List', 'Bill of Lading (SWB or Telex)', 'Certificate of Origin', 'Air Waybill', 'CCVO', 'Insurance Certificate', 'Others'],
+      'Regulatory & Customs Documents': ['Form M', 'PAAR', 'SONCAP / SON Documents', 'NAFDAC Documents', 'NESREA Documents', 'NCS-Required Permits/Approvals', 'End User Certificate', 'Product-Specific Regulatory Permits', 'Customs Duty Payment Evidence', 'Others'],
+      'Importer/Consignee Documents': ['Importer Authorisation / Letter of Authority', 'Shipping Invoice', 'Shipping Receipt', 'Delivery Order', 'Terminal Invoice', 'Others'],
+      'Clearing Documents': ['Terminal Receipt', 'Final Assessment', 'Inspection Act', 'Exit Note / Gate', 'TDO', 'EIR', 'Waybill', 'Others'],
+    },
+    Export: {
+      'Commercial Documents': ['Proforma Invoice', 'Packing List', 'Commercial Invoice', 'Others'],
+      'Regulatory & Export Documents': ['NXP Form', 'Clean Certificate of Inspection', 'Single Goods Declaration (SGD)', 'Inspection Act', 'Shipping Export Docs Acknowledgement', 'Vessel Plan Confirmation', 'Terminal Invoice', 'Terminal Receipt', 'Customs Examination/Release Documentation', 'EIR / Indemnity', 'Others'],
+      'Shipping Documents': ['Booking Confirmation', 'Shipping Instruction', 'Bill of Lading / Sea Waybill', 'Shipping Invoice (Freight)', 'Shipping Payment (Freight)', 'Shipping Invoice (Local)', 'Shipping Receipt (Local)', 'Others'],
+      'Post Shipment Documents': ['Certificate of Origin', 'Fumigation Certificate', 'Phytosanitary Certificate', 'SON/Export Regulatory Documents', 'Exporter Acknowledged Copy', 'Other Commodity-Specific Permits', 'Others'],
+    },
   };
+  function shipmentDocDirection(s) { return /Export/.test(s.mode) ? 'Export' : 'Import'; }
+  // The one place both apps look up which category/type list applies to a
+  // given shipment, so the Import/Export split logic lives here once.
+  function getDocTaxonomyForShipment(jobRef) {
+    const s = state.shipments[jobRef];
+    return s ? DOC_TAXONOMY[shipmentDocDirection(s)] : {};
+  }
 
   // ------------------------------------------------------------------
   // Reference data — shipments + service delivery templates
@@ -202,23 +219,32 @@
   const TEAM_ROLE_LABEL = { owner: 'Owner', supporting: 'Supporting' };
   const TEAM_ROLE_RANK = { supporting: 1, owner: 2 };
 
-  // Demo-only seed documents, one shipment's worth of variety reused
-  // across every shipment (offset by shipmentIndex) so a fresh browser's
-  // Documents tab/screen isn't empty on first load in either app. These
-  // are "isMock" (no real fileUrl), matching how the Admin Portal already
-  // flagged its own previously-local mock documents.
-  const DOC_SEED_FILES = [
-    { fileName: 'Bill_of_Lading.pdf', category: 'Shipping', docType: 'Bill of Lading' },
-    { fileName: 'Commercial_Invoice.pdf', category: 'Finance', docType: 'Commercial Invoice' },
-    { fileName: 'Packing_List.xlsx', category: 'Shipping', docType: 'Packing List' },
-    { fileName: 'Certificate_of_Origin.pdf', category: 'Compliance', docType: 'Certificate of Origin' },
-  ];
+  // Demo-only seed documents, picked from the matching Import/Export set so
+  // a fresh browser's Documents tab/screen isn't empty on first load in
+  // either app, and never shows an Export-only document type on an Import
+  // shipment or vice versa. These are "isMock" (no real fileUrl), matching
+  // how the Admin Portal already flagged its own previously-local mocks.
+  const DOC_SEED_BY_DIRECTION = {
+    Import: [
+      { fileName: 'Bill_of_Lading.pdf', category: 'Commercial & Shipping Documents', docType: 'Bill of Lading (SWB or Telex)' },
+      { fileName: 'Commercial_Invoice.pdf', category: 'Commercial & Shipping Documents', docType: 'Commercial Invoice' },
+      { fileName: 'Packing_List.xlsx', category: 'Commercial & Shipping Documents', docType: 'Packing List' },
+      { fileName: 'Form_M.pdf', category: 'Regulatory & Customs Documents', docType: 'Form M' },
+    ],
+    Export: [
+      { fileName: 'Commercial_Invoice.pdf', category: 'Commercial Documents', docType: 'Commercial Invoice' },
+      { fileName: 'Bill_of_Lading.pdf', category: 'Shipping Documents', docType: 'Bill of Lading / Sea Waybill' },
+      { fileName: 'Packing_List.xlsx', category: 'Commercial Documents', docType: 'Packing List' },
+      { fileName: 'Certificate_of_Origin.pdf', category: 'Post Shipment Documents', docType: 'Certificate of Origin' },
+    ],
+  };
   function seedDocumentsForShipment(s, shipmentIndex) {
+    const files = DOC_SEED_BY_DIRECTION[shipmentDocDirection(s)];
     const teamIds = [s.ownerId, ...(s.supportingOwnerIds || [])];
-    const count = 1 + (shipmentIndex % DOC_SEED_FILES.length);
+    const count = 1 + (shipmentIndex % files.length);
     const docs = [];
     for (let i = 0; i < count; i += 1) {
-      const f = DOC_SEED_FILES[i];
+      const f = files[i];
       docs.push({
         id: makeId('doc'),
         fileName: f.fileName,
@@ -889,6 +915,7 @@
     ADMIN_USER_ID: ADMIN_USER.id,
     TEAM_ROLE_LABEL,
     DOC_TAXONOMY,
+    getDocTaxonomyForShipment,
     sync: {
       getShipments: _getShipments,
       getShipment: _getShipment,

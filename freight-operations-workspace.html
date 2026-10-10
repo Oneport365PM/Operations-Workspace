@@ -853,6 +853,10 @@ textarea.field-control{resize:vertical;min-height:70px}
           <option value="">Select category first…</option>
         </select>
       </div>
+      <div class="form-field" id="input-doc-other-name-wrap" style="margin-top:14px; display:none">
+        <label class="field-label">Document Name</label>
+        <input type="text" class="field-control" id="input-doc-other-name" placeholder="Enter document name" maxlength="80">
+      </div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-outline" data-close-modal>Cancel</button>
@@ -1679,30 +1683,52 @@ function formatBytes(bytes){
   return (bytes/(1024*1024)).toFixed(1) + ' MB';
 }
 
+// Category/Type options depend on whether the open shipment is an Import
+// or Export job (see MilestoneStore.getDocTaxonomyForShipment) — an Ocean
+// Export shipment should never offer an Import-only document type, and
+// vice versa.
+function getUploadTaxonomy(){
+  const s = currentShipment();
+  return s ? MilestoneStore.getDocTaxonomyForShipment(s.jobRef) : {};
+}
 function populateDocTypeOptions(category){
   const typeSelect = el('input-doc-type');
-  const types = category ? (MilestoneStore.DOC_TAXONOMY[category] || []) : [];
+  const types = category ? (getUploadTaxonomy()[category] || []) : [];
   typeSelect.disabled = !category;
   typeSelect.innerHTML = category
     ? `<option value="">Select type…</option>` + types.map(t=>`<option>${t}</option>`).join('')
     : `<option value="">Select category first…</option>`;
+  toggleDocOtherNameField();
+}
+// "Others" is a slot in every category, not a document type of its own —
+// picking it reveals a free-text field to capture the real document name.
+function toggleDocOtherNameField(){
+  const isOther = el('input-doc-type').value === 'Others';
+  el('input-doc-other-name-wrap').style.display = isOther ? '' : 'none';
+  if(!isOther) el('input-doc-other-name').value = '';
 }
 el('input-doc-category').addEventListener('change', (e)=>{
   populateDocTypeOptions(e.target.value);
   updateSaveUploadDocsState();
 });
-el('input-doc-type').addEventListener('change', updateSaveUploadDocsState);
+el('input-doc-type').addEventListener('change', ()=>{
+  toggleDocOtherNameField();
+  updateSaveUploadDocsState();
+});
+el('input-doc-other-name').addEventListener('input', updateSaveUploadDocsState);
 
 function updateSaveUploadDocsState(){
   const category = el('input-doc-category').value;
   const docType = el('input-doc-type').value;
-  el('save-upload-docs').disabled = state.pendingFiles.length===0 || !category || !docType;
+  const needsOtherName = docType === 'Others' && !el('input-doc-other-name').value.trim();
+  el('save-upload-docs').disabled = state.pendingFiles.length===0 || !category || !docType || needsOtherName;
 }
 
 function openUploadDocsModal(){
   state.pendingFiles = [];
   el('input-doc-category').innerHTML = `<option value="">Select category…</option>` +
-    Object.keys(MilestoneStore.DOC_TAXONOMY).map(c=>`<option>${c}</option>`).join('');
+    Object.keys(getUploadTaxonomy()).map(c=>`<option>${c}</option>`).join('');
+  el('input-doc-other-name').value = '';
   populateDocTypeOptions('');
   renderFilePillList();
   openModal('modal-upload-docs');
@@ -1745,7 +1771,8 @@ function renderFilePillList(){
 el('save-upload-docs').addEventListener('click', ()=>{
   const s = currentShipment();
   const category = el('input-doc-category').value;
-  const docType = el('input-doc-type').value;
+  const typeValue = el('input-doc-type').value;
+  const docType = typeValue === 'Others' ? el('input-doc-other-name').value.trim() : typeValue;
   const files = state.pendingFiles;
   const btn = el('save-upload-docs');
   btn.disabled = true;

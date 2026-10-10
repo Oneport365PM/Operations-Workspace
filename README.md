@@ -212,31 +212,44 @@ sequence (section 43):
 - **Documents** — tied to a shipment, not a milestone/task (a shipment can
   have documents before any milestone exists). Two sub-tabs, a segmented
   pill control at the top of the screen:
-  - **Upload** — pick which of your own shipments to upload for (anywhere
-    you're Owner or Supporting on the team, via
-    `MilestoneStore.getMyShipments`), which opens **Category** → **Type**
-    (options filtered by the chosen category) → **Upload File**. After a
-    successful upload, the app lands back on Documents with History active
-    so the new document is immediately visible as confirmation.
+  - **Upload** — the form itself is the tab's default view, so there's no
+    extra screen to drill into: **Job Number** (type-ahead search by job
+    number or customer; picking a result shows a confirmation card —
+    Customer, Route — so it's obvious the right shipment was found) →
+    **Document Category** → **Document Type** (options filtered by the
+    chosen category, and scoped to whether the shipment is Import or
+    Export — see taxonomy note below) → **File**. Picking the Type
+    "Others" reveals a free-text "Document Name" field, since "Others" is
+    a slot for an undocumented type, not a type in its own right. A
+    successful upload resets the form in place (not a redirect) so the
+    next upload can start immediately, and quietly refreshes History's
+    badge/data in the background.
   - **History** — every document uploaded across all of your shipments,
     flat and newest first, each one clearly labeled with its job number
     (same card style as the Tasks list). There's no detail page for a
     document — tapping a card opens its file preview if one is available
-    on this device, otherwise does nothing.
-  No bulk upload, no edit/delete, and no dedicated notification for a new
-  document in this MVP — uploading and reviewing is the full scope here.
-  Documents are shared with the Admin Portal through `MilestoneStore`
-  (`addDocument` / `getDocumentsForShipment`), the same pattern as
-  milestones and the team roster — a document uploaded from either app
-  shows up in the other's list, in the same order, without a page
-  reload. See "Known simplifications" below for the one real limitation
-  this sharing has (file previews don't cross tabs/devices).
-  - **Category/Type taxonomy is a placeholder.** `DOC_TAXONOMY` in
-    `shared/milestone-store.js` reuses the Admin Portal's existing
-    category list (Shipping/Finance/Customs/Compliance/General); the Doc
-    Types under each are illustrative stand-ins, not the organization's
-    real list. Both apps read categories/types from this one object, so
-    swapping in the real taxonomy is a one-place edit.
+    on this device, otherwise does nothing. Each card has a small
+    overflow menu (⋮) with a single "Delete" action; deleting requires an
+    explicit confirmation sheet naming the exact file and job number and
+    warning it can't be undone, never a single destructive tap.
+  No bulk upload and no dedicated notification for a new document in this
+  MVP. Documents are shared with the Admin Portal through `MilestoneStore`
+  (`addDocument` / `getDocumentsForShipment` / `deleteDocument`), the same
+  pattern as milestones and the team roster — a document uploaded or
+  deleted from either app shows up (or disappears) in the other's list, in
+  the same order, without a page reload. See "Known simplifications" below
+  for the one real limitation this sharing has (file previews don't cross
+  tabs/devices).
+  - **Category/Type taxonomy** comes from "Back Office 2.0 — Operations
+    Feedback" (the Documents Required for Import / Export sections).
+    Import and Export have different category sets entirely (e.g. Import
+    has "Clearing Documents", Export has "Post Shipment Documents"), so
+    `MilestoneStore.getDocTaxonomyForShipment(jobRef)` picks the right one
+    from the shipment's own `mode` (any "...Export" mode uses the Export
+    set, everything else uses Import) — both apps call this one function
+    rather than each re-deriving the split themselves. Every category ends
+    with "Others", which is what triggers the free-text field described
+    above in both apps' upload forms.
 
 ## Admin Portal — what changed
 
@@ -263,8 +276,10 @@ sequence (section 43):
   change made for milestones and the team roster, and for the same
   reason: the Field Channel's Documents tab needs to see the exact same
   records. The upload modal gained a required Document Type dropdown
-  (filtered by the chosen Category) alongside the existing Category
-  field, and the table gained a Type column.
+  (filtered by the chosen Category, and by the shipment's Import/Export
+  direction via `MilestoneStore.getDocTaxonomyForShipment`) alongside the
+  existing Category field, a free-text Document Name field that appears
+  when Type is "Others", and the table gained a Type column.
 - Everything else (containers, physical tracking, shipment CRUD) is
   unchanged local-mock behavior — those are out of MVP scope for the
   Field Channel and were left alone.

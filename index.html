@@ -154,6 +154,30 @@ input,textarea{font-family:var(--font-body)}
 .segmented-tab.active .seg-badge{ background:var(--green-accent); color:var(--green-dark); }
 .docs-helper-text{ color:var(--silver-light); font-size:13px; margin:0 0 10px; padding:0 2px; }
 
+/* ---- Document upload form: job search-as-you-type ---- */
+.job-search-wrap{ position:relative; }
+.job-search-results{ display:none; position:absolute; left:0; right:0; top:calc(100% + 4px); background:var(--white); border:1px solid var(--border-tint); border-radius:var(--radius-md); box-shadow:var(--shadow-e2); max-height:220px; overflow-y:auto; z-index:30; }
+.job-search-results.open{ display:block; }
+.job-search-item{ display:flex; flex-direction:column; gap:2px; width:100%; text-align:left; background:none; border:none; padding:10px 14px; border-bottom:1px solid var(--border-tint); }
+.job-search-item:last-child{ border-bottom:none; }
+.job-search-item:active{ background:var(--green-light-surface); }
+.job-search-item .jsi-ref{ font-family:var(--font-display); font-weight:600; font-size:13.5px; color:var(--green-dark); }
+.job-search-item .jsi-customer{ font-size:12px; color:var(--silver-light); }
+.job-search-empty{ padding:12px 14px; font-size:13px; color:var(--silver-light); }
+.link-btn{ background:none; border:none; padding:8px 2px; margin-top:2px; font-family:var(--font-display); font-weight:600; font-size:12.5px; color:var(--green-dark); text-decoration:underline; }
+
+/* ---- Card overflow menu (e.g. Documents History "Delete") ---- */
+.card-menu-wrap{ position:relative; }
+.card-menu-btn{ background:none; border:none; padding:6px; margin:-6px; border-radius:var(--radius-sm); color:var(--silver-light); display:flex; flex-shrink:0; }
+.card-menu-btn:active{ background:var(--green-light-surface); }
+.card-menu{ display:none; position:absolute; right:0; top:calc(100% + 4px); background:var(--white); border:1px solid var(--border-tint); border-radius:var(--radius-md); box-shadow:var(--shadow-e2); min-width:140px; z-index:30; overflow:hidden; }
+.card-menu.open{ display:block; }
+.card-menu-item{ display:block; width:100%; text-align:left; background:none; border:none; padding:11px 14px; font-size:13.5px; font-weight:600; color:var(--silver-dark); }
+.card-menu-item:active{ background:var(--green-light-surface); }
+.card-menu-item.danger{ color:var(--error-text); }
+.btn-danger{ background:var(--error); color:var(--white); }
+.btn-danger:active{ background:var(--error-text); }
+
 /* ---- Notifications ---- */
 .notif-item{
   background:var(--white); border:1px solid var(--border-tint); border-radius:var(--radius-lg);
@@ -337,16 +361,6 @@ select.field-input{ background-image:url('data:image/svg+xml;utf8,<svg xmlns="ht
     <div class="list" id="docs-pane"></div>
   </div>
 
-  <!-- ============== DOCUMENT UPLOAD (drill-down) ============== -->
-  <div class="screen" id="screen-doc-detail">
-    <div class="topbar topbar-simple">
-      <button class="back-btn" id="btn-back-doc-detail"><svg width="21" height="21" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-      <h1>Upload Document</h1>
-    </div>
-    <div id="doc-detail-banner"></div>
-    <div class="detail-body" id="doc-detail-body"></div>
-  </div>
-
   <!-- ============== MILESTONE DETAIL (drill-down) ============== -->
   <div class="screen" id="screen-detail">
     <div class="topbar topbar-simple">
@@ -431,6 +445,20 @@ select.field-input{ background-image:url('data:image/svg+xml;utf8,<svg xmlns="ht
   </div>
 </div>
 
+<!-- ============== DELETE DOCUMENT SHEET ============== -->
+<div class="sheet-overlay" id="delete-doc-sheet">
+  <div class="sheet">
+    <div class="handle"></div>
+    <h2>Delete this document?</h2>
+    <p class="sheet-sub" id="delete-doc-sub"></p>
+    <p class="empty-note" style="margin:0 0 16px">This can't be undone.</p>
+    <div class="sheet-actions">
+      <button class="btn btn-outline" id="delete-doc-cancel">Cancel</button>
+      <button class="btn btn-danger" id="delete-doc-confirm">Delete</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast-wrap"></div>
 
 <script src="shared/milestone-store.js"></script>
@@ -449,6 +477,7 @@ const ICON_CHEVRON = '<svg width="14" height="14" fill="none" stroke="currentCol
 const ICON_COMMENT = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
 const ICON_TEAM = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="10" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
 const ICON_DOC = '<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><path d="M14 2v6h6"></path></svg>';
+const ICON_MORE = '<svg width="18" height="18" fill="currentColor" stroke="none" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg>';
 const SLA_ICON = { healthy: ICON_CLOCK, 'at-risk': ICON_WARN, breached: ICON_WARN };
 const NOTIF_ICON = { comment: ICON_COMMENT, sla_breached: ICON_WARN, team_added: ICON_TEAM, team_removed: ICON_TEAM, role_updated: ICON_TEAM };
 const NOTIF_PAGE_SIZE = 10;
@@ -469,11 +498,14 @@ const state = {
   myShipments: [],
   docHistory: [],
   docsActiveTab: 'upload',
-  currentDocShipmentRef: null,
+  docJobSearch: '',
+  docSelectedJobRef: null,
   docCategory: '',
   docType: '',
+  docCustomName: '',
   pendingDocFile: null,
   uploadingDoc: false,
+  deleteDocTarget: null, // { docId, jobRef, fileName } — delete confirmation sheet
 };
 
 function el(id){ return document.getElementById(id); }
@@ -741,17 +773,24 @@ el('todos-list').addEventListener('click', (e)=>{
 
 /* ==========================================================================
    Documents — tied to a shipment, not a milestone/task. Two sub-tabs:
-   Upload (pick which of your shipments to upload a document for, then
-   Category -> Type -> File) and History (every document you've ever
-   uploaded, across all your shipments, flat and newest first — no
-   per-document detail page, just the list). Shared with the Admin Portal
-   via MilestoneStore; no edit/delete from this app and no dedicated
-   notification (product decision for this MVP).
+   Upload (the upload form is the default view — Job Number search, then
+   Category -> Type -> File, all on one screen) and History (every document
+   you've ever uploaded, across all your shipments, flat and newest first —
+   no per-document detail page, just the list, with a per-card menu to
+   delete). Shared with the Admin Portal via MilestoneStore.
    ========================================================================== */
 function goToDocs(){
   showScreen('screen-docs');
   renderDocsTabs();
-  loadDocsData();
+  el('docs-banner').innerHTML = '';
+  if(!state.myShipments.length && !state.docHistory.length){
+    el('docs-pane').innerHTML = `<div class="skeleton-card"></div>`;
+  }
+  refreshDocsData().then(()=> renderDocsPane()).catch(err=>{
+    console.error('loadDocsData failed:', err);
+    el('docs-pane').innerHTML = '';
+    el('docs-banner').innerHTML = bannerHtml('error', 'Unable to load documents. Please check your connection and try again.');
+  });
 }
 function setDocsTab(tab){
   if(state.docsActiveTab === tab) return;
@@ -766,33 +805,73 @@ function renderDocsTabs(){
 el('docs-tab-upload-btn').addEventListener('click', ()=>setDocsTab('upload'));
 el('docs-tab-history-btn').addEventListener('click', ()=>setDocsTab('history'));
 
-// Loads both the shipment list (Upload tab) and the full document history
-// (History tab) up front, so switching tabs is instant and both badge
-// counts are always accurate regardless of which tab is showing.
-function loadDocsData(){
-  el('docs-banner').innerHTML = '';
-  el('docs-pane').innerHTML = `<div class="skeleton-card"></div>`;
-  MilestoneStore.getMyShipments(state.me.id).then(shipments=>{
+// Refreshes the underlying data (shipment list + full document history)
+// and badge counts only — never touches the Upload pane's own DOM, so a
+// cross-tab revalidation can't steal focus out from under someone mid-way
+// through filling the upload form. Callers that DO want a full re-render
+// (initial load, explicit tab switch) chain .then(renderDocsPane) themselves.
+function refreshDocsData(){
+  return MilestoneStore.getMyShipments(state.me.id).then(shipments=>{
     state.myShipments = shipments;
-    return Promise.all(shipments.map(s=>MilestoneStore.getDocumentsForShipment(s.jobRef))).then(lists=>{
-      const flat = [];
-      shipments.forEach((s, i)=> lists[i].forEach(d=> flat.push({ doc: d, shipment: s })));
-      flat.sort((a, b)=> new Date(b.doc.uploadedAt) - new Date(a.doc.uploadedAt));
-      state.docHistory = flat;
-    });
-  }).then(()=>{
+    return Promise.all(shipments.map(s=>MilestoneStore.getDocumentsForShipment(s.jobRef)));
+  }).then(lists=>{
+    const flat = [];
+    state.myShipments.forEach((s, i)=> lists[i].forEach(d=> flat.push({ doc: d, shipment: s })));
+    flat.sort((a, b)=> new Date(b.doc.uploadedAt) - new Date(a.doc.uploadedAt));
+    state.docHistory = flat;
     el('docs-tab-upload-badge').textContent = state.myShipments.length;
     el('docs-tab-history-badge').textContent = state.docHistory.length;
-    renderDocsPane();
-  }).catch(err=>{
-    console.error('loadDocsData failed:', err);
-    el('docs-pane').innerHTML = '';
-    el('docs-banner').innerHTML = bannerHtml('error', 'Unable to load documents. Please check your connection and try again.');
   });
 }
 function renderDocsPane(){
   if(state.docsActiveTab === 'history') renderDocHistoryPane();
   else renderDocsUploadPane();
+}
+
+/* ---- Upload tab: Job Number search -> Category -> Type -> File ---- */
+function docSelectedShipment(){
+  return state.myShipments.find(s=>s.jobRef===state.docSelectedJobRef) || null;
+}
+function canSubmitDocUpload(){
+  if(state.uploadingDoc) return false;
+  if(!state.docSelectedJobRef || !state.docCategory || !state.docType) return false;
+  if(state.docType === 'Others' && !state.docCustomName.trim()) return false;
+  return !!state.pendingDocFile;
+}
+function updateSubmitDocState(){
+  const btn = el('btn-submit-doc-upload');
+  if(btn) btn.disabled = !canSubmitDocUpload();
+}
+function filterJobMatches(query){
+  const q = query.trim().toLowerCase();
+  if(!q) return [];
+  return state.myShipments.filter(s=>
+    s.jobRef.toLowerCase().includes(q) || s.customer.toLowerCase().includes(q)
+  ).slice(0, 8);
+}
+function renderJobSearchResults(){
+  const wrap = el('doc-job-results');
+  const input = el('doc-job-search');
+  if(!wrap || !input) return;
+  const matches = filterJobMatches(input.value);
+  if(!input.value.trim()){ wrap.innerHTML = ''; wrap.classList.remove('open'); return; }
+  wrap.innerHTML = matches.length
+    ? matches.map(s=>`
+      <button type="button" class="job-search-item" data-pick-job="${s.jobRef}">
+        <span class="jsi-ref">${s.jobRef}</span>
+        <span class="jsi-customer">${escapeHtml(s.customer)}</span>
+      </button>`).join('')
+    : `<div class="job-search-empty">No matching shipments</div>`;
+  wrap.classList.add('open');
+}
+function selectDocJob(jobRef){
+  state.docSelectedJobRef = jobRef;
+  state.docJobSearch = '';
+  state.docCategory = '';
+  state.docType = '';
+  state.docCustomName = '';
+  state.pendingDocFile = null;
+  renderDocsUploadPane();
 }
 function renderDocsUploadPane(){
   if(!state.myShipments.length){
@@ -804,22 +883,154 @@ function renderDocsUploadPane(){
       </div>`;
     return;
   }
+  const selected = docSelectedShipment();
+  const taxonomy = selected ? MilestoneStore.getDocTaxonomyForShipment(selected.jobRef) : {};
+  const categories = Object.keys(taxonomy);
+  const types = state.docCategory ? (taxonomy[state.docCategory] || []) : [];
+
   el('docs-pane').innerHTML = `
-    <p class="docs-helper-text">Select the shipment you'd like to upload a document for.</p>
-    ${state.myShipments.map(s=>`
-      <div class="ms-card" data-open-job="${s.jobRef}">
-        <div class="row1">
-          <span class="ms-name">${s.customer}</span>
-          <span class="ship-ref">${s.jobRef}</span>
-        </div>
-        <div class="meta-row">
-          <span>${transportLabelOf(s)}</span>
-          <span>·</span>
-          <span>${ICON_PIN}${s.route}</span>
-        </div>
-      </div>`).join('')}
+    <label class="field-label" for="doc-job-search">Job Number</label>
+    ${selected ? `
+      <div class="info-card">
+        <div class="info-row"><span class="k">Job Number</span><span class="v">${selected.jobRef}</span></div>
+        <div class="info-row"><span class="k">Customer</span><span class="v">${escapeHtml(selected.customer)}</span></div>
+        <div class="info-row"><span class="k">Route</span><span class="v">${escapeHtml(selected.route)}</span></div>
+      </div>
+      <button type="button" class="link-btn" id="btn-change-doc-job">Change job</button>
+    ` : `
+      <div class="job-search-wrap">
+        <input type="text" class="field-input" id="doc-job-search" placeholder="Search by job number or customer" autocomplete="off" value="${escapeHtml(state.docJobSearch)}">
+        <div class="job-search-results" id="doc-job-results"></div>
+      </div>
+    `}
+
+    <label class="field-label" for="doc-category-select" style="margin-top:14px">Document Category</label>
+    <select class="field-input" id="doc-category-select" ${!selected ? 'disabled' : ''}>
+      <option value="" disabled ${!state.docCategory ? 'selected' : ''}>${selected ? 'Select category' : 'Select a job first'}</option>
+      ${categories.map(c=>`<option value="${escapeHtml(c)}" ${state.docCategory===c?'selected':''}>${escapeHtml(c)}</option>`).join('')}
+    </select>
+
+    <label class="field-label" for="doc-type-select" style="margin-top:14px">Document Type</label>
+    <select class="field-input" id="doc-type-select" ${!state.docCategory ? 'disabled' : ''}>
+      <option value="" disabled ${!state.docType ? 'selected' : ''}>${state.docCategory ? 'Select type' : 'Select category first'}</option>
+      ${types.map(t=>`<option value="${escapeHtml(t)}" ${state.docType===t?'selected':''}>${escapeHtml(t)}</option>`).join('')}
+    </select>
+
+    ${state.docType === 'Others' ? `
+    <label class="field-label" for="doc-custom-name" style="margin-top:14px">Document Name</label>
+    <input type="text" class="field-input" id="doc-custom-name" placeholder="Enter document name" maxlength="80" value="${escapeHtml(state.docCustomName)}">
+    ` : ''}
+
+    <label class="field-label" for="doc-file-input" style="margin-top:14px">File</label>
+    <input type="file" class="field-input" id="doc-file-input" style="padding:10px 12px">
+    <p class="empty-note" id="doc-file-name">${state.pendingDocFile ? escapeHtml(state.pendingDocFile.name) : 'No file selected'}</p>
+
+    <button class="btn btn-primary" id="btn-submit-doc-upload" style="margin-top:16px">${ICON_CHECK} Upload Document</button>
   `;
+  wireDocsUploadPaneEvents();
 }
+function wireDocsUploadPaneEvents(){
+  const searchInput = el('doc-job-search');
+  if(searchInput){
+    searchInput.addEventListener('input', (e)=>{ state.docJobSearch = e.target.value; renderJobSearchResults(); });
+    searchInput.addEventListener('focus', renderJobSearchResults);
+  }
+  const resultsWrap = el('doc-job-results');
+  if(resultsWrap){
+    resultsWrap.addEventListener('click', (e)=>{
+      const item = e.target.closest('[data-pick-job]');
+      if(item) selectDocJob(item.dataset.pickJob);
+    });
+  }
+  const changeJobBtn = el('btn-change-doc-job');
+  if(changeJobBtn) changeJobBtn.addEventListener('click', ()=>{
+    state.docSelectedJobRef = null;
+    state.docCategory = '';
+    state.docType = '';
+    state.docCustomName = '';
+    state.pendingDocFile = null;
+    renderDocsUploadPane();
+  });
+  const categorySelect = el('doc-category-select');
+  if(categorySelect) categorySelect.addEventListener('change', (e)=>{
+    state.docCategory = e.target.value;
+    state.docType = '';
+    state.docCustomName = '';
+    renderDocsUploadPane();
+  });
+  const typeSelect = el('doc-type-select');
+  if(typeSelect) typeSelect.addEventListener('change', (e)=>{
+    state.docType = e.target.value;
+    state.docCustomName = '';
+    renderDocsUploadPane();
+  });
+  const customNameInput = el('doc-custom-name');
+  if(customNameInput) customNameInput.addEventListener('input', (e)=>{
+    state.docCustomName = e.target.value;
+    updateSubmitDocState();
+  });
+  const fileInput = el('doc-file-input');
+  if(fileInput) fileInput.addEventListener('change', (e)=>{
+    state.pendingDocFile = e.target.files[0] || null;
+    el('doc-file-name').textContent = state.pendingDocFile ? state.pendingDocFile.name : 'No file selected';
+    updateSubmitDocState();
+  });
+  const submitBtn = el('btn-submit-doc-upload');
+  if(submitBtn) submitBtn.addEventListener('click', submitDocUpload);
+  updateSubmitDocState();
+}
+// Closes the job-search dropdown on an outside tap/click.
+document.addEventListener('click', (e)=>{
+  if(!e.target.closest('.job-search-wrap')){
+    const results = el('doc-job-results');
+    if(results) results.classList.remove('open');
+  }
+});
+
+function submitDocUpload(){
+  if(!canSubmitDocUpload()) return;
+  const jobRef = state.docSelectedJobRef;
+  const file = state.pendingDocFile;
+  const category = state.docCategory;
+  const docType = state.docType === 'Others' ? state.docCustomName.trim() : state.docType;
+  state.uploadingDoc = true;
+  const btn = el('btn-submit-doc-upload');
+  if(btn){ btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Uploading…'; }
+
+  MilestoneStore.addDocument(jobRef, {
+    fileName: file.name,
+    category,
+    docType,
+    fileUrl: URL.createObjectURL(file),
+    size: file.size,
+  }, state.me.id).then(res=>{
+    state.uploadingDoc = false;
+    if(!res.ok){
+      const messages = { FORBIDDEN: "You're not on this shipment's team.", NOT_FOUND: 'This shipment is no longer available.' };
+      showToast(messages[res.code] || 'Unable to upload this document.', 'error');
+      if(btn){ btn.disabled = false; btn.innerHTML = `${ICON_CHECK} Upload Document`; }
+      return;
+    }
+    showToast('Document uploaded');
+    // Reset the form so the next upload can start immediately — the whole
+    // point of keeping the form as the Upload tab's default view — and
+    // quietly refresh History's data/badge in case the user checks it.
+    state.docSelectedJobRef = null;
+    state.docCategory = '';
+    state.docType = '';
+    state.docCustomName = '';
+    state.pendingDocFile = null;
+    renderDocsUploadPane();
+    refreshDocsData().then(()=>{ if(state.docsActiveTab === 'history') renderDocHistoryPane(); });
+  }).catch(err=>{
+    state.uploadingDoc = false;
+    console.error('addDocument failed:', err);
+    showToast('Unable to upload this document. Please check your connection and try again.', 'error');
+    if(btn){ btn.disabled = false; btn.innerHTML = `${ICON_CHECK} Upload Document`; }
+  });
+}
+
+/* ---- History tab: flat list, newest first, with a delete-only card menu ---- */
 // A document's fileUrl is a browser blob: URL — it only resolves in the
 // tab/origin that created it, so a document uploaded from another
 // device/tab (including the Admin Portal) shows a "preview unavailable"
@@ -844,7 +1055,15 @@ function renderDocHistoryPane(){
     <div class="ms-card" data-view-doc="${d.id}" style="cursor:${d.fileUrl ? 'pointer' : 'default'}">
       <div class="row1">
         <span class="ms-name">${escapeHtml(d.fileName)}</span>
-        <span class="ship-ref">${s.jobRef}</span>
+        <div style="display:flex; align-items:center; gap:4px;">
+          <span class="ship-ref">${s.jobRef}</span>
+          <div class="card-menu-wrap">
+            <button type="button" class="card-menu-btn" data-doc-menu="${d.id}" title="Options">${ICON_MORE}</button>
+            <div class="card-menu" id="doc-menu-${d.id}">
+              <button type="button" class="card-menu-item danger" data-delete-doc="${d.id}">Delete</button>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="customer-line">${escapeHtml(d.category || 'Uncategorized')}${d.docType ? ' · ' + escapeHtml(d.docType) : ''}</div>
       <div class="meta-row">
@@ -857,8 +1076,22 @@ function renderDocHistoryPane(){
   }).join('');
 }
 el('docs-pane').addEventListener('click', (e)=>{
-  const jobCard = e.target.closest('[data-open-job]');
-  if(jobCard){ openDocUpload(jobCard.dataset.openJob); return; }
+  const menuBtn = e.target.closest('[data-doc-menu]');
+  if(menuBtn){
+    e.stopPropagation();
+    const menu = el('doc-menu-' + menuBtn.dataset.docMenu);
+    const wasOpen = menu && menu.classList.contains('open');
+    document.querySelectorAll('.card-menu.open').forEach(m=>m.classList.remove('open'));
+    if(menu && !wasOpen) menu.classList.add('open');
+    return;
+  }
+  const deleteBtn = e.target.closest('[data-delete-doc]');
+  if(deleteBtn){
+    e.stopPropagation();
+    document.querySelectorAll('.card-menu.open').forEach(m=>m.classList.remove('open'));
+    openDeleteDocSheet(deleteBtn.dataset.deleteDoc);
+    return;
+  }
   const histCard = e.target.closest('[data-view-doc]');
   if(histCard){
     const entry = state.docHistory.find(h=>h.doc.id === histCard.dataset.viewDoc);
@@ -867,113 +1100,47 @@ el('docs-pane').addEventListener('click', (e)=>{
     else showToast('Preview unavailable — this document was uploaded from another device/tab', 'error');
   }
 });
+// Closes any open card menu on an outside tap/click.
+document.addEventListener('click', (e)=>{
+  if(!e.target.closest('.card-menu-wrap')){
+    document.querySelectorAll('.card-menu.open').forEach(m=>m.classList.remove('open'));
+  }
+});
 
-function currentDocShipment(){
-  return state.myShipments.find(s=>s.jobRef===state.currentDocShipmentRef);
+/* ---- Delete a document — destructive, so it always requires an explicit,
+   separate confirmation step (never a single tap) naming exactly what's
+   about to be removed, consistent with how every other irreversible
+   action in this app (none, until now) would be gated. ---- */
+function openDeleteDocSheet(docId){
+  const entry = state.docHistory.find(h=>h.doc.id === docId);
+  if(!entry) return;
+  state.deleteDocTarget = { docId, jobRef: entry.shipment.jobRef, fileName: entry.doc.fileName };
+  el('delete-doc-sub').textContent = `${entry.doc.fileName} — ${entry.shipment.jobRef}`;
+  el('delete-doc-confirm').disabled = false;
+  el('delete-doc-confirm').innerHTML = 'Delete';
+  el('delete-doc-sheet').classList.add('open');
 }
-function openDocUpload(jobRef){
-  state.currentDocShipmentRef = jobRef;
-  state.docCategory = '';
-  state.docType = '';
-  state.pendingDocFile = null;
-  showScreen('screen-doc-detail');
-  el('doc-detail-banner').innerHTML = '';
-  renderDocUploadForm();
-}
-el('btn-back-doc-detail').addEventListener('click', goToDocs);
+function closeDeleteDocSheet(){ el('delete-doc-sheet').classList.remove('open'); }
+el('delete-doc-cancel').addEventListener('click', closeDeleteDocSheet);
+el('delete-doc-sheet').addEventListener('click', (e)=>{ if(e.target.id==='delete-doc-sheet') closeDeleteDocSheet(); });
 
-function canSubmitDocUpload(){
-  return !!(state.docCategory && state.docType && state.pendingDocFile) && !state.uploadingDoc;
-}
-function updateSubmitDocState(){
-  const btn = el('btn-submit-doc-upload');
-  if(btn) btn.disabled = !canSubmitDocUpload();
-}
-
-function renderDocUploadForm(){
-  const s = currentDocShipment();
-  if(!s) return;
-  const categories = Object.keys(MilestoneStore.DOC_TAXONOMY);
-  const types = state.docCategory ? (MilestoneStore.DOC_TAXONOMY[state.docCategory] || []) : [];
-  el('doc-detail-body').innerHTML = `
-    <div class="info-card">
-      <div class="info-row"><span class="k">Reference</span><span class="v">${s.jobRef}</span></div>
-      <div class="info-row"><span class="k">Customer</span><span class="v">${s.customer}</span></div>
-      <div class="info-row"><span class="k">Route</span><span class="v">${s.route}</span></div>
-    </div>
-
-    <label class="field-label" for="doc-category-select">Document Category</label>
-    <select class="field-input" id="doc-category-select">
-      <option value="" disabled ${!state.docCategory ? 'selected' : ''}>Select category</option>
-      ${categories.map(c=>`<option value="${c}" ${state.docCategory===c?'selected':''}>${c}</option>`).join('')}
-    </select>
-
-    <label class="field-label" for="doc-type-select" style="margin-top:14px">Document Type</label>
-    <select class="field-input" id="doc-type-select" ${!state.docCategory ? 'disabled' : ''}>
-      <option value="" disabled ${!state.docType ? 'selected' : ''}>${state.docCategory ? 'Select type' : 'Select category first'}</option>
-      ${types.map(t=>`<option value="${t}" ${state.docType===t?'selected':''}>${t}</option>`).join('')}
-    </select>
-
-    <label class="field-label" for="doc-file-input" style="margin-top:14px">File</label>
-    <input type="file" class="field-input" id="doc-file-input" style="padding:10px 12px">
-    <p class="empty-note" id="doc-file-name">${state.pendingDocFile ? escapeHtml(state.pendingDocFile.name) : 'No file selected'}</p>
-
-    <button class="btn btn-primary" id="btn-submit-doc-upload" style="margin-top:16px">${ICON_CHECK} Upload Document</button>
-  `;
-
-  el('doc-category-select').addEventListener('change', (e)=>{
-    state.docCategory = e.target.value;
-    state.docType = '';
-    renderDocUploadForm();
-  });
-  const typeSelect = el('doc-type-select');
-  if(typeSelect) typeSelect.addEventListener('change', (e)=>{ state.docType = e.target.value; updateSubmitDocState(); });
-  el('doc-file-input').addEventListener('change', (e)=>{
-    state.pendingDocFile = e.target.files[0] || null;
-    el('doc-file-name').textContent = state.pendingDocFile ? state.pendingDocFile.name : 'No file selected';
-    updateSubmitDocState();
-  });
-  el('btn-submit-doc-upload').addEventListener('click', submitDocUpload);
-  updateSubmitDocState();
-}
-
-function submitDocUpload(){
-  if(!canSubmitDocUpload()) return;
-  const jobRef = state.currentDocShipmentRef;
-  const file = state.pendingDocFile;
-  const category = state.docCategory;
-  const docType = state.docType;
-  state.uploadingDoc = true;
-  const btn = el('btn-submit-doc-upload');
-  if(btn){ btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Uploading…'; }
-
-  MilestoneStore.addDocument(jobRef, {
-    fileName: file.name,
-    category,
-    docType,
-    fileUrl: URL.createObjectURL(file),
-    size: file.size,
-  }, state.me.id).then(res=>{
-    state.uploadingDoc = false;
-    if(!res.ok){
-      const messages = { FORBIDDEN: "You're not on this shipment's team.", NOT_FOUND: 'This shipment is no longer available.' };
-      showToast(messages[res.code] || 'Unable to upload this document.', 'error');
-      if(btn){ btn.disabled = false; btn.innerHTML = `${ICON_CHECK} Upload Document`; }
-      return;
-    }
-    showToast('Document uploaded');
-    // Land back on Documents with History active, so the upload that was
-    // just made is immediately visible as confirmation — rather than
-    // leaving the user on a reset upload form with no feedback.
-    state.docsActiveTab = 'history';
-    goToDocs();
+el('delete-doc-confirm').addEventListener('click', ()=>{
+  const target = state.deleteDocTarget;
+  if(!target) return;
+  const btn = el('delete-doc-confirm');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Deleting…';
+  MilestoneStore.deleteDocument(target.jobRef, target.docId, state.me.id).then(res=>{
+    closeDeleteDocSheet();
+    if(!res.ok){ showToast('Unable to delete this document.', 'error'); return; }
+    showToast('Document deleted');
+    refreshDocsData().then(()=>{ if(state.docsActiveTab === 'history') renderDocHistoryPane(); });
   }).catch(err=>{
-    state.uploadingDoc = false;
-    console.error('addDocument failed:', err);
-    showToast('Unable to upload this document. Please check your connection and try again.', 'error');
-    if(btn){ btn.disabled = false; btn.innerHTML = `${ICON_CHECK} Upload Document`; }
+    console.error('deleteDocument failed:', err);
+    closeDeleteDocSheet();
+    showToast('Unable to delete this document. Please check your connection and try again.', 'error');
   });
-}
+});
 
 /* ==========================================================================
    Milestone Detail — compact, single-screen: status/SLA, milestone name,
@@ -1340,7 +1507,13 @@ MilestoneStore.subscribe(()=>{
   if(el('screen-todos').classList.contains('active')) loadTodos();
   if(el('screen-detail').classList.contains('active')) loadMilestoneDetail();
   if(el('screen-notifications').classList.contains('active')){ state.notifPage = 1; loadNotifications(); }
-  if(el('screen-docs').classList.contains('active')) loadDocsData();
+  if(el('screen-docs').classList.contains('active')){
+    // Keep data/badges fresh, but only re-render the DOM when History is
+    // showing — a subscribe-triggered re-render of the Upload tab's form
+    // would blow away whatever the user is mid-way through filling in.
+    refreshDocsData().then(()=>{ if(state.docsActiveTab === 'history') renderDocHistoryPane(); })
+      .catch(err=>console.error('refreshDocsData (subscribe) failed:', err));
+  }
 });
 
 /* ==========================================================================
