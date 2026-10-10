@@ -94,12 +94,12 @@ sequence (section 43):
   the client never gets to declare its own identity for a completion
   (`completeMilestone` takes the acting user id, but a real backend would
   derive it from the session/token, not trust a client-supplied value).
-- **Bottom tab navigation** — Tasks / Expense / More. Tasks is the To-Dos
-  flow described below. Expense is a placeholder screen with a "Request
-  Expense" button that isn't wired up yet (shows a toast, same convention
-  the Admin Portal already uses for unbuilt actions). More is an
-  intentional dead end for this MVP — tapping it doesn't navigate
-  anywhere.
+- **Bottom tab navigation** — Tasks / Expense / Docs / More. Tasks is the
+  To-Dos flow described below. Expense is a placeholder screen with a
+  "Request Expense" button that isn't wired up yet (shows a toast, same
+  convention the Admin Portal already uses for unbuilt actions). Docs is
+  the document upload flow described below. More is an intentional dead
+  end for this MVP — tapping it doesn't navigate anywhere.
 - **To-Dos** — milestones assigned to the signed-in user, sorted by due
   date (earliest first). A completed milestone is not shown here at all —
   once done, it's off the Field Channel, so there's no separate
@@ -209,6 +209,26 @@ sequence (section 43):
     Already have older demo data in this browser? These only seed into a
     *fresh* store — run `MilestoneStore.resetDemoData()` from the console
     (either app) to reseed and pick them up.
+- **Documents** — tied to a shipment, not a milestone/task (a shipment can
+  have documents before any milestone exists). Flow: **Select Job** (your
+  own shipments only — anywhere you're Owner or Supporting on the team,
+  via `MilestoneStore.getMyShipments`) → **Category** → **Type** (options
+  filtered by the chosen category) → **Upload File**. The same screen then
+  shows the **latest 3 documents** for that shipment, newest first. No
+  bulk upload, no edit/delete, and no dedicated notification for a new
+  document in this MVP — uploading and reviewing is the full scope here.
+  Documents are shared with the Admin Portal through `MilestoneStore`
+  (`addDocument` / `getDocumentsForShipment`), the same pattern as
+  milestones and the team roster — a document uploaded from either app
+  shows up in the other's list, in the same order, without a page
+  reload. See "Known simplifications" below for the one real limitation
+  this sharing has (file previews don't cross tabs/devices).
+  - **Category/Type taxonomy is a placeholder.** `DOC_TAXONOMY` in
+    `shared/milestone-store.js` reuses the Admin Portal's existing
+    category list (Shipping/Finance/Customs/Compliance/General); the Doc
+    Types under each are illustrative stand-ins, not the organization's
+    real list. Both apps read categories/types from this one object, so
+    swapping in the real taxonomy is a one-place edit.
 
 ## Admin Portal — what changed
 
@@ -228,9 +248,18 @@ sequence (section 43):
   since the Field Channel's notifications depend on that roster being the
   same shared record both apps see — not two independently-maintained
   copies of "who's on this shipment."
-- Everything else (containers, documents, physical tracking, shipment
-  CRUD) is unchanged local-mock behavior — those are out of MVP scope for
-  the Field Channel and were left alone.
+- The Documents tab (upload, view, download, update file, delete) now
+  reads and writes through `MilestoneStore` (`getDocumentsForShipment`,
+  `addDocument`, `updateDocument`, `deleteDocument`) instead of a
+  local-only `s.documents` array that reset on every page load — the same
+  change made for milestones and the team roster, and for the same
+  reason: the Field Channel's Documents tab needs to see the exact same
+  records. The upload modal gained a required Document Type dropdown
+  (filtered by the chosen Category) alongside the existing Category
+  field, and the table gained a Type column.
+- Everything else (containers, physical tracking, shipment CRUD) is
+  unchanged local-mock behavior — those are out of MVP scope for the
+  Field Channel and were left alone.
 
 ## MVP scope
 
@@ -284,6 +313,20 @@ migration on this shape.
     it there, bringing both devices back onto the same data. This is a
     manual, one-shot copy for testing convenience — not live sync, so
     re-copy the link any time you want the two devices to match again.
+- **A document's file preview doesn't actually travel with it.** Uploaded
+  files are kept as a browser `blob:` URL (`URL.createObjectURL`), which
+  the browser only ever resolves in the exact tab that created it — it
+  can't be written to `localStorage`, sent over `BroadcastChannel`, or
+  resolved in another tab, even one on the same device. So the document's
+  *metadata* (file name, category, type, uploader, timestamp) syncs
+  normally between the Admin Portal and the Field Channel like everything
+  else in this file, but "View"/"Download" on a document uploaded from
+  the *other* app or tab shows "Preview unavailable" instead of the file —
+  there's nothing broken to fix here, no `blob:` URL can cross that
+  boundary in a browser. A real deployment replaces `fileUrl` with an
+  actual uploaded-file URL from a real backend, at which point every
+  device can resolve it and this caveat disappears, same as the
+  `localStorage` one above.
 - `MilestoneStore` seeds fresh demo data on first load per browser and
   keeps mutations after that. There's no `Math.random()` anywhere in the
   seed, and most of it is fully fixed — but a not-started milestone's due

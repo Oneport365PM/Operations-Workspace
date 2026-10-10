@@ -64,6 +64,22 @@
   function isAdmin(userId) { const u = getUserById(userId); return !!(u && u.isAdmin); }
 
   // ------------------------------------------------------------------
+  // Document Category / Type taxonomy
+  // ------------------------------------------------------------------
+  // PLACEHOLDER VALUES. Categories reuse the Admin Portal's existing
+  // upload-modal list; Doc Types are illustrative stand-ins only. Swap
+  // this object out for the real taxonomy once it's supplied — nothing
+  // else in either app needs to change, both Admin and Field Channel read
+  // category/type options from here.
+  const DOC_TAXONOMY = {
+    Shipping: ['Bill of Lading', 'Packing List', 'Booking Confirmation'],
+    Finance: ['Commercial Invoice', 'Debit Note', 'Payment Receipt'],
+    Customs: ['Form M', 'PAAR', 'Customs Assessment'],
+    Compliance: ['Certificate of Origin', 'SONCAP Certificate', 'Insurance Certificate'],
+    General: ['Other'],
+  };
+
+  // ------------------------------------------------------------------
   // Reference data — shipments + service delivery templates
   // ------------------------------------------------------------------
   const SHIPMENTS_SEED = [
@@ -186,6 +202,38 @@
   const TEAM_ROLE_LABEL = { owner: 'Owner', supporting: 'Supporting' };
   const TEAM_ROLE_RANK = { supporting: 1, owner: 2 };
 
+  // Demo-only seed documents, one shipment's worth of variety reused
+  // across every shipment (offset by shipmentIndex) so a fresh browser's
+  // Documents tab/screen isn't empty on first load in either app. These
+  // are "isMock" (no real fileUrl), matching how the Admin Portal already
+  // flagged its own previously-local mock documents.
+  const DOC_SEED_FILES = [
+    { fileName: 'Bill_of_Lading.pdf', category: 'Shipping', docType: 'Bill of Lading' },
+    { fileName: 'Commercial_Invoice.pdf', category: 'Finance', docType: 'Commercial Invoice' },
+    { fileName: 'Packing_List.xlsx', category: 'Shipping', docType: 'Packing List' },
+    { fileName: 'Certificate_of_Origin.pdf', category: 'Compliance', docType: 'Certificate of Origin' },
+  ];
+  function seedDocumentsForShipment(s, shipmentIndex) {
+    const teamIds = [s.ownerId, ...(s.supportingOwnerIds || [])];
+    const count = 1 + (shipmentIndex % DOC_SEED_FILES.length);
+    const docs = [];
+    for (let i = 0; i < count; i += 1) {
+      const f = DOC_SEED_FILES[i];
+      docs.push({
+        id: makeId('doc'),
+        fileName: f.fileName,
+        category: f.category,
+        docType: f.docType,
+        uploadedBy: teamIds[(i + shipmentIndex) % teamIds.length] || ADMIN_USER.id,
+        uploadedAt: new Date(Date.now() - (count - i) * 86400000 * 2).toISOString(),
+        isMock: true,
+        fileUrl: null,
+        size: null,
+      });
+    }
+    return docs;
+  }
+
   // Demo-only: seed one example of every non-breach notification type
   // (comment / team_added / team_removed / role_updated — sla_breached
   // already appears on its own via checkSlaBreaches() below, for whoever
@@ -249,7 +297,7 @@
     const shipments = {};
     const milestones = {};
     SHIPMENTS_SEED.forEach((s, shipmentIndex) => {
-      shipments[s.jobRef] = { ...s, team: deriveTeamFromOwners(s) };
+      shipments[s.jobRef] = { ...s, team: deriveTeamFromOwners(s), documents: seedDocumentsForShipment(s, shipmentIndex) };
       seedMilestonesForShipment(s, shipmentIndex).forEach((m) => { milestones[m.id] = m; });
     });
     return { shipments, milestones, notifications: seedDemoNotifications(milestones), version: 1 };
@@ -308,6 +356,7 @@
       Object.keys(seed).forEach((k) => { if (s[k] === undefined) { s[k] = seed[k]; changed = true; } });
     }
     if (!Array.isArray(s.team)) { s.team = deriveTeamFromOwners(s); changed = true; }
+    if (!Array.isArray(s.documents)) { s.documents = []; changed = true; }
     return changed;
   }
 
@@ -443,6 +492,23 @@
   // ------------------------------------------------------------------
   function _getShipments() { return Object.values(state.shipments).map((s) => ({ ...s })); }
   function _getShipment(jobRef) { return state.shipments[jobRef] ? { ...state.shipments[jobRef] } : null; }
+  function isOnShipmentTeam(s, userId) {
+    return Array.isArray(s.team) && s.team.some((t) => t.userId === userId);
+  }
+  // GET /shipments?assigned_to=me — owner or supporting, scoped to one user.
+  function _getMyShipments(userId) {
+    return Object.values(state.shipments)
+      .filter((s) => isOnShipmentTeam(s, userId))
+      .map((s) => ({ ...s }))
+      .sort((a, b) => a.jobRef.localeCompare(b.jobRef));
+  }
+  // GET /shipments/{jobRef}/documents?limit= — newest first.
+  function _getDocumentsForShipment(jobRef, limit) {
+    const s = state.shipments[jobRef];
+    if (!s || !Array.isArray(s.documents)) return [];
+    const sorted = s.documents.slice().sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+    return (typeof limit === 'number' ? sorted.slice(0, limit) : sorted).map((d) => ({ ...d }));
+  }
   function _getMilestonesForShipment(jobRef) {
     return Object.values(state.milestones)
       .filter((m) => m.shipmentRef === jobRef)
@@ -463,7 +529,10 @@
 
   function getShipments() { return respond(_getShipments); }
   function getShipment(jobRef) { return respond(() => _getShipment(jobRef)); }
+  // GET /shipments?assigned_to=me
+  function getMyShipments(userId) { return respond(() => _getMyShipments(userId)); }
   function getMilestonesForShipment(jobRef) { return respond(() => _getMilestonesForShipment(jobRef)); }
+  function getDocumentsForShipment(jobRef, limit) { return respond(() => _getDocumentsForShipment(jobRef, limit)); }
   // GET /milestones?assigned_to=me
   function getMyMilestones(userId) { return respond(() => _getMyMilestones(userId)); }
   // GET /milestones/{id}
@@ -643,6 +712,73 @@
     });
   }
 
+  // ------------------------------------------------------------------
+  // Documents — tied to a shipment, not a milestone/task. Both Admin
+  // Portal and Field Channel read/write the same per-shipment list here.
+  // Note: `fileUrl` (a browser blob: URL) only resolves in the tab/origin
+  // that created it via URL.createObjectURL — it never survives a reload
+  // or crosses into another tab, even though the rest of the document
+  // record syncs normally. Callers show a "preview unavailable" state for
+  // any document whose fileUrl doesn't resolve locally, the same way the
+  // Admin Portal already does for its mock (isMock) seed documents.
+  // ------------------------------------------------------------------
+  // POST /shipments/{jobRef}/documents
+  function addDocument(jobRef, fields, actingUserId) {
+    return respond(() => {
+      const s = state.shipments[jobRef];
+      if (!s) return { ok: false, code: 'NOT_FOUND' };
+      if (!isAdmin(actingUserId) && !isOnShipmentTeam(s, actingUserId)) return { ok: false, code: 'FORBIDDEN' };
+      const doc = {
+        id: makeId('doc'),
+        fileName: fields.fileName,
+        category: fields.category || null,
+        docType: fields.docType || null,
+        uploadedBy: actingUserId,
+        uploadedAt: new Date().toISOString(),
+        isMock: false,
+        fileUrl: fields.fileUrl || null,
+        size: typeof fields.size === 'number' ? fields.size : null,
+      };
+      if (!Array.isArray(s.documents)) s.documents = [];
+      s.documents.push(doc);
+      commit('document-added');
+      return { ok: true, document: { ...doc } };
+    });
+  }
+
+  // POST /shipments/{jobRef}/documents/{docId} (replace file)
+  function updateDocument(jobRef, docId, fields, actingUserId) {
+    return respond(() => {
+      const s = state.shipments[jobRef];
+      if (!s) return { ok: false, code: 'NOT_FOUND' };
+      if (!isAdmin(actingUserId) && !isOnShipmentTeam(s, actingUserId)) return { ok: false, code: 'FORBIDDEN' };
+      const doc = (s.documents || []).find((d) => d.id === docId);
+      if (!doc) return { ok: false, code: 'NOT_FOUND' };
+      if (fields.fileName !== undefined) doc.fileName = fields.fileName;
+      if (fields.fileUrl !== undefined) doc.fileUrl = fields.fileUrl;
+      if (fields.size !== undefined) doc.size = fields.size;
+      doc.isMock = false;
+      doc.uploadedBy = actingUserId;
+      doc.uploadedAt = new Date().toISOString();
+      commit('document-updated');
+      return { ok: true, document: { ...doc } };
+    });
+  }
+
+  // DELETE /shipments/{jobRef}/documents/{docId}
+  function deleteDocument(jobRef, docId, actingUserId) {
+    return respond(() => {
+      const s = state.shipments[jobRef];
+      if (!s) return { ok: false, code: 'NOT_FOUND' };
+      if (!isAdmin(actingUserId) && !isOnShipmentTeam(s, actingUserId)) return { ok: false, code: 'FORBIDDEN' };
+      const before = (s.documents || []).length;
+      s.documents = (s.documents || []).filter((d) => d.id !== docId);
+      if (s.documents.length === before) return { ok: false, code: 'NOT_FOUND' };
+      commit('document-deleted');
+      return { ok: true };
+    });
+  }
+
   // Merges flagHistory and comments into one flat, chronological feed for
   // display — the product decision was one merged "Comments" list rather
   // than two separate histories, so a flagged blocker note and a plain
@@ -743,20 +879,24 @@
 
   global.MilestoneStore = {
     getUsers, getOperationsStaff, getUserById, isAdmin,
-    getShipments, getShipment, getMilestonesForShipment,
+    getShipments, getShipment, getMyShipments, getMilestonesForShipment,
     getMyMilestones, getMilestone,
     reassignMilestone, completeMilestone, flagMilestone, addComment, getActivity,
     updateShipmentTeam,
+    getDocumentsForShipment, addDocument, updateDocument, deleteDocument,
     getNotifications, getUnreadNotificationCount, markNotificationRead,
     subscribe, resetDemoData, getSyncLink,
     ADMIN_USER_ID: ADMIN_USER.id,
     TEAM_ROLE_LABEL,
+    DOC_TAXONOMY,
     sync: {
       getShipments: _getShipments,
       getShipment: _getShipment,
+      getMyShipments: _getMyShipments,
       getMilestonesForShipment: _getMilestonesForShipment,
       getMyMilestones: _getMyMilestones,
       getMilestone: _getMilestone,
+      getDocumentsForShipment: _getDocumentsForShipment,
       getNotifications: _getNotifications,
       getUnreadNotificationCount: _getUnreadNotificationCount,
     },

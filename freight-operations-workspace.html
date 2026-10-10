@@ -628,6 +628,7 @@ textarea.field-control{resize:vertical;min-height:70px}
                   <tr>
                     <th>File Name</th>
                     <th>Category</th>
+                    <th>Type</th>
                     <th>Uploaded By</th>
                     <th>Uploaded On</th>
                     <th style="text-align:right">Actions</th>
@@ -841,14 +842,15 @@ textarea.field-control{resize:vertical;min-height:70px}
       <div class="file-pill-list" id="file-pill-list"></div>
 
       <div class="form-field" style="margin-top:22px">
-        <label class="field-label">Category (optional)</label>
+        <label class="field-label">Category</label>
         <select class="field-control" id="input-doc-category">
           <option value="">Select category…</option>
-          <option>Shipping</option>
-          <option>Finance</option>
-          <option>Customs</option>
-          <option>Compliance</option>
-          <option>General</option>
+        </select>
+      </div>
+      <div class="form-field" style="margin-top:14px">
+        <label class="field-label">Document Type</label>
+        <select class="field-control" id="input-doc-type" disabled>
+          <option value="">Select category first…</option>
         </select>
       </div>
     </div>
@@ -927,7 +929,6 @@ const SOURCE_ICON = {
 /* ==========================================================================
    Mock data
    ========================================================================== */
-const CURRENT_USER = 'Nkechi M.';
 
 const TEAM = [
   {id:'u1', name:'James Adewale', role:'Sales Lead', initials:'JA', fill:'dark'},
@@ -1066,10 +1067,6 @@ function makeId(prefix){ return prefix + '-' + Math.random().toString(36).slice(
 
 // Build a fleshed-out shipment detail object from a light list record + a seed for variety
 function buildShipmentDetail(base, seed){
-  // Only used below to seed document-author variety, not the shipment's
-  // actual team roster (owners: reads that from MilestoneStore instead).
-  const shipTeamIds = [base.ownerId, ...(base.supportingOwnerIds||[])];
-
   const containerCount = 2 + (seed % 3);
   const containers = [];
   for(let i=0;i<containerCount;i++){
@@ -1098,28 +1095,6 @@ function buildShipmentDetail(base, seed){
     done: i < trackedCount,
   }));
 
-  const docSeedNames = [
-    ['Bill_of_Lading.pdf','Shipping'],
-    ['Commercial_Invoice.pdf','Finance'],
-    ['Packing_List.xlsx','Shipping'],
-    ['Certificate_of_Origin.pdf','Compliance'],
-  ];
-  const docCount = 1 + (seed % docSeedNames.length);
-  const documents = [];
-  for(let i=0;i<docCount;i++){
-    const d = docSeedNames[i];
-    documents.push({
-      id: makeId('doc'),
-      name: d[0],
-      category: d[1],
-      uploadedBy: teamMember(shipTeamIds[(i+seed)%shipTeamIds.length]).name,
-      uploadedOn: new Date(Date.now() - (docCount-i)*86400000*2).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),
-      isMock: true,
-      fileUrl: null,
-      size: null,
-    });
-  }
-
   return {
     ...base,
     // The team roster (who's on it, primary vs supporting) is read from
@@ -1127,11 +1102,12 @@ function buildShipmentDetail(base, seed){
     // one thing about a shipment the Field Channel also needs to know
     // about (to notify a user added/removed/re-roled), so it has to live
     // in the shared store rather than this file's own local mock data.
+    // Documents work the same way — see renderDocuments(), which reads
+    // them live from MilestoneStore rather than from this cached object.
     owners: teamToOwners(MilestoneStore.sync.getShipment(base.jobRef).team),
     containers,
     milestones,
     physicalTracking,
-    documents,
   };
 }
 
@@ -1425,20 +1401,29 @@ function renderShipmentTracking(){
   `).join('');
 }
 
+// Documents are read live from MilestoneStore (shared with the Field
+// Channel) rather than from the cached shipment-detail object — same
+// pattern as renderServiceDelivery() reading milestones.
 function renderDocuments(){
   const s = currentShipment();
-  el('doc-total-count').textContent = s.documents.length;
-  el('documents-tbody').innerHTML = s.documents.map(d=>`
+  const docs = MilestoneStore.sync.getDocumentsForShipment(s.jobRef);
+  el('doc-total-count').textContent = docs.length;
+  el('documents-tbody').innerHTML = docs.map(d=>{
+    const uploader = MilestoneStore.getUserById(d.uploadedBy);
+    const uploadedByLabel = uploader ? uploader.name : (d.uploadedBy || 'Unknown');
+    const uploadedOnLabel = d.uploadedAt ? new Date(d.uploadedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+    return `
     <tr>
       <td>
         <div style="display:flex;align-items:center;gap:10px">
           <svg width="16" height="16" fill="none" stroke="#023819" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><path d="M14 2v6h6"></path></svg>
-          <b style="color:var(--green-dark);font-weight:600">${d.name}</b>
+          <b style="color:var(--green-dark);font-weight:600">${d.fileName}</b>
         </div>
       </td>
       <td>${d.category ? `<span class="chip chip-neutral">${d.category}</span>` : '<span style="color:var(--silver-light)">—</span>'}</td>
-      <td>${d.uploadedBy}</td>
-      <td>${d.uploadedOn}</td>
+      <td>${d.docType || '<span style="color:var(--silver-light)">—</span>'}</td>
+      <td>${uploadedByLabel}</td>
+      <td>${uploadedOnLabel}</td>
       <td style="text-align:right">
         <div class="dropdown">
           <button class="btn btn-ghost btn-icon dropdown-toggle" title="Actions"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg></button>
@@ -1451,7 +1436,8 @@ function renderDocuments(){
         </div>
       </td>
     </tr>
-  `).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--silver-light);padding:30px">No documents uploaded yet.</td></tr>`;
+  `;
+  }).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--silver-light);padding:30px">No documents uploaded yet.</td></tr>`;
 }
 
 /* ==========================================================================
@@ -1606,7 +1592,7 @@ function refreshCurrentShipmentMilestones(){
   s.owners = teamToOwners(MilestoneStore.sync.getShipment(s.jobRef).team);
   // openShipment() doesn't set state.currentView, so check the DOM directly
   // for whether the shipment-detail view is actually the one on screen.
-  if(el('view-shipment-detail').classList.contains('active')){ renderServiceDelivery(); renderShipHeader(); renderShipDetailFields(); }
+  if(el('view-shipment-detail').classList.contains('active')){ renderServiceDelivery(); renderShipHeader(); renderShipDetailFields(); renderDocuments(); }
 }
 el('save-milestone').addEventListener('click', ()=>{
   const note = el('input-milestone-comment').value.trim();
@@ -1693,9 +1679,31 @@ function formatBytes(bytes){
   return (bytes/(1024*1024)).toFixed(1) + ' MB';
 }
 
+function populateDocTypeOptions(category){
+  const typeSelect = el('input-doc-type');
+  const types = category ? (MilestoneStore.DOC_TAXONOMY[category] || []) : [];
+  typeSelect.disabled = !category;
+  typeSelect.innerHTML = category
+    ? `<option value="">Select type…</option>` + types.map(t=>`<option>${t}</option>`).join('')
+    : `<option value="">Select category first…</option>`;
+}
+el('input-doc-category').addEventListener('change', (e)=>{
+  populateDocTypeOptions(e.target.value);
+  updateSaveUploadDocsState();
+});
+el('input-doc-type').addEventListener('change', updateSaveUploadDocsState);
+
+function updateSaveUploadDocsState(){
+  const category = el('input-doc-category').value;
+  const docType = el('input-doc-type').value;
+  el('save-upload-docs').disabled = state.pendingFiles.length===0 || !category || !docType;
+}
+
 function openUploadDocsModal(){
   state.pendingFiles = [];
-  el('input-doc-category').value = '';
+  el('input-doc-category').innerHTML = `<option value="">Select category…</option>` +
+    Object.keys(MilestoneStore.DOC_TAXONOMY).map(c=>`<option>${c}</option>`).join('');
+  populateDocTypeOptions('');
   renderFilePillList();
   openModal('modal-upload-docs');
 }
@@ -1731,32 +1739,39 @@ function renderFilePillList(){
       <button class="frm" data-remove-file="${i}"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"></path></svg></button>
     </div>
   `).join('');
-  el('save-upload-docs').disabled = state.pendingFiles.length===0;
+  updateSaveUploadDocsState();
 }
 
 el('save-upload-docs').addEventListener('click', ()=>{
   const s = currentShipment();
   const category = el('input-doc-category').value;
-  const today = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
-  state.pendingFiles.forEach(f=>{
-    s.documents.push({
-      id: makeId('doc'),
-      name: f.name,
-      category: category,
-      uploadedBy: CURRENT_USER,
-      uploadedOn: today,
-      isMock:false,
-      fileUrl: URL.createObjectURL(f),
-      size: f.size,
-    });
+  const docType = el('input-doc-type').value;
+  const files = state.pendingFiles;
+  const btn = el('save-upload-docs');
+  btn.disabled = true;
+
+  Promise.all(files.map(f=>MilestoneStore.addDocument(s.jobRef, {
+    fileName: f.name,
+    category,
+    docType,
+    fileUrl: URL.createObjectURL(f),
+    size: f.size,
+  }, MilestoneStore.ADMIN_USER_ID))).then(results=>{
+    btn.disabled = false;
+    const failed = results.filter(r=>!r.ok);
+    renderDocuments();
+    closeModal('modal-upload-docs');
+    const count = results.length - failed.length;
+    if(count) showToast(`${count} document${count!==1?'s':''} uploaded`);
+    if(failed.length) showToast('Unable to upload one or more documents', 'error');
+  }).catch(err=>{
+    console.error('addDocument failed:', err);
+    btn.disabled = false;
+    showToast('Unable to upload documents. Please check your connection and try again.', 'error');
   });
-  const count = state.pendingFiles.length;
-  renderDocuments();
-  closeModal('modal-upload-docs');
-  showToast(`${count} document${count!==1?'s':''} uploaded`);
 });
 
-function findDoc(id){ return currentShipment().documents.find(d=>d.id===id); }
+function findDoc(id){ return MilestoneStore.sync.getDocumentsForShipment(currentShipment().jobRef).find(d=>d.id===id); }
 
 function viewDocument(id){
   const d = findDoc(id);
@@ -1766,7 +1781,7 @@ function viewDocument(id){
 function downloadDocument(id){
   const d = findDoc(id);
   if(d.fileUrl){
-    const a = document.createElement('a'); a.href = d.fileUrl; a.download = d.name; a.click();
+    const a = document.createElement('a'); a.href = d.fileUrl; a.download = d.fileName; a.click();
   } else {
     showToast('Download unavailable — this is a mock document with no attached file', 'error');
   }
@@ -1775,7 +1790,7 @@ function downloadDocument(id){
 function openUpdateFileModal(id){
   state.activeDocUpdate = id;
   const d = findDoc(id);
-  el('update-file-sub').textContent = `Replacing file for "${d.name}"`;
+  el('update-file-sub').textContent = `Replacing file for "${d.fileName}"`;
   el('update-file-name').textContent = 'Select a replacement file';
   el('save-update-file').disabled = true;
   pendingReplacementFile = null;
@@ -1798,30 +1813,47 @@ function handleUpdateFile(file){
   el('save-update-file').disabled = false;
 }
 el('save-update-file').addEventListener('click', ()=>{
-  const d = findDoc(state.activeDocUpdate);
   if(!pendingReplacementFile) return;
-  d.name = pendingReplacementFile.name;
-  d.fileUrl = URL.createObjectURL(pendingReplacementFile);
-  d.size = pendingReplacementFile.size;
-  d.uploadedOn = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
-  d.uploadedBy = CURRENT_USER;
+  const s = currentShipment();
+  const docId = state.activeDocUpdate;
+  const file = pendingReplacementFile;
   pendingReplacementFile = null;
-  renderDocuments();
-  closeModal('modal-update-file');
-  showToast('File replaced successfully');
+  const btn = el('save-update-file');
+  btn.disabled = true;
+  MilestoneStore.updateDocument(s.jobRef, docId, {
+    fileName: file.name,
+    fileUrl: URL.createObjectURL(file),
+    size: file.size,
+  }, MilestoneStore.ADMIN_USER_ID).then(res=>{
+    btn.disabled = false;
+    if(!res.ok){ showToast('Unable to replace this file.', 'error'); return; }
+    renderDocuments();
+    closeModal('modal-update-file');
+    showToast('File replaced successfully');
+  }).catch(err=>{
+    console.error('updateDocument failed:', err);
+    btn.disabled = false;
+    showToast('Unable to replace this file. Please check your connection and try again.', 'error');
+  });
 });
 
 function openDeleteDocModal(id){
   state.activeDocDelete = id;
-  el('delete-doc-name').textContent = findDoc(id).name;
+  el('delete-doc-name').textContent = findDoc(id).fileName;
   openModal('modal-delete-doc');
 }
 el('confirm-delete-doc').addEventListener('click', ()=>{
   const s = currentShipment();
-  s.documents = s.documents.filter(d=>d.id!==state.activeDocDelete);
-  renderDocuments();
-  closeModal('modal-delete-doc');
-  showToast('Document deleted');
+  const docId = state.activeDocDelete;
+  MilestoneStore.deleteDocument(s.jobRef, docId, MilestoneStore.ADMIN_USER_ID).then(res=>{
+    if(!res.ok){ showToast('Unable to delete this document.', 'error'); return; }
+    renderDocuments();
+    closeModal('modal-delete-doc');
+    showToast('Document deleted');
+  }).catch(err=>{
+    console.error('deleteDocument failed:', err);
+    showToast('Unable to delete this document. Please check your connection and try again.', 'error');
+  });
 });
 
 /* ==========================================================================
