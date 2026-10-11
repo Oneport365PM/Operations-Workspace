@@ -149,9 +149,7 @@ input,textarea{font-family:var(--font-body)}
 /* ---- Segmented tabs (e.g. Documents: Upload / History) ---- */
 .segmented-tabs{ display:flex; gap:4px; background:var(--white); border:1px solid var(--border-tint); border-radius:999px; padding:4px; margin:0 16px 12px; }
 .segmented-tab{ flex:1; display:flex; align-items:center; justify-content:center; gap:7px; background:none; border:none; border-radius:999px; padding:10px 6px; font-family:var(--font-display); font-weight:600; font-size:13.5px; color:var(--silver-dark); }
-.segmented-tab .seg-badge{ display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; border-radius:999px; background:var(--green-light-surface); color:var(--silver-dark); font-size:11px; font-weight:700; }
 .segmented-tab.active{ background:var(--green-dark); color:var(--cream); }
-.segmented-tab.active .seg-badge{ background:var(--green-accent); color:var(--green-dark); }
 .docs-helper-text{ color:var(--silver-light); font-size:13px; margin:0 0 10px; padding:0 2px; }
 
 /* ---- Document upload form: job search-as-you-type ---- */
@@ -352,8 +350,8 @@ select.field-input{ background-image:url('data:image/svg+xml;utf8,<svg xmlns="ht
       <div class="page-head"><h1>Documents</h1></div>
     </div>
     <div class="segmented-tabs">
-      <button class="segmented-tab" id="docs-tab-upload-btn"><span>Upload</span><span class="seg-badge" id="docs-tab-upload-badge">0</span></button>
-      <button class="segmented-tab" id="docs-tab-history-btn"><span>History</span><span class="seg-badge" id="docs-tab-history-badge">0</span></button>
+      <button class="segmented-tab" id="docs-tab-upload-btn"><span>Upload</span></button>
+      <button class="segmented-tab" id="docs-tab-history-btn"><span>History</span></button>
     </div>
     <div id="docs-banner"></div>
     <div class="list" id="docs-pane"></div>
@@ -821,8 +819,6 @@ function refreshDocsData(){
     }));
     flat.sort((a, b)=> new Date(b.doc.uploadedAt) - new Date(a.doc.uploadedAt));
     state.docHistory = flat;
-    el('docs-tab-upload-badge').textContent = state.myShipments.length;
-    el('docs-tab-history-badge').textContent = state.docHistory.length;
   });
 }
 function renderDocsPane(){
