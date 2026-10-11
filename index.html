@@ -164,17 +164,15 @@ input,textarea{font-family:var(--font-body)}
 .job-search-item .jsi-ref{ font-family:var(--font-display); font-weight:600; font-size:13.5px; color:var(--green-dark); }
 .job-search-item .jsi-customer{ font-size:12px; color:var(--silver-light); }
 .job-search-empty{ padding:12px 14px; font-size:13px; color:var(--silver-light); }
-.link-btn{ background:none; border:none; padding:8px 2px; margin-top:2px; font-family:var(--font-display); font-weight:600; font-size:12.5px; color:var(--green-dark); text-decoration:underline; }
+.job-confirm-line{ margin:8px 2px 0; display:flex; flex-direction:column; gap:3px; }
 
-/* ---- Card overflow menu (e.g. Documents History "Delete") ---- */
-.card-menu-wrap{ position:relative; }
-.card-menu-btn{ background:none; border:none; padding:6px; margin:-6px; border-radius:var(--radius-sm); color:var(--silver-light); display:flex; flex-shrink:0; }
-.card-menu-btn:active{ background:var(--green-light-surface); }
-.card-menu{ display:none; position:absolute; right:0; top:calc(100% + 4px); background:var(--white); border:1px solid var(--border-tint); border-radius:var(--radius-md); box-shadow:var(--shadow-e2); min-width:140px; z-index:30; overflow:hidden; }
-.card-menu.open{ display:block; }
-.card-menu-item{ display:block; width:100%; text-align:left; background:none; border:none; padding:11px 14px; font-size:13.5px; font-weight:600; color:var(--silver-dark); }
-.card-menu-item:active{ background:var(--green-light-surface); }
-.card-menu-item.danger{ color:var(--error-text); }
+/* ---- Documents History card: a quiet delete icon tucked in the corner,
+   never an overflow menu — it's the only action, so it doesn't need one
+   level of indirection, just enough visual quiet to not compete with the
+   card's actual content. ---- */
+.doc-history-card{ position:relative; padding-right:44px; }
+.doc-delete-btn{ position:absolute; right:10px; bottom:10px; background:none; border:none; padding:7px; border-radius:50%; color:var(--silver-light); display:flex; }
+.doc-delete-btn:active{ background:var(--error-bg); color:var(--error-text); }
 .btn-danger{ background:var(--error); color:var(--white); }
 .btn-danger:active{ background:var(--error-text); }
 
@@ -477,7 +475,7 @@ const ICON_CHEVRON = '<svg width="14" height="14" fill="none" stroke="currentCol
 const ICON_COMMENT = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
 const ICON_TEAM = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="10" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
 const ICON_DOC = '<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><path d="M14 2v6h6"></path></svg>';
-const ICON_MORE = '<svg width="18" height="18" fill="currentColor" stroke="none" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg>';
+const ICON_TRASH = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18" stroke-linecap="round"></path><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 11v6M14 11v6" stroke-linecap="round"></path></svg>';
 const SLA_ICON = { healthy: ICON_CLOCK, 'at-risk': ICON_WARN, breached: ICON_WARN };
 const NOTIF_ICON = { comment: ICON_COMMENT, sla_breached: ICON_WARN, team_added: ICON_TEAM, team_removed: ICON_TEAM, role_updated: ICON_TEAM };
 const NOTIF_PAGE_SIZE = 10;
@@ -774,10 +772,10 @@ el('todos-list').addEventListener('click', (e)=>{
 /* ==========================================================================
    Documents — tied to a shipment, not a milestone/task. Two sub-tabs:
    Upload (the upload form is the default view — Job Number search, then
-   Category -> Type -> File, all on one screen) and History (every document
-   you've ever uploaded, across all your shipments, flat and newest first —
-   no per-document detail page, just the list, with a per-card menu to
-   delete). Shared with the Admin Portal via MilestoneStore.
+   Category -> Type -> File, all on one screen) and History (documents
+   *you personally* uploaded, across all your shipments, flat and newest
+   first — no per-document detail page, just the list, with a quiet
+   per-card delete icon). Shared with the Admin Portal via MilestoneStore.
    ========================================================================== */
 function goToDocs(){
   showScreen('screen-docs');
@@ -810,13 +808,17 @@ el('docs-tab-history-btn').addEventListener('click', ()=>setDocsTab('history'));
 // cross-tab revalidation can't steal focus out from under someone mid-way
 // through filling the upload form. Callers that DO want a full re-render
 // (initial load, explicit tab switch) chain .then(renderDocsPane) themselves.
+// History is role-scoped: it only ever includes documents *this* signed-in
+// user uploaded, never a teammate's, even on a shipment they both work.
 function refreshDocsData(){
   return MilestoneStore.getMyShipments(state.me.id).then(shipments=>{
     state.myShipments = shipments;
     return Promise.all(shipments.map(s=>MilestoneStore.getDocumentsForShipment(s.jobRef)));
   }).then(lists=>{
     const flat = [];
-    state.myShipments.forEach((s, i)=> lists[i].forEach(d=> flat.push({ doc: d, shipment: s })));
+    state.myShipments.forEach((s, i)=> lists[i].forEach(d=>{
+      if(d.uploadedBy === state.me.id) flat.push({ doc: d, shipment: s });
+    }));
     flat.sort((a, b)=> new Date(b.doc.uploadedAt) - new Date(a.doc.uploadedAt));
     state.docHistory = flat;
     el('docs-tab-upload-badge').textContent = state.myShipments.length;
@@ -828,7 +830,15 @@ function renderDocsPane(){
   else renderDocsUploadPane();
 }
 
-/* ---- Upload tab: Job Number search -> Category -> Type -> File ---- */
+/* ---- Upload tab: Job Number search -> Category -> Type -> File ----
+   The Job Number input always shows the job number itself — picking a
+   result from the dropdown fills it in rather than replacing the field
+   with something else, and a short, unboxed confirmation line appears
+   right under it (customer + route, the same shape as a Tasks-list card's
+   subtitle/meta line) so it's obvious at a glance the right job was
+   found. Editing the input again (to search a different job) clears that
+   confirmation and the fields that depend on it, without disturbing the
+   input itself or losing focus mid-keystroke. ---- */
 function docSelectedShipment(){
   return state.myShipments.find(s=>s.jobRef===state.docSelectedJobRef) || null;
 }
@@ -853,8 +863,8 @@ function renderJobSearchResults(){
   const wrap = el('doc-job-results');
   const input = el('doc-job-search');
   if(!wrap || !input) return;
-  const matches = filterJobMatches(input.value);
   if(!input.value.trim()){ wrap.innerHTML = ''; wrap.classList.remove('open'); return; }
+  const matches = filterJobMatches(input.value);
   wrap.innerHTML = matches.length
     ? matches.map(s=>`
       <button type="button" class="job-search-item" data-pick-job="${s.jobRef}">
@@ -864,46 +874,42 @@ function renderJobSearchResults(){
     : `<div class="job-search-empty">No matching shipments</div>`;
   wrap.classList.add('open');
 }
+function renderDocJobConfirm(){
+  const wrap = el('doc-job-confirm');
+  if(!wrap) return;
+  const s = docSelectedShipment();
+  wrap.innerHTML = s ? `
+    <div class="job-confirm-line">
+      <div class="customer-line">${escapeHtml(s.customer)}</div>
+      <div class="meta-row"><span>${transportLabelOf(s)}</span><span>·</span><span>${ICON_PIN}${escapeHtml(s.route)}</span></div>
+    </div>` : '';
+}
 function selectDocJob(jobRef){
   state.docSelectedJobRef = jobRef;
-  state.docJobSearch = '';
+  state.docJobSearch = jobRef;
   state.docCategory = '';
   state.docType = '';
   state.docCustomName = '';
   state.pendingDocFile = null;
-  renderDocsUploadPane();
+  const input = el('doc-job-search');
+  if(input) input.value = jobRef;
+  const results = el('doc-job-results');
+  if(results){ results.innerHTML = ''; results.classList.remove('open'); }
+  renderDocJobConfirm();
+  renderDocFormBody();
 }
-function renderDocsUploadPane(){
-  if(!state.myShipments.length){
-    el('docs-pane').innerHTML = `
-      <div class="empty-state">
-        <div class="icon">${ICON_DOC}</div>
-        <h3>No shipments yet</h3>
-        <p>You'll see your shipments here once you're added to a shipment team.</p>
-      </div>`;
-    return;
-  }
+// Only the Category/Type/Others/File/Submit section re-renders here — the
+// Job Number input is never touched by this, so it can be called freely
+// (on every category/type change) without ever stealing input focus.
+function renderDocFormBody(){
+  const body = el('doc-form-body');
+  if(!body) return;
   const selected = docSelectedShipment();
   const taxonomy = selected ? MilestoneStore.getDocTaxonomyForShipment(selected.jobRef) : {};
   const categories = Object.keys(taxonomy);
   const types = state.docCategory ? (taxonomy[state.docCategory] || []) : [];
 
-  el('docs-pane').innerHTML = `
-    <label class="field-label" for="doc-job-search">Job Number</label>
-    ${selected ? `
-      <div class="info-card">
-        <div class="info-row"><span class="k">Job Number</span><span class="v">${selected.jobRef}</span></div>
-        <div class="info-row"><span class="k">Customer</span><span class="v">${escapeHtml(selected.customer)}</span></div>
-        <div class="info-row"><span class="k">Route</span><span class="v">${escapeHtml(selected.route)}</span></div>
-      </div>
-      <button type="button" class="link-btn" id="btn-change-doc-job">Change job</button>
-    ` : `
-      <div class="job-search-wrap">
-        <input type="text" class="field-input" id="doc-job-search" placeholder="Search by job number or customer" autocomplete="off" value="${escapeHtml(state.docJobSearch)}">
-        <div class="job-search-results" id="doc-job-results"></div>
-      </div>
-    `}
-
+  body.innerHTML = `
     <label class="field-label" for="doc-category-select" style="margin-top:14px">Document Category</label>
     <select class="field-input" id="doc-category-select" ${!selected ? 'disabled' : ''}>
       <option value="" disabled ${!state.docCategory ? 'selected' : ''}>${selected ? 'Select category' : 'Select a job first'}</option>
@@ -927,42 +933,19 @@ function renderDocsUploadPane(){
 
     <button class="btn btn-primary" id="btn-submit-doc-upload" style="margin-top:16px">${ICON_CHECK} Upload Document</button>
   `;
-  wireDocsUploadPaneEvents();
-}
-function wireDocsUploadPaneEvents(){
-  const searchInput = el('doc-job-search');
-  if(searchInput){
-    searchInput.addEventListener('input', (e)=>{ state.docJobSearch = e.target.value; renderJobSearchResults(); });
-    searchInput.addEventListener('focus', renderJobSearchResults);
-  }
-  const resultsWrap = el('doc-job-results');
-  if(resultsWrap){
-    resultsWrap.addEventListener('click', (e)=>{
-      const item = e.target.closest('[data-pick-job]');
-      if(item) selectDocJob(item.dataset.pickJob);
-    });
-  }
-  const changeJobBtn = el('btn-change-doc-job');
-  if(changeJobBtn) changeJobBtn.addEventListener('click', ()=>{
-    state.docSelectedJobRef = null;
-    state.docCategory = '';
-    state.docType = '';
-    state.docCustomName = '';
-    state.pendingDocFile = null;
-    renderDocsUploadPane();
-  });
+
   const categorySelect = el('doc-category-select');
   if(categorySelect) categorySelect.addEventListener('change', (e)=>{
     state.docCategory = e.target.value;
     state.docType = '';
     state.docCustomName = '';
-    renderDocsUploadPane();
+    renderDocFormBody();
   });
   const typeSelect = el('doc-type-select');
   if(typeSelect) typeSelect.addEventListener('change', (e)=>{
     state.docType = e.target.value;
     state.docCustomName = '';
-    renderDocsUploadPane();
+    renderDocFormBody();
   });
   const customNameInput = el('doc-custom-name');
   if(customNameInput) customNameInput.addEventListener('input', (e)=>{
@@ -978,6 +961,50 @@ function wireDocsUploadPaneEvents(){
   const submitBtn = el('btn-submit-doc-upload');
   if(submitBtn) submitBtn.addEventListener('click', submitDocUpload);
   updateSubmitDocState();
+}
+function renderDocsUploadPane(){
+  if(!state.myShipments.length){
+    el('docs-pane').innerHTML = `
+      <div class="empty-state">
+        <div class="icon">${ICON_DOC}</div>
+        <h3>No shipments yet</h3>
+        <p>You'll see your shipments here once you're added to a shipment team.</p>
+      </div>`;
+    return;
+  }
+  el('docs-pane').innerHTML = `
+    <label class="field-label" for="doc-job-search">Job Number</label>
+    <div class="job-search-wrap">
+      <input type="text" class="field-input" id="doc-job-search" placeholder="Search by job number or customer" autocomplete="off" value="${escapeHtml(state.docJobSearch)}">
+      <div class="job-search-results" id="doc-job-results"></div>
+    </div>
+    <div id="doc-job-confirm"></div>
+    <div id="doc-form-body"></div>
+  `;
+  const searchInput = el('doc-job-search');
+  searchInput.addEventListener('input', (e)=>{
+    state.docJobSearch = e.target.value;
+    // Editing the input after a job was confirmed un-confirms it — but
+    // only the confirmation text and the fields below react; the input
+    // itself is left completely alone so typing is never interrupted.
+    if(state.docSelectedJobRef && e.target.value !== state.docSelectedJobRef){
+      state.docSelectedJobRef = null;
+      state.docCategory = '';
+      state.docType = '';
+      state.docCustomName = '';
+      state.pendingDocFile = null;
+      renderDocJobConfirm();
+      renderDocFormBody();
+    }
+    renderJobSearchResults();
+  });
+  searchInput.addEventListener('focus', renderJobSearchResults);
+  el('doc-job-results').addEventListener('click', (e)=>{
+    const item = e.target.closest('[data-pick-job]');
+    if(item) selectDocJob(item.dataset.pickJob);
+  });
+  renderDocJobConfirm();
+  renderDocFormBody();
 }
 // Closes the job-search dropdown on an outside tap/click.
 document.addEventListener('click', (e)=>{
@@ -1016,6 +1043,7 @@ function submitDocUpload(){
     // point of keeping the form as the Upload tab's default view — and
     // quietly refresh History's data/badge in case the user checks it.
     state.docSelectedJobRef = null;
+    state.docJobSearch = '';
     state.docCategory = '';
     state.docType = '';
     state.docCustomName = '';
@@ -1030,7 +1058,13 @@ function submitDocUpload(){
   });
 }
 
-/* ---- History tab: flat list, newest first, with a delete-only card menu ---- */
+/* ---- History tab: flat list, newest first, scoped to documents this
+   user personally uploaded. The card leads with Document Type (what it
+   is, same role as a Task card's milestone name) with Category as its
+   subtitle (like a customer name) and the file name/date as supporting
+   meta — a raw filename alone is rarely the most meaningful thing to
+   scan for. The only action (Delete) is a quiet icon in the corner, not
+   an overflow menu — there's nothing else to disambiguate it from. ---- */
 // A document's fileUrl is a browser blob: URL — it only resolves in the
 // tab/origin that created it, so a document uploaded from another
 // device/tab (including the Admin Portal) shows a "preview unavailable"
@@ -1048,47 +1082,28 @@ function renderDocHistoryPane(){
     return;
   }
   el('docs-pane').innerHTML = state.docHistory.map(({doc: d, shipment: s})=>{
-    const uploader = MilestoneStore.getUserById(d.uploadedBy);
-    const who = escapeHtml(uploader ? uploader.name : (d.uploadedBy || 'Unknown'));
     const when = d.uploadedAt ? new Date(d.uploadedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '';
     return `
-    <div class="ms-card" data-view-doc="${d.id}" style="cursor:${d.fileUrl ? 'pointer' : 'default'}">
+    <div class="ms-card doc-history-card" data-view-doc="${d.id}" style="cursor:${d.fileUrl ? 'pointer' : 'default'}">
       <div class="row1">
-        <span class="ms-name">${escapeHtml(d.fileName)}</span>
-        <div style="display:flex; align-items:center; gap:4px;">
-          <span class="ship-ref">${s.jobRef}</span>
-          <div class="card-menu-wrap">
-            <button type="button" class="card-menu-btn" data-doc-menu="${d.id}" title="Options">${ICON_MORE}</button>
-            <div class="card-menu" id="doc-menu-${d.id}">
-              <button type="button" class="card-menu-item danger" data-delete-doc="${d.id}">Delete</button>
-            </div>
-          </div>
-        </div>
+        <span class="ms-name">${escapeHtml(d.docType || d.fileName)}</span>
+        <span class="ship-ref">${s.jobRef}</span>
       </div>
-      <div class="customer-line">${escapeHtml(d.category || 'Uncategorized')}${d.docType ? ' · ' + escapeHtml(d.docType) : ''}</div>
+      <div class="customer-line">${escapeHtml(d.category || 'Uncategorized')}</div>
       <div class="meta-row">
-        <span>${who}</span>
+        <span>${escapeHtml(d.fileName)}</span>
         <span>·</span>
         <span>${when}</span>
         ${d.fileUrl ? '' : '<span>· Preview unavailable on this device</span>'}
       </div>
+      <button type="button" class="doc-delete-btn" data-delete-doc="${d.id}" title="Delete document" aria-label="Delete document">${ICON_TRASH}</button>
     </div>`;
   }).join('');
 }
 el('docs-pane').addEventListener('click', (e)=>{
-  const menuBtn = e.target.closest('[data-doc-menu]');
-  if(menuBtn){
-    e.stopPropagation();
-    const menu = el('doc-menu-' + menuBtn.dataset.docMenu);
-    const wasOpen = menu && menu.classList.contains('open');
-    document.querySelectorAll('.card-menu.open').forEach(m=>m.classList.remove('open'));
-    if(menu && !wasOpen) menu.classList.add('open');
-    return;
-  }
   const deleteBtn = e.target.closest('[data-delete-doc]');
   if(deleteBtn){
     e.stopPropagation();
-    document.querySelectorAll('.card-menu.open').forEach(m=>m.classList.remove('open'));
     openDeleteDocSheet(deleteBtn.dataset.deleteDoc);
     return;
   }
@@ -1098,12 +1113,6 @@ el('docs-pane').addEventListener('click', (e)=>{
     if(!entry) return;
     if(entry.doc.fileUrl) window.open(entry.doc.fileUrl, '_blank');
     else showToast('Preview unavailable — this document was uploaded from another device/tab', 'error');
-  }
-});
-// Closes any open card menu on an outside tap/click.
-document.addEventListener('click', (e)=>{
-  if(!e.target.closest('.card-menu-wrap')){
-    document.querySelectorAll('.card-menu.open').forEach(m=>m.classList.remove('open'));
   }
 });
 

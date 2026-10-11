@@ -214,24 +214,36 @@ sequence (section 43):
   pill control at the top of the screen:
   - **Upload** — the form itself is the tab's default view, so there's no
     extra screen to drill into: **Job Number** (type-ahead search by job
-    number or customer; picking a result shows a confirmation card —
-    Customer, Route — so it's obvious the right shipment was found) →
-    **Document Category** → **Document Type** (options filtered by the
-    chosen category, and scoped to whether the shipment is Import or
-    Export — see taxonomy note below) → **File**. Picking the Type
-    "Others" reveals a free-text "Document Name" field, since "Others" is
-    a slot for an undocumented type, not a type in its own right. A
-    successful upload resets the form in place (not a redirect) so the
-    next upload can start immediately, and quietly refreshes History's
-    badge/data in the background.
-  - **History** — every document uploaded across all of your shipments,
-    flat and newest first, each one clearly labeled with its job number
-    (same card style as the Tasks list). There's no detail page for a
-    document — tapping a card opens its file preview if one is available
-    on this device, otherwise does nothing. Each card has a small
-    overflow menu (⋮) with a single "Delete" action; deleting requires an
-    explicit confirmation sheet naming the exact file and job number and
-    warning it can't be undone, never a single destructive tap.
+    number or customer — picking a result fills the job number straight
+    into the input itself, with a plain, unboxed confirmation line right
+    underneath it, customer name + mode/route, the same shape as a
+    Tasks-list card's subtitle/meta line, so it's obvious at a glance the
+    right shipment was found) → **Document Category** → **Document Type**
+    (options filtered by the chosen category, and scoped to whether the
+    shipment is Import or Export — see taxonomy note below) → **File**.
+    Editing the Job Number field again (to search a different job) clears
+    that confirmation and the fields below it without disrupting the
+    input itself. Picking the Type "Others" reveals a free-text "Document
+    Name" field, since "Others" is a slot for an undocumented type, not a
+    type in its own right. A successful upload resets the form in place
+    (not a redirect) so the next upload can start immediately, and
+    quietly refreshes History's badge/data in the background.
+  - **History** — documents *you personally* uploaded, across all of your
+    shipments, flat and newest first (role-scoped: a teammate's uploads on
+    a shipment you share never show up here, even though you can both see
+    and act on the same milestones). Each card leads with the document's
+    **Type** (what it is, playing the same role a milestone name does on
+    a Tasks card) with **Category** as its subtitle and the job number as
+    a corner chip, and the actual file name + upload date as smaller
+    supporting detail — a raw file name alone is rarely the most useful
+    thing to scan a list by. There's no detail page for a document —
+    tapping a card opens its file preview if one is available on this
+    device, otherwise does nothing. The only action, Delete, is a single
+    quiet icon tucked in the card's corner rather than behind an overflow
+    menu (there's nothing else to disambiguate it from), and still always
+    requires an explicit confirmation sheet naming the exact file and job
+    number and warning it can't be undone — never a single destructive
+    tap.
   No bulk upload and no dedicated notification for a new document in this
   MVP. Documents are shared with the Admin Portal through `MilestoneStore`
   (`addDocument` / `getDocumentsForShipment` / `deleteDocument`), the same
