@@ -215,25 +215,36 @@ sequence (section 43):
   - **Select Job** — the Docs tab's landing screen: a searchable list of
     the signed-in user's own shipments (Owner or Supporting), same
     search-toggle pattern as the Tasks screen. Each card shows Job Number
-    (corner chip), Customer Name (title), Transport Type, and Route.
-  - **Job Documents** — tapping a job opens every document on that job,
-    newest first. Each card leads with the document's **Type** (what it
-    is, playing the same role a milestone name does on a Tasks card) with
-    **Category** as its subtitle, and the actual file name + upload date
-    as smaller supporting detail — a raw file name alone is rarely the
-    most useful thing to scan a list by. Tapping a card opens its file
-    preview if one is available on this device, otherwise does nothing.
-    This screen is **read-only**: no delete, no replace, no edit from the
-    Field Channel — those stay Admin Portal actions, if ever added there.
-  - **Upload** — reached only via the floating "+" on Job Documents, so
-    there's no job picker on this screen; the job is already fixed from
-    context. Just **Document Category** → **Document Type** (options
-    filtered by the chosen category, and scoped to whether the shipment
-    is Import or Export — see taxonomy note below) → **File**. Picking
-    the Type "Others" reveals a free-text "Document Name" field, since
-    "Others" is a slot for an undocumented type, not a type in its own
-    right. A successful upload returns to Job Documents, refreshed, so
-    the new upload is immediately visible as confirmation.
+    (corner chip), Customer Name (title), Transport Type, and Route. This
+    list is re-derived from current team membership on every load/
+    revalidation (`MilestoneStore.getMyShipments`), not cached once and
+    forgotten — a shipment a user is removed from drops off the next time
+    the list loads.
+  - **Job Documents** — tapping a job opens every document on that job
+    (everyone's uploads, not just the signed-in user's own — this is a
+    shared job record, not a personal history), newest first. Each card
+    shows a colored file-type tile (PDF/image/other), leads with the
+    document's **Type** (what it is, playing the same role a milestone
+    name does on a Tasks card) with **Category** as a chip subtitle, the
+    file name + upload date as smaller supporting detail, and a chevron
+    when a preview is available to tap. This screen is **read-only**: no
+    delete, no replace, no edit from the Field Channel — those stay Admin
+    Portal actions. A sticky "Upload Document" button sits at the bottom
+    of the screen (not a floating button), consistent with how every
+    other screen in this app places its primary action. Re-checks the
+    signed-in user's team membership on every revalidation too: if an
+    Admin Portal change removes them from this shipment's team while
+    they're looking at it, they're bounced back to Select Job with a
+    toast rather than left staring at a job that no longer includes them.
+  - **Upload** — reached only via the "Upload Document" button on Job
+    Documents, so there's no job picker on this screen; the job is
+    already fixed from context. Just **Document Category** → **Document
+    Type** (options filtered by the chosen category, and scoped to
+    whether the shipment is Import or Export — see taxonomy note below)
+    → **File**. Picking the Type "Others" reveals a free-text "Document
+    Name" field, since "Others" is a slot for an undocumented type, not a
+    type in its own right. A successful upload returns to Job Documents,
+    refreshed, so the new upload is immediately visible as confirmation.
   No bulk upload and no dedicated notification for a new document in this
   MVP. Documents are shared with the Admin Portal through `MilestoneStore`
   (`addDocument` / `getDocumentsForShipment`), the same pattern as

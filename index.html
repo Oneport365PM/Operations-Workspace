@@ -160,9 +160,19 @@ input,textarea{font-family:var(--font-body)}
 .dropzone-tap.has-file .dz-icon{ color:var(--green-dark); }
 .dropzone-tap .dz-filename{ font-family:var(--font-display); font-weight:600; font-size:13.5px; color:var(--green-dark); word-break:break-all; max-width:100%; }
 
-/* ---- Floating action button (Job Documents screen: upload a new doc) ---- */
-.fab{ position:absolute; right:20px; bottom:calc(24px + env(safe-area-inset-bottom)); width:56px; height:56px; border-radius:50%; background:var(--green-dark); color:var(--green-accent); border:none; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-e2); z-index:25; }
-.fab:active{ background:var(--green-dark-hover); }
+/* ---- Job Documents card: a colored file-type tile, a category chip,
+   and a chevron affordance when a preview is tappable — replaces the
+   plain stacked-text card that made every document in the list look
+   identical regardless of what it was. ---- */
+.doc-card-row{ display:flex; align-items:flex-start; gap:12px; }
+.doc-icon-tile{ width:44px; height:44px; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.doc-icon-tile.doc-type-pdf{ background:var(--error-bg); color:var(--error-text); }
+.doc-icon-tile.doc-type-image{ background:var(--gold-bg); color:var(--gold-text); }
+.doc-icon-tile.doc-type-other{ background:var(--green-light-surface); color:var(--green-dark); }
+.doc-card-main{ flex:1; min-width:0; }
+.doc-card-title{ font-family:var(--font-display); font-weight:600; font-size:15px; color:var(--green-dark); margin-bottom:5px; }
+.doc-category-chip{ display:inline-block; background:var(--green-light-surface); color:var(--green-dark); font-family:var(--font-display); font-weight:600; font-size:11px; padding:3px 9px; border-radius:999px; margin-bottom:7px; }
+.doc-card-chevron{ color:var(--silver-light); flex-shrink:0; align-self:center; }
 
 /* ---- Notifications ---- */
 .notif-item{
@@ -358,7 +368,9 @@ select.field-input{ background-image:url('data:image/svg+xml;utf8,<svg xmlns="ht
     </div>
     <div id="doc-job-banner"></div>
     <div class="detail-body" id="doc-job-body"></div>
-    <button class="fab" id="btn-open-doc-upload" title="Upload document" aria-label="Upload document"></button>
+    <div class="bottom-bar">
+      <button class="btn btn-primary" id="btn-open-doc-upload"></button>
+    </div>
   </div>
 
   <!-- ============== UPLOAD DOCUMENT (drill-down) ============== -->
@@ -475,6 +487,8 @@ const ICON_TEAM = '<svg width="16" height="16" fill="none" stroke="currentColor"
 const ICON_DOC = '<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><path d="M14 2v6h6"></path></svg>';
 const ICON_UPLOAD = '<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 16V4M6 10l6-6 6 6M4 20h16" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
 const ICON_PLUS = '<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"></path></svg>';
+const ICON_CHEVRON_RIGHT = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
+const ICON_IMAGE = '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="M21 15l-5-5L5 21" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
 const SLA_ICON = { healthy: ICON_CLOCK, 'at-risk': ICON_WARN, breached: ICON_WARN };
 const NOTIF_ICON = { comment: ICON_COMMENT, sla_breached: ICON_WARN, team_added: ICON_TEAM, team_removed: ICON_TEAM, role_updated: ICON_TEAM };
 const NOTIF_PAGE_SIZE = 10;
@@ -779,7 +793,7 @@ const DOC_MAX_FILE_SIZE_MB = 25;
 function isAllowedDocFile(file){
   return /\.(pdf|jpe?g|png)$/i.test(file.name) || ['application/pdf', 'image/jpeg', 'image/png'].includes(file.type);
 }
-el('btn-open-doc-upload').innerHTML = ICON_PLUS;
+el('btn-open-doc-upload').innerHTML = `${ICON_PLUS} Upload Document`;
 
 /* ---- Select Job: searchable list of the signed-in user's own shipments,
    same search-toggle pattern as the Tasks screen. ---- */
@@ -884,9 +898,25 @@ function openDocJob(jobRef){
   loadDocJobDocuments();
 }
 el('btn-back-doc-job').addEventListener('click', goToDocs);
+// Re-checks team membership on every load (not just on first open) — the
+// Job List is scoped to "my shipments", but a user already viewing a
+// job's documents could be unassigned from it mid-session (e.g. the
+// Admin Portal reassigns the team while this screen is open); the next
+// revalidation here must catch that and back the user out, the same way
+// Milestone Detail refuses to keep showing a milestone that's no longer
+// assigned/available.
 function loadDocJobDocuments(){
   const jobRef = state.docCurrentJobRef;
-  MilestoneStore.getDocumentsForShipment(jobRef).then(docs=>{
+  MilestoneStore.getMyShipments(state.me.id).then(shipments=>{
+    state.myShipments = shipments;
+    if(!shipments.some(s=>s.jobRef===jobRef)){
+      showToast("You're no longer assigned to this shipment.", 'error');
+      goToDocs();
+      return null;
+    }
+    return MilestoneStore.getDocumentsForShipment(jobRef);
+  }).then(docs=>{
+    if(!docs) return; // already redirected above
     state.docJobDocuments = docs;
     renderDocJobBody();
   }).catch(err=>{
@@ -895,6 +925,15 @@ function loadDocJobDocuments(){
     el('doc-job-banner').innerHTML = bannerHtml('error', 'Unable to load documents. Please check your connection and try again.');
   });
 }
+// A document's visual "type tile" is derived from its file extension —
+// purely cosmetic grouping (pdf / image / other) so a list of documents
+// reads as more than identical stacked text rows.
+function docFileTypeInfo(fileName){
+  const ext = (fileName.split('.').pop() || '').toLowerCase();
+  if(ext === 'pdf') return { cls: 'doc-type-pdf', icon: ICON_DOC };
+  if(['jpg', 'jpeg', 'png'].includes(ext)) return { cls: 'doc-type-image', icon: ICON_IMAGE };
+  return { cls: 'doc-type-other', icon: ICON_DOC };
+}
 function renderDocJobBody(){
   const s = currentDocJobShipment();
   if(!s) return;
@@ -902,24 +941,29 @@ function renderDocJobBody(){
   const docsHtml = state.docJobDocuments.length
     ? state.docJobDocuments.map(d=>{
         const when = d.uploadedAt ? new Date(d.uploadedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '';
+        const fileType = docFileTypeInfo(d.fileName);
         return `
         <div class="ms-card" data-view-doc="${d.id}" style="cursor:${d.fileUrl ? 'pointer' : 'default'}">
-          <div class="row1">
-            <span class="ms-name">${escapeHtml(d.docType || d.fileName)}</span>
-          </div>
-          <div class="customer-line">${escapeHtml(d.category || 'Uncategorized')}</div>
-          <div class="meta-row">
-            <span>${escapeHtml(d.fileName)}</span>
-            <span>·</span>
-            <span>${when}</span>
-            ${d.fileUrl ? '' : '<span>· Preview unavailable on this device</span>'}
+          <div class="doc-card-row">
+            <div class="doc-icon-tile ${fileType.cls}">${fileType.icon}</div>
+            <div class="doc-card-main">
+              <div class="doc-card-title">${escapeHtml(d.docType || d.fileName)}</div>
+              <span class="doc-category-chip">${escapeHtml(d.category || 'Uncategorized')}</span>
+              <div class="meta-row">
+                <span>${escapeHtml(d.fileName)}</span>
+                <span>·</span>
+                <span>${when}</span>
+                ${d.fileUrl ? '' : '<span>· Preview unavailable on this device</span>'}
+              </div>
+            </div>
+            ${d.fileUrl ? `<div class="doc-card-chevron">${ICON_CHEVRON_RIGHT}</div>` : ''}
           </div>
         </div>`;
       }).join('')
     : `<div class="empty-state">
         <div class="icon">${ICON_DOC}</div>
         <h3>No documents yet</h3>
-        <p>Use the + button to upload the first document for this shipment.</p>
+        <p>Use the button below to upload the first document for this shipment.</p>
       </div>`;
 
   el('doc-job-body').innerHTML = `
