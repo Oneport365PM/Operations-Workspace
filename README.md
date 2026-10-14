@@ -229,22 +229,23 @@ sequence (section 43):
     file name + upload date as smaller supporting detail, and a chevron
     when a preview is available to tap. This screen is **read-only**: no
     delete, no replace, no edit from the Field Channel — those stay Admin
-    Portal actions. A sticky "Upload Document" button sits at the bottom
-    of the screen (not a floating button), consistent with how every
-    other screen in this app places its primary action. Re-checks the
+    Portal actions. A floating "+" button opens Upload. Re-checks the
     signed-in user's team membership on every revalidation too: if an
     Admin Portal change removes them from this shipment's team while
     they're looking at it, they're bounced back to Select Job with a
     toast rather than left staring at a job that no longer includes them.
-  - **Upload** — reached only via the "Upload Document" button on Job
-    Documents, so there's no job picker on this screen; the job is
-    already fixed from context. Just **Document Category** → **Document
-    Type** (options filtered by the chosen category, and scoped to
-    whether the shipment is Import or Export — see taxonomy note below)
-    → **File**. Picking the Type "Others" reveals a free-text "Document
-    Name" field, since "Others" is a slot for an undocumented type, not a
-    type in its own right. A successful upload returns to Job Documents,
-    refreshed, so the new upload is immediately visible as confirmation.
+  - **Upload** — reached only via the floating "+" on Job Documents, so
+    there's no job picker on this screen; the job is already fixed from
+    context. Just **Document Category** → **Document Type** (options
+    filtered by the chosen category, and scoped to whether the shipment
+    is Import or Export — see taxonomy note below) → **File**. Picking
+    the Type "Others" reveals a free-text "Document Name" field, since
+    "Others" is a slot for an undocumented type, not a type in its own
+    right. The "Upload Document" button sits in a sticky bar at the
+    bottom of this screen (separate from the scrollable form above it),
+    so it stays reachable without scrolling regardless of form length. A
+    successful upload returns to Job Documents, refreshed, so the new
+    upload is immediately visible as confirmation.
   No bulk upload and no dedicated notification for a new document in this
   MVP. Documents are shared with the Admin Portal through `MilestoneStore`
   (`addDocument` / `getDocumentsForShipment`), the same pattern as

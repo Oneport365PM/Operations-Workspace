@@ -160,6 +160,10 @@ input,textarea{font-family:var(--font-body)}
 .dropzone-tap.has-file .dz-icon{ color:var(--green-dark); }
 .dropzone-tap .dz-filename{ font-family:var(--font-display); font-weight:600; font-size:13.5px; color:var(--green-dark); word-break:break-all; max-width:100%; }
 
+/* ---- Floating action button (Job Documents screen: upload a new doc) ---- */
+.fab{ position:absolute; right:20px; bottom:calc(24px + env(safe-area-inset-bottom)); width:56px; height:56px; border-radius:50%; background:var(--green-dark); color:var(--green-accent); border:none; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-e2); z-index:25; }
+.fab:active{ background:var(--green-dark-hover); }
+
 /* ---- Job Documents card: a colored file-type tile, a category chip,
    and a chevron affordance when a preview is tappable — replaces the
    plain stacked-text card that made every document in the list look
@@ -368,9 +372,7 @@ select.field-input{ background-image:url('data:image/svg+xml;utf8,<svg xmlns="ht
     </div>
     <div id="doc-job-banner"></div>
     <div class="detail-body" id="doc-job-body"></div>
-    <div class="bottom-bar">
-      <button class="btn btn-primary" id="btn-open-doc-upload"></button>
-    </div>
+    <button class="fab" id="btn-open-doc-upload" title="Upload document" aria-label="Upload document"></button>
   </div>
 
   <!-- ============== UPLOAD DOCUMENT (drill-down) ============== -->
@@ -381,6 +383,9 @@ select.field-input{ background-image:url('data:image/svg+xml;utf8,<svg xmlns="ht
     </div>
     <div id="doc-upload-banner"></div>
     <div class="detail-body" id="doc-upload-body"></div>
+    <div class="bottom-bar">
+      <button class="btn btn-primary" id="btn-submit-doc-upload"></button>
+    </div>
   </div>
 
   <!-- ============== MILESTONE DETAIL (drill-down) ============== -->
@@ -793,7 +798,7 @@ const DOC_MAX_FILE_SIZE_MB = 25;
 function isAllowedDocFile(file){
   return /\.(pdf|jpe?g|png)$/i.test(file.name) || ['application/pdf', 'image/jpeg', 'image/png'].includes(file.type);
 }
-el('btn-open-doc-upload').innerHTML = `${ICON_PLUS} Upload Document`;
+el('btn-open-doc-upload').innerHTML = ICON_PLUS;
 
 /* ---- Select Job: searchable list of the signed-in user's own shipments,
    same search-toggle pattern as the Tasks screen. ---- */
@@ -1006,6 +1011,12 @@ function openDocJobUpload(){
 }
 el('btn-open-doc-upload').addEventListener('click', openDocJobUpload);
 el('btn-back-doc-upload').addEventListener('click', ()=> showScreen('screen-doc-job'));
+// Static — sits in a sticky bottom-bar outside the scrollable form body,
+// so it stays visible without scrolling regardless of form length; wired
+// once here rather than in renderDocUploadBody(), which only touches
+// #doc-upload-body.
+el('btn-submit-doc-upload').innerHTML = `${ICON_CHECK} Upload Document`;
+el('btn-submit-doc-upload').addEventListener('click', submitDocUpload);
 
 function renderDocUploadBody(){
   const s = currentDocJobShipment();
@@ -1051,8 +1062,6 @@ function renderDocUploadBody(){
         <div class="dz-sub">PDF, JPG, PNG — Max ${DOC_MAX_FILE_SIZE_MB} MB</div>
       `}
     </div>
-
-    <button class="btn btn-primary" id="btn-submit-doc-upload" style="margin-top:16px">${ICON_CHECK} Upload Document</button>
   `;
 
   const categorySelect = el('doc-category-select');
@@ -1093,8 +1102,6 @@ function renderDocUploadBody(){
       renderDocUploadBody();
     });
   }
-  const submitBtn = el('btn-submit-doc-upload');
-  if(submitBtn) submitBtn.addEventListener('click', submitDocUpload);
   updateSubmitDocState();
 }
 
