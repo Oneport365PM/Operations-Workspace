@@ -210,48 +210,37 @@ sequence (section 43):
     *fresh* store — run `MilestoneStore.resetDemoData()` from the console
     (either app) to reseed and pick them up.
 - **Documents** — tied to a shipment, not a milestone/task (a shipment can
-  have documents before any milestone exists). Two sub-tabs, a segmented
-  pill control at the top of the screen:
-  - **Upload** — the form itself is the tab's default view, so there's no
-    extra screen to drill into: **Job Number** (type-ahead search by job
-    number or customer — picking a result fills the job number straight
-    into the input itself, with a plain, unboxed confirmation line right
-    underneath it, customer name + mode/route, the same shape as a
-    Tasks-list card's subtitle/meta line, so it's obvious at a glance the
-    right shipment was found) → **Document Category** → **Document Type**
-    (options filtered by the chosen category, and scoped to whether the
-    shipment is Import or Export — see taxonomy note below) → **File**.
-    Editing the Job Number field again (to search a different job) clears
-    that confirmation and the fields below it without disrupting the
-    input itself. Picking the Type "Others" reveals a free-text "Document
-    Name" field, since "Others" is a slot for an undocumented type, not a
-    type in its own right. A successful upload resets the form in place
-    (not a redirect) so the next upload can start immediately, and
-    quietly refreshes History's badge/data in the background.
-  - **History** — documents *you personally* uploaded, across all of your
-    shipments, flat and newest first (role-scoped: a teammate's uploads on
-    a shipment you share never show up here, even though you can both see
-    and act on the same milestones). Each card leads with the document's
-    **Type** (what it is, playing the same role a milestone name does on
-    a Tasks card) with **Category** as its subtitle and the job number as
-    a corner chip, and the actual file name + upload date as smaller
-    supporting detail — a raw file name alone is rarely the most useful
-    thing to scan a list by. There's no detail page for a document —
-    tapping a card opens its file preview if one is available on this
-    device, otherwise does nothing. The only action, Delete, is a single
-    quiet icon tucked in the card's corner rather than behind an overflow
-    menu (there's nothing else to disambiguate it from), and still always
-    requires an explicit confirmation sheet naming the exact file and job
-    number and warning it can't be undone — never a single destructive
-    tap.
+  have documents before any milestone exists). A job-first drill-down, not
+  tabs:
+  - **Select Job** — the Docs tab's landing screen: a searchable list of
+    the signed-in user's own shipments (Owner or Supporting), same
+    search-toggle pattern as the Tasks screen. Each card shows Job Number
+    (corner chip), Customer Name (title), Transport Type, and Route.
+  - **Job Documents** — tapping a job opens every document on that job,
+    newest first. Each card leads with the document's **Type** (what it
+    is, playing the same role a milestone name does on a Tasks card) with
+    **Category** as its subtitle, and the actual file name + upload date
+    as smaller supporting detail — a raw file name alone is rarely the
+    most useful thing to scan a list by. Tapping a card opens its file
+    preview if one is available on this device, otherwise does nothing.
+    This screen is **read-only**: no delete, no replace, no edit from the
+    Field Channel — those stay Admin Portal actions, if ever added there.
+  - **Upload** — reached only via the floating "+" on Job Documents, so
+    there's no job picker on this screen; the job is already fixed from
+    context. Just **Document Category** → **Document Type** (options
+    filtered by the chosen category, and scoped to whether the shipment
+    is Import or Export — see taxonomy note below) → **File**. Picking
+    the Type "Others" reveals a free-text "Document Name" field, since
+    "Others" is a slot for an undocumented type, not a type in its own
+    right. A successful upload returns to Job Documents, refreshed, so
+    the new upload is immediately visible as confirmation.
   No bulk upload and no dedicated notification for a new document in this
   MVP. Documents are shared with the Admin Portal through `MilestoneStore`
-  (`addDocument` / `getDocumentsForShipment` / `deleteDocument`), the same
-  pattern as milestones and the team roster — a document uploaded or
-  deleted from either app shows up (or disappears) in the other's list, in
-  the same order, without a page reload. See "Known simplifications" below
-  for the one real limitation this sharing has (file previews don't cross
-  tabs/devices).
+  (`addDocument` / `getDocumentsForShipment`), the same pattern as
+  milestones and the team roster — a document uploaded from either app
+  shows up in the other's list, in the same order, without a page reload.
+  See "Known simplifications" below for the one real limitation this
+  sharing has (file previews don't cross tabs/devices).
   - **Category/Type taxonomy** comes from "Back Office 2.0 — Operations
     Feedback" (the Documents Required for Import / Export sections).
     Import and Export have different category sets entirely (e.g. Import
