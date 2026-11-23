@@ -1636,6 +1636,9 @@ function buildShipmentDetail(base, seed){
   const slaHealth = base.status !== 'Active' ? 'Healthy'
     : base.lead < 0 ? 'Breached' : (base.lead <= 1 || base.openFlag) ? 'At-Risk' : 'Healthy';
   const etd = formatDate(plan.due[plan.startIdx]), eta = formatDate(plan.due[plan.stopIdx]);
+  // First time the status was set to Active (every sample job has been Active,
+  // including the one later cancelled): just after Pre-Booking closed
+  const activatedAt = new Date(plan.due[0].getTime() - 0.25*86400000);
 
   const trackedCount = Math.min(PHYSICAL_TRACKING_TEMPLATE.length, 2 + (seed % 5));
   const physicalTracking = PHYSICAL_TRACKING_TEMPLATE.map((t,i)=>({
@@ -1674,7 +1677,7 @@ function buildShipmentDetail(base, seed){
 
   return {
     ...base,
-    slaHealth, etd, eta,
+    slaHealth, etd, eta, activatedAt, surveyResponse:null,
     owners: { primary, supporting, responsibilities },
     containers,
     milestones,
@@ -2187,6 +2190,7 @@ function renderShipDetailFields(){
     ['Destination', s.destination],
     ['Port of Loading', `${locodeOf(s.pol)}<div class="v-sub">${s.pol}</div>`],
     ['Port of Discharge', `${locodeOf(s.pod)}<div class="v-sub">${s.pod}</div>`],
+    ['First set to Active', s.activatedAt ? formatDateTime(s.activatedAt) : 'Not yet'],
     ['ETD', s.etd],
     ['ETA', s.eta],
   ];
@@ -2607,6 +2611,7 @@ function openUpdateStatusModal(){
 el('save-update-status').addEventListener('click', ()=>{
   const s = currentShipment();
   s.status = el('input-update-status').value;
+  if(s.status === 'Active' && !s.activatedAt) s.activatedAt = new Date();
   renderShipHeader();
   renderShipmentsList();
   closeModal('modal-update-status');
@@ -3386,66 +3391,51 @@ const LD_STAGE_INDEX = {'Prospecting':0, 'Pre-Booking':1, 'Booking':2, 'Post-Boo
 function ldProduct(s){ const p = productOf(s); return { tier1:p.tier1, tier2:p.tier2 }; }
 
 // Leadership indicators for the Booking and Post-Booking stages (numbers are
-// the steps on the leadership process map). `sla`, `primary` and `support`
-// are the leadership wording. `trigger` is PROVISIONAL until the real
-// triggers are agreed: for now an indicator is complete when every workbook
-// task whose name matches `tasks` is complete on that shipment. Swap `trigger`
-// for a system event (e.g. credit approved, survey response received) once
-// those are defined. An indicator with no matching tasks for a service
-// combination shows as Not applicable.
+// the steps on the leadership process map). Triggers as agreed in the
+// indicator trigger sign-off:
+//   system   - a system event (status first set to Active; survey response)
+//   stage    - every task in a workbook stage is complete
+//   task     - one Progress task: the first name in `tasks` that exists in the
+//              shipment's service combination. `missing` says what to show when
+//              none exists: 'na' (step not part of the service) or 'unset'
+//              (step applies but no trigger exists yet). `skip` lists service
+//              combinations where the step does not apply.
 const LD_INDICATORS = [
-  { id:'job-opened', stage:'Booking', no:8, label:'Job opened', detail:'Same job ID · budget from quote · doc checklist · milestones · Ops owner named',
-    sla:'Automatic', primary:'Head of Ops · Ops owner', support:'Sales exec · CS · Finance',
-    trigger:{ kind:'system', note:'Auto-opens when credit is approved', tasks:/^(File entry and activation|Build shipment on)/ } },
-  { id:'booking', stage:'Booking', no:9, label:'Booking', detail:'Carrier booking ref · cut-offs · Form M + PFI checked · customer notified',
-    sla:'2 days', primary:'Ops owner · CS · Customer (Form M, PFI)', support:'Sales exec · Pricing · Finance',
-    trigger:{ kind:'tasks', note:'No Form M means the job cannot reach Sailed', tasks:/./, stageOnly:'Booking', exclude:'job-opened' } },
-  { id:'origin', stage:'Post-Booking', no:10, label:'Origin & sailing', detail:'Gate-in · loaded · BL draft checked vs Form M · sailed · ETA posted',
-    sla:'BL check 1 day', primary:'Ops owner · CS', support:'Finance (freight invoice) · Sales',
-    trigger:{ kind:'tasks', note:'Sailing starts the freight invoice (13)', tasks:/Submit SI|draft BL|Vessel confirmation|Loading on vessel|shipping clearance|gate in to port|Stuff container|outside stuffing|Pick up empty|Update EDI|Confirm cargo (handover|readiness)|Submit AWB details|Confirm flight departure|Track (flight|vessel)|deliver to airport export warehouse/ } },
-  { id:'clearing', stage:'Post-Booking', no:11, label:'Pre-arrival & clearing', detail:'PAAR · SONCAP · duty · DO · terminal · release · exit · demurrage clock visible',
-    sla:'Within free days', primary:'C&F officers · Finance (duty)', support:'CS · Sales · Kemi · COO on red',
-    trigger:{ kind:'tasks', tasks:/rotation number|assessment|duty|Delivery Order|Trigger Customs|THC|scanning or examination|scanned|agencies' report|exit and gate pass|Clear cargo|Export customs|CCI|NESS|Inspection Act|Arrival notice|Receive original documents/i } },
-  { id:'cost', stage:'Post-Booking', no:12, label:'Cost capture & check', detail:'Every vendor charge on a job line · duplicate check · variance > 5% · unbilled = 0',
-    sla:'1 day of receipt', primary:'Finance analyst · Ops owner · Kemi approves', support:'Chioma (quote accuracy) · COO',
-    trigger:{ kind:'tasks', tasks:/Reconcile|Obtain freight and local invoices|Pay invoices|Obtain shipping invoice|Obtain airline invoice|Airline invoice and payment|Warehouse invoice|Obtain and pay freight invoice|Pay air freight/ } },
-  { id:'invoice', stage:'Post-Booking', no:13, label:'Invoice & collect', detail:'Invoice per tier · A/R ageing · reminders +3 · Sales +7 · CEO/COO +14',
-    sla:'Invoice ≤ 1 day', primary:'Finance · Sales exec at +7 · CEO/COO at +14', support:'Ops owner · CS',
-    trigger:{ kind:'tasks', tasks:/Final invoice|Issue (final|customer) invoice|send to Finance for invoicing/ } },
-  { id:'paid', stage:'Post-Booking', no:null, label:'Paid · docs released', detail:'Documents held until paid · if unpaid: reminders +3 · Sales +7 · CEO/COO +14',
-    sla:'Gate', primary:'Finance posts receipt', support:'Ops owner (release) · Sales',
-    trigger:{ kind:'finance', note:'Finance posts the receipt; yes → documents released', tasks:/Release original documents|Release OBL|Approve and dispatch OBL|Approve dispatch of documents|approve delivery of documents/ } },
-  { id:'delivery', stage:'Post-Booking', no:14, label:'Delivery & handover', detail:'POD · empties · detention closed · docs on PAID (Trail, Basic) or on terms (Prime)',
-    sla:'—', primary:'Ops owner · CS · Customer', support:'Finance (final costs) · Sales',
-    trigger:{ kind:'tasks', tasks:/^Deliver(;| cargo)|proof of delivery|Return empty|Customer offloads|waybill from driver|Load containers for dispatch|Allocate vendor and truck/ } },
-  { id:'ack', stage:'Post-Booking', no:null, label:'Handover acknowledged', detail:'Customer confirms by portal click or signed form · automatic status updates throughout',
-    sla:'—', primary:'Customer · CS', support:'Sales exec',
-    trigger:{ kind:'customer', note:'Customer action: portal click or signed form', tasks:/acknowledgement|closure email|closing documents|Dispatch documents/ } },
-  { id:'survey', stage:'Post-Booking', no:null, label:'Survey answered', detail:'3 questions + 0–10 recommend · auto-sent on DELIVERED · reminder +3 days · job CLOSED on response or at +7 days',
-    sla:'Reminder +3 days', primary:'Customer', support:'CS · Sales exec',
-    trigger:{ kind:'customer', note:'Customer action: survey auto-sent on Delivered', tasks:/Gate 2|Close shipment|Close file|close the file/ } },
+  { id:'job-opened', stage:'Booking', no:8, label:'Job opened',
+    trigger:{ kind:'system', event:'activated', note:'First time the shipment status is set to Active' } },
+  { id:'booking', stage:'Booking', no:9, label:'Booking',
+    trigger:{ kind:'stage', stage:'Booking', note:'Every Booking-stage task complete (ends at Gate 1)' } },
+  { id:'origin', stage:'Post-Booking', no:10, label:'Origin & sailing',
+    trigger:{ kind:'task', missing:'na', tasks:['Loading on vessel','Confirm flight departure to customer','Track flight; send ETA to customer','Track vessel; send ETA updates to customer','Exit warehouse or terminal; gate in to port','Pick up cargo; deliver to airport export warehouse'] } },
+  { id:'clearing', stage:'Post-Booking', no:11, label:'Pre-arrival & clearing',
+    trigger:{ kind:'task', missing:'na', tasks:['Obtain exit and gate pass','Clear cargo: FA, IA, exit note, gate pass','Get Inspection Act; submit export documents to the shipping line','Export customs processing and inspection at the airport','Arrival notice to consignee'] } },
+  { id:'cost', stage:'Post-Booking', no:12, label:'Cost capture & check',
+    trigger:{ kind:'task', missing:'unset', note:'No cost task in the workbook for this service yet', tasks:['Reconcile costs against quote','Reconcile vendor costs against quote','Obtain airline invoice and pay','Obtain and pay freight invoice'] } },
+  { id:'invoice', stage:'Post-Booking', no:13, label:'Invoice & collect',
+    trigger:{ kind:'task', missing:'unset', tasks:['Final invoice','Issue customer invoice','Issue final invoice'] } },
+  { id:'paid', stage:'Post-Booking', no:null, label:'Paid · docs released',
+    trigger:{ kind:'task', missing:'unset', note:'No document release task in the workbook for this service yet', tasks:['Release original documents after full payment or agreed terms','Approve and dispatch OBL / FECD to shipper','Approve dispatch of documents to customer','FECD closure; approve delivery of documents to customer','Release OBL or telex release to customer'] } },
+  { id:'delivery', stage:'Post-Booking', no:14, label:'Delivery & handover',
+    trigger:{ kind:'task', missing:'na', skip:['VA-AFCBT-IMPORT'], tasks:['Return empty; get EIR; claim deposit refund','Obtain waybill from driver','Obtain Terminal Delivery Order','Pay air freight (prepaid or collect); release AWB','Approve and dispatch OBL / FECD to shipper','Deliver closing documents to shipper','Release OBL or telex release to customer'] } },
+  { id:'ack', stage:'Post-Booking', no:null, label:'Handover acknowledged',
+    trigger:{ kind:'task', missing:'unset', note:'Customer portal click or signed form (not built yet)', tasks:['Dispatch documents; file customer acknowledgement','Deliver closing documents to shipper'] } },
+  { id:'survey', stage:'Post-Booking', no:null, label:'Survey answered',
+    trigger:{ kind:'system', event:'survey', note:'Auto-sent at handover; reminder at +3 days; closes at +7 days with no response' } },
 ];
 const LD_PRE_COLUMNS = [ {stage:'Prospecting', label:'Prospect'}, {stage:'Pre-Booking', label:'Pre-Booking'} ];
 const LD_STAGE_LABEL = {'Booking':'Booking', 'Post-Booking':'Post Booking'};
+const LD_SURVEY_REMIND_DAYS = 3, LD_SURVEY_CLOSE_DAYS = 7;
 
-// Which of a shipment's tasks feed each indicator (provisional; first match wins)
-function ldIndicatorTasks(s){
-  const taken = new Set(), out = {};
-  LD_INDICATORS.forEach(ind=>{
-    const tr = ind.trigger;
-    out[ind.id] = s.milestones.filter(m=>{
-      if(taken.has(m) || !isProgressStage(m.stage)) return false;
-      if(tr.stageOnly && m.stage !== tr.stageOnly) return false;
-      return tr.tasks.test(m.name);
-    });
-    // Job opened: until the credit-approved event exists, use the first Booking task
-    if(ind.id==='job-opened' && !out[ind.id].length){
-      const first = s.milestones.find(m=>m.stage==='Booking');
-      if(first) out[ind.id] = [first];
-    }
-    out[ind.id].forEach(m=>taken.add(m));
-  });
-  return out;
+// The Progress task(s) that trigger an indicator on this shipment
+function ldTriggerTasks(s, ind){
+  const tr = ind.trigger;
+  if(tr.kind==='stage') return s.milestones.filter(m=>m.stage===tr.stage);
+  if(tr.kind!=='task' || (tr.skip||[]).includes(s.serviceId)) return [];
+  for(const name of tr.tasks){
+    const m = s.milestones.find(x=>x.name===name && isProgressStage(x.stage));
+    if(m) return [m];
+  }
+  return [];
 }
 const ldState = { q:'', open:null };
 const ldHas = (o,k) => Object.prototype.hasOwnProperty.call(o,k);
@@ -3501,7 +3491,7 @@ function ldEvalGroup(tasks, prevDone){
   return {...base, state: (prevDone || doneCount>0) ? 'ontrack' : 'upcoming', due};
 }
 function ldAnalyse(s){
-  const feed = ldIndicatorTasks(s);
+  const evById = {};
   let prevDone = true;
   const stages = [];
   LD_PRE_COLUMNS.forEach(c=>{
@@ -3512,11 +3502,12 @@ function ldAnalyse(s){
   });
   ['Booking','Post-Booking'].forEach(stage=>{
     const indicators = LD_INDICATORS.filter(i=>i.stage===stage).map(ind=>{
-      const tasks = feed[ind.id];
-      // Finance and customer events with no Ops task to stand in yet: trigger still to be defined
-      const ev = (!tasks.length && (ind.trigger.kind==='finance' || ind.trigger.kind==='customer'))
-        ? {state:'unset', doneCount:0, total:0}
+      const tasks = ldTriggerTasks(s, ind), tr = ind.trigger;
+      const ev = tr.event==='activated' ? ldEvalActivated(s)
+        : tr.event==='survey' ? ldEvalSurvey(s, evById)
+        : !tasks.length ? {state: tr.missing || 'na', doneCount:0, total:0}
         : ldEvalGroup(tasks, prevDone);
+      evById[ind.id] = ev;
       if(ev.state!=='na' && ev.state!=='unset') prevDone = ev.state==='done' || ev.state==='late';
       return {kind:'indicator', ind, label:ind.label, stage, tasks, ev};
     });
@@ -3531,6 +3522,31 @@ function ldAnalyse(s){
   const live = stages.filter(c=>c.indicators).flatMap(c=>c.indicators).filter(i=>i.ev.state!=='na' && i.ev.state!=='unset');
   return {stages, health, done: live.filter(i=>i.ev.state==='done'||i.ev.state==='late').length, total: live.length};
 }
+// 8 Job opened: the first time the shipment status was set to Active
+function ldEvalActivated(s){
+  return s.activatedAt
+    ? {state:'done', doneCount:1, total:1, completedAt:s.activatedAt, due:s.activatedAt}
+    : {state:'upcoming', doneCount:0, total:1, due:null};
+}
+// Survey answered: sent automatically when the shipment reaches handover
+// (Delivery & handover, or Paid / Invoice where the service has no delivery
+// step); complete on the customer's response, or closed with no response
+// after LD_SURVEY_CLOSE_DAYS. At risk once the reminder has gone out.
+function ldSurveySentAt(evById){
+  const h = ['delivery','paid','invoice'].map(id=>evById[id]).find(e=>e && e.state!=='na' && e.state!=='unset');
+  return h && (h.state==='done' || h.state==='late') ? h.completedAt : null;
+}
+function ldEvalSurvey(s, evById){
+  const sentAt = ldSurveySentAt(evById);
+  if(!sentAt) return {state:'upcoming', doneCount:0, total:1, due:null, note:'Sent automatically at handover'};
+  const due = new Date(sentAt.getTime() + LD_SURVEY_CLOSE_DAYS*86400000), now = Date.now();
+  if(s.surveyResponse) return {state:'done', doneCount:1, total:1, completedAt:s.surveyResponse.at, due, note:`Customer responded · survey sent ${ldDay(sentAt)}`};
+  if(now >= due.getTime()) return {state:'done', doneCount:1, total:1, completedAt:due, due, noResponse:true, note:`Closed with no response · survey sent ${ldDay(sentAt)}`};
+  const age = (now - sentAt)/86400000;
+  if(age >= LD_SURVEY_REMIND_DAYS) return {state:'atrisk', doneCount:0, total:1, due, sentAt, reason:`No response ${Math.floor(age)} days after sending · reminder sent`};
+  return {state:'ontrack', doneCount:0, total:1, due, sentAt, note:`Survey sent ${formatDateTime(sentAt)} · closes ${ldDay(due)} if unanswered`};
+}
+
 // A stage's status rolls up from its indicators: complete when every
 // applicable indicator is complete, otherwise its most urgent open indicator.
 function ldRollUp(indicators){
@@ -3610,14 +3626,18 @@ function renderLeadershipDrawer(){
   const whenLine = e => (e.state==='done'||e.state==='late') ? `Completed ${formatDateTime(e.completedAt)}` : e.due ? `Due ${ldWhen(e.due)}` : '';
   const indicatorRow = c => {
     const e = c.ev, st = e.state, ind = c.ind;
-    const sub = st==='unset' ? `${escapeHtml(ind.trigger.note || 'Trigger to be defined')} · trigger not set yet`
+    const sub = e.note ? escapeHtml(e.note)
+      : st==='unset' ? `Trigger not set · ${escapeHtml(ind.trigger.note || 'to be defined')}`
       : st==='na' ? `Not part of ${escapeHtml(prod.tier2)}` : whenLine(e);
+    const surveyBtn = ind.id==='survey' && e.sentAt && st!=='done'
+      ? `<div class="ld-ind-body"><button class="btn btn-outline btn-sm" data-ld-survey="${s.jobRef}">Demo: record customer survey response</button></div>` : '';
     return `<div class="ld-ind ${st}">
       <div class="ld-ind-top">${ldGlyph(st, ldColFlag(c))}
         <div class="ld-ind-name"><b>${ind.no ? `<span class="ind-no">${ind.no}</span>` : ''}${escapeHtml(ind.label)}</b><span>${sub}</span></div>
         <span class="chip ${LD_STATE[st].chip}">${LD_STATE[st].label}</span>
       </div>
       ${e.reason ? `<div class="ld-ind-body"><div class="ld-reason ${st==='breached'?'bad':'warn'}">${escapeHtml(e.reason)}</div></div>` : ''}
+      ${surveyBtn}
     </div>`;
   };
   const stageBlock = c => {
@@ -3659,6 +3679,8 @@ function ldCloseDrawer(){ ldState.open = null; el('ld-overlay').hidden = true; e
 document.addEventListener('click', (e)=>{
   const t = e.target;
   if(t.closest('[data-ld-close]') || t.id==='ld-overlay'){ ldCloseDrawer(); return; }
+  const sv = t.closest('[data-ld-survey]');
+  if(sv){ SHIPMENTS[sv.dataset.ldSurvey].surveyResponse = { at:new Date() }; renderLeadership(); renderLeadershipDrawer(); showToast('Survey response recorded'); return; }
   const go = t.closest('[data-ld-goto]');
   if(go){ ldCloseDrawer(); openShipment(go.dataset.ldGoto); switchTab('progress'); return; }
   const row = t.closest('[data-ld-ref]');
