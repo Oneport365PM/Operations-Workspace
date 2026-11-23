@@ -127,7 +127,7 @@ button{cursor:pointer}
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
 
 /* Body grid */
-.body{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start}
+.body{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:start}
 @media (max-width:1180px){ .body{grid-template-columns:minmax(0,1fr)} }
 .section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 18px 12px}
 .section-head h2{font-size:16px}
@@ -305,7 +305,6 @@ details.team[open] summary::after{content:"▴"}
         <div>
           <div class="eyebrow">Leadership view</div>
           <h1>Key SLA Milestones</h1>
-          <p>The milestones that matter across every active shipment, fed by the tasks your teams tick off in each shipment's Progress tab.</p>
         </div>
         <div class="head-actions">
           <span class="live"><i></i><span id="asof"></span></span>
@@ -316,16 +315,6 @@ details.team[open] summary::after{content:"▴"}
         </div>
       </div>
 
-      <div class="how" id="how">
-        <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
-          <div class="flow"><span>Team ticks a task in Progress</span>→<span>Task marked ★ key</span>→<span>Key milestone updates here</span></div>
-          <div>Any overdue or flagged team task inside a stage pushes the key milestone ahead of it to <b>At risk</b>, so blockers surface here before the key milestone itself is late.</div>
-        </div>
-        <button class="btn btn-ghost x" id="how-close" type="button" aria-label="Hide explanation">✕</button>
-      </div>
-
-      <section class="kpis" id="kpis"></section>
-
       <div class="body">
         <section class="card" style="min-width:0">
           <div class="section-head">
@@ -333,23 +322,13 @@ details.team[open] summary::after{content:"▴"}
               <h2>Shipment pipeline</h2>
               <p>Each column is a key milestone. Click a shipment to see the team tasks behind it.</p>
             </div>
-            <div class="legend" id="glyph-legend"></div>
           </div>
           <div class="filters">
-            <div class="seg" id="f-tpl"></div>
-            <div class="seg" id="f-health"></div>
             <label class="search"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4" stroke-linecap="round"/></svg><input id="f-q" type="search" placeholder="Shipment or customer"></label>
           </div>
           <div id="pipeline"></div>
         </section>
 
-        <aside class="card rail">
-          <div class="section-head">
-            <div><h2>Needs attention</h2><p id="att-sub"></p></div>
-          </div>
-          <div class="rail-tabs"><div class="seg" id="f-att"></div></div>
-          <div class="att-list" id="att-list"></div>
-        </aside>
       </div>
     </div>
   </main>
@@ -632,54 +611,21 @@ function cellLabel(k){
 /* =========================================================================
    Rendering
    ========================================================================= */
-const UI = { tpl:'all', health:'all', q:'', att:'all', open:null };
-try{ const v = localStorage.getItem('oneport-leadership-ui'); if(v) Object.assign(UI, JSON.parse(v), {open:null}); }catch(e){}
-function saveUI(){ try{ localStorage.setItem('oneport-leadership-ui', JSON.stringify({tpl:UI.tpl, health:UI.health, att:UI.att, how:UI.how})); }catch(e){} }
+const UI = { tpl:'all', health:'all', q:'', open:null };
 const $ = id => document.getElementById(id);
 
 function renderAll(){
   NOW = new Date();
   const A = SHIPMENTS.map(s=>({s, a:analyse(s)}));
   $('asof').textContent = `Live · ${relDay(NOW)}`;
-  $('how').hidden = !!UI.how;
-  renderKpis(A); renderFilters(A); renderPipeline(A); renderAttention(A);
+  renderPipeline(A);
   if(UI.open) renderDrawer(UI.open);
 }
 
-function renderKpis(A){
-  const active = A.filter(x=>x.a.health!=='complete');
-  const n = h => active.filter(x=>x.a.health===h).length;
-  const allKeys = A.flatMap(x=>x.a.keys);
-  const doneKeys = allKeys.filter(k=>k.trigger.done);
-  const onTime = doneKeys.filter(k=>k.ev.state==='done').length;
-  const rate = doneKeys.length ? Math.round(onTime/doneKeys.length*100) : 0;
-  const breachedKeys = allKeys.filter(k=>k.ev.state==='breached').length;
-  const flaggedShips = active.filter(x=>x.a.keys.some(k=>k.ev.state!=='done' && k.ev.state!=='late' && k.tasks.some(t=>!t.done && t.flag))).length;
-  const due48 = allKeys.filter(k=>!k.trigger.done && k.trigger.due>=NOW && k.trigger.due-NOW < 2*DAY).length;
-  const b=n('breached'), r=n('atrisk'), o=n('ontrack'), tot=active.length||1;
-  $('kpis').innerHTML = `
-    <div class="card kpi"><div class="k">Active shipments</div><div class="v">${active.length}</div><div class="s">${A.reduce((x,y)=>x+y.a.keys.length,0)} key milestones tracked</div></div>
-    <div class="card kpi ${rate>=85?'ok':rate>=70?'warn':'bad'}"><div class="k">Key milestones on time</div><div class="v">${rate}<small>%</small></div><div class="s">${onTime} of ${doneKeys.length} completed within SLA</div></div>
-    <div class="card kpi bad"><div class="k">Shipments breached</div><div class="v">${b}</div><div class="s">${breachedKeys} key milestone${breachedKeys===1?'':'s'} past due</div></div>
-    <div class="card kpi warn"><div class="k">Shipments at risk</div><div class="v">${r}</div><div class="s">${flaggedShips} with a blocker flagged by the team</div></div>
-    <div class="card kpi"><div class="k">Due in next 48 hrs</div><div class="v">${due48}</div><div class="s">Key milestones still open</div></div>
-    <div class="card mix">
-      <div class="mixbar" role="img" aria-label="Shipment health mix: ${b} breached, ${r} at risk, ${o} on track">
-        <span style="width:${b/tot*100}%;background:var(--bad)"></span><span style="width:${r/tot*100}%;background:var(--warn)"></span><span style="width:${o/tot*100}%;background:var(--ok)"></span>
-      </div>
-      <div class="legend"><span><i class="dot" style="background:var(--bad)"></i>Breached <b>${b}</b></span><span><i class="dot" style="background:var(--warn)"></i>At risk <b>${r}</b></span><span><i class="dot" style="background:var(--ok)"></i>On track <b>${o}</b></span><span>Shipment health = its worst open key milestone</span></div>
-    </div>`;
-}
 
 function seg(el, items, value, onPick){
   el.innerHTML = items.map(([v,l,c])=>`<button type="button" class="${v===value?'on':''}" data-v="${v}">${l}${c!==undefined?`<span class="c">${c}</span>`:''}</button>`).join('');
   el.onclick = e => { const b = e.target.closest('button'); if(b){ onPick(b.dataset.v); } };
-}
-function renderFilters(A){
-  const active = A.filter(x=>x.a.health!=='complete');
-  seg($('f-tpl'), [['all','All',active.length], ...TPL_ORDER.map(t=>[t, TEMPLATES[t].label, active.filter(x=>x.s.tpl===t).length])], UI.tpl, v=>{UI.tpl=v; saveUI(); renderAll();});
-  seg($('f-health'), [['all','Any health'],['breached','Breached'],['atrisk','At risk'],['ontrack','On track']], UI.health, v=>{UI.health=v; saveUI(); renderAll();});
-  $('glyph-legend').innerHTML = ['done','late','breached','atrisk','ontrack','upcoming'].map(s=>`<span style="display:inline-flex;align-items:center;gap:5px">${glyph(s).replace('glyph ','glyph mini ')}${STATE_META[s].label}</span>`).join('');
 }
 
 function renderPipeline(A){
@@ -711,25 +657,6 @@ function renderPipeline(A){
   }).join('');
 }
 
-function renderAttention(A){
-  const items = [];
-  A.forEach(({s,a})=> a.keys.forEach(k=>{ if(k.ev.state==='breached'||k.ev.state==='atrisk') items.push({s,k}); }));
-  items.sort((x,y)=> SEV[y.k.ev.state]-SEV[x.k.ev.state] || x.k.trigger.due - y.k.trigger.due);
-  const nB = items.filter(i=>i.k.ev.state==='breached').length, nF = items.filter(i=>i.k.ev.flag).length;
-  $('att-sub').textContent = `${items.length} key milestones · breached first, then soonest due`;
-  seg($('f-att'), [['all','All',items.length],['breached','Breached',nB],['flag','Blockers',nF]], UI.att, v=>{UI.att=v; saveUI(); renderAll();});
-  const shown = items.filter(i=> UI.att==='all' || (UI.att==='breached' ? i.k.ev.state==='breached' : !!i.k.ev.flag));
-  $('att-list').innerHTML = shown.length ? shown.map(({s,k})=>{
-    const e = k.ev, who = (e.reasonTask||k.trigger).owner, task = e.reasonTask||k.trigger;
-    const extra = e.state==='breached' && e.flag ? `<div class="att-reason" style="color:var(--bad-text)">${ICON.flagLg}<span>${esc(e.flag.flag.note)}</span></div>` : '';
-    return `<button type="button" class="att" data-ref="${s.ref}">
-      <div class="att-top"><span class="att-title">${esc(k.label)}</span><span class="pill ${STATE_META[e.state].pill}">${STATE_META[e.state].label}</span></div>
-      <div class="att-meta">${s.ref} · ${esc(s.customer)} · due ${relDay(k.trigger.due)}</div>
-      <div class="att-reason">${e.kind==='flag'?ICON.flagLg:ICON.warn}<span>${esc(e.reason)}</span></div>${extra}
-      <div class="att-owner">${avatar(who)}<span>${shortName(TEAM[who].name)} · ${esc(task.resp)}</span></div>
-    </button>`;
-  }).join('') : `<div class="empty">Nothing here. Every key milestone in this view is on track.</div>`;
-}
 
 /* Drawer: key milestone timeline + the team tasks feeding each one */
 function renderDrawer(ref){
@@ -753,7 +680,7 @@ function renderDrawer(ref){
       </div>
     </div>
     <div class="drawer-body">
-      <div class="demo-note"><b>Prototype:</b> the checkboxes below stand in for the team ticking tasks in this shipment's Progress tab. Tick one and watch the key milestone, the pipeline and the attention list update.</div>
+      <div class="demo-note"><b>Prototype:</b> the checkboxes below stand in for the team ticking tasks in this shipment's Progress tab. Tick one and watch the key milestone, and the pipeline update.</div>
       ${a.stages.map(st=>{
         const e = st.ev, t = st.trigger;
         const head = t ? `<div class="stage-top"><h4>${esc(st.label)}</h4><span class="pill ${STATE_META[e.state].pill}">${STATE_META[e.state].label}</span></div>
@@ -825,9 +752,8 @@ function toast(html){
 /* Events */
 document.addEventListener('click', e=>{
   if(e.target.closest('[data-close]') || e.target.id==='overlay'){ closeAll(); return; }
-  const row = e.target.closest('tr.row, .att'); if(row){ openDrawer(row.dataset.ref); return; }
+  const row = e.target.closest('tr.row'); if(row){ openDrawer(row.dataset.ref); return; }
   if(e.target.closest('#btn-config')){ openConfig(); return; }
-  if(e.target.closest('#how-close')){ UI.how = true; saveUI(); renderAll(); return; }
   if(e.target.id==='cfg-reset'){ draft = JSON.parse(JSON.stringify(DEFAULT_KEYS)); renderConfig(); return; }
   if(e.target.id==='cfg-save'){ KEYS = draft; saveKeys(KEYS); closeAll(); renderAll(); toast('Key milestones saved. The pipeline now reflects your selection.'); return; }
 });
