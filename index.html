@@ -558,11 +558,8 @@ td.ld-first .ld-ms::before{display:none}
 .ld-ind.na,.ld-ind.unset{background:transparent;border-style:dashed}
 .ld-ind.na .ld-ind-name b,.ld-ind.unset .ld-ind-name b{color:var(--silver-light)}
 .ld-ind-body{margin:6px 0 0 30px}
-.ld-ind-body .ld-team{margin-top:8px}
 .ld-ind-meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--silver-dark);margin-top:6px}
 .ld-ind-meta b{color:var(--green-dark);margin-right:3px}
-.ld-ind-detail{font-size:12px;color:var(--silver-light);margin-top:3px}
-.ld-trigger-note{font-size:11.5px;color:var(--silver-light);padding:6px 12px;border-top:1px solid var(--border-tint-soft);font-style:italic}
 .ld-empty{padding:40px 22px;text-align:center;color:var(--silver-light)}
 .ld-overlay{position:fixed;inset:0;background:rgba(2,24,12,.38);z-index:900}
 .ld-drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100vw);background:var(--cream);z-index:901;box-shadow:var(--shadow-e3);display:flex;flex-direction:column}
@@ -571,7 +568,7 @@ td.ld-first .ld-ms::before{display:none}
 .ld-dhead .row1{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .ld-eyebrow{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--silver-light)}
 .ld-dhead h2{font-size:19px}
-.ld-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 14px;font-size:12px}
+.ld-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 14px;font-size:12px}
 .ld-facts .k{color:var(--silver-light)} .ld-facts .v{color:var(--green-dark);font-weight:600}
 .ld-dbody{overflow:auto;padding:20px 24px 28px;flex:1}
 .ld-dfoot{padding:14px 24px;background:var(--white);border-top:1px solid var(--border-tint-soft);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--silver-light)}
@@ -3593,7 +3590,6 @@ function renderLeadership(){
 function renderLeadershipDrawer(){
   const s = SHIPMENTS[ldState.open]; if(!s) return;
   const a = ldAnalyse(s);
-  const lastDue = [...progressMilestones(s)].reverse().find(m=>m.dueDate);
   const prod = productOf(s);
   const taskRow = m => {
     const done = ldDone(m), over = !done && m.dueDate && m.dueDate.getTime() < Date.now();
@@ -3613,7 +3609,6 @@ function renderLeadershipDrawer(){
     const e = c.ev, st = e.state, ind = c.ind;
     const sub = st==='unset' ? `${escapeHtml(ind.trigger.note || 'Trigger to be defined')} · trigger not set yet`
       : st==='na' ? `Not part of ${escapeHtml(prod.tier2)}` : whenLine(e);
-    const isOpen = st==='breached' || st==='atrisk';
     return `<div class="ld-ind ${st}">
       <div class="ld-ind-top">${ldGlyph(st, ldColFlag(c))}
         <div class="ld-ind-name"><b>${ind.no ? `<span class="ind-no">${ind.no}</span>` : ''}${escapeHtml(ind.label)}</b><span>${sub}</span></div>
@@ -3622,12 +3617,6 @@ function renderLeadershipDrawer(){
       ${st!=='na' ? `<div class="ld-ind-body">
         ${e.reason ? `<div class="ld-reason ${st==='breached'?'bad':'warn'}">${escapeHtml(e.reason)}</div>` : ''}
         <div class="ld-ind-meta"><span><b>SLA</b> ${escapeHtml(ind.sla)}</span><span><b>P</b> ${escapeHtml(ind.primary)}</span><span><b>S</b> ${escapeHtml(ind.support)}</span></div>
-        <div class="ld-ind-detail">${escapeHtml(ind.detail)}</div>
-        ${c.tasks.length ? `<details class="ld-team" ${isOpen?'open':''}>
-          <summary><span>Provisional trigger · fed by Ops tasks</span><span style="color:var(--silver-light);font-weight:500">${e.doneCount}/${e.total} done</span></summary>
-          ${ind.trigger.note ? `<div class="ld-trigger-note">${escapeHtml(ind.trigger.note)}</div>` : ''}
-          ${c.tasks.map(taskRow).join('')}
-        </details>` : ''}
       </div>` : ''}
     </div>`;
   };
@@ -3657,13 +3646,10 @@ function renderLeadershipDrawer(){
         <div><div class="k">Primary owner</div><div class="v">${escapeHtml(s.owners.primary.name)}</div></div>
         <div><div class="k">Health</div><div class="v"><span class="chip ${LD_HEALTH[a.health].chip}">${LD_HEALTH[a.health].label}</span></div></div>
         <div><div class="k">ETD</div><div class="v">${escapeHtml(s.etd)}</div></div>
-        <div><div class="k">Last task due</div><div class="v">${lastDue ? ldDay(lastDue.dueDate) : '—'}</div></div>
-        <div><div class="k">Team tasks</div><div class="v">${a.done} of ${a.total} done</div></div>
       </div>
     </div>
     <div class="ld-dbody">${a.stages.map(stageBlock).join('')}</div>
     <div class="ld-dfoot">
-      <span>Indicators update from the Ops team's work in the Progress tab.</span>
       <button class="btn btn-solid btn-sm" data-ld-goto="${s.jobRef}">Open Progress tab →</button>
     </div>`;
 }
