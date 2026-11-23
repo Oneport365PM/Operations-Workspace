@@ -543,9 +543,23 @@ td.ld-first .ld-ms::before{display:none}
 .ld-flagmark{position:absolute;top:-4px;right:-6px;width:14px;height:14px;border-radius:50%;background:var(--white);color:var(--error);display:grid;place-items:center}
 .ld-tier1{font-weight:700;color:var(--green-dark);font-size:12.5px;white-space:nowrap}
 .ld-tier2{font-size:11.5px;color:var(--silver-light);max-width:150px;line-height:1.35}
+.ld-g-unset{background:var(--white);border:1.5px dashed #B5BDAE;color:var(--silver-light);font-size:11px;font-weight:700}
 .ld-g-na{background:var(--green-chip-bg);color:var(--silver-light);font-size:12px;font-weight:700}
-.ld-ms.na .lbl{font-style:italic}
+.ld-ms.na .lbl,.ld-ms.unset .lbl{font-style:italic}
 .ld-matrix th.key{min-width:92px}
+.ld-matrix tr.ld-group-row th{vertical-align:bottom}
+.ld-matrix th.grp{text-align:center;font-family:var(--font-display);font-size:12px;letter-spacing:.04em;padding:7px 8px;border-bottom:0}
+.ld-matrix th.grp-booking{background:var(--gold-bg);color:var(--gold-text);border-left:2px solid var(--white)}
+.ld-matrix th.grp-post{background:var(--success-bg);color:var(--success-text);border-left:2px solid var(--white)}
+.ld-matrix th.key.ind{min-width:86px;max-width:100px;font-size:11px;vertical-align:top}
+.ind-no{display:inline-block;font-size:10px;font-weight:700;color:var(--silver-light);margin-right:4px;font-variant-numeric:tabular-nums}
+.ld-matrix td.grp-start{box-shadow:inset 2px 0 0 var(--border-tint-soft)}
+.ld-dsection{margin-bottom:6px}
+.ld-dsection-head{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--silver-light);margin:4px 0 12px}
+.ld-ind-meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--silver-dark);margin-top:6px}
+.ld-ind-meta b{color:var(--green-dark);margin-right:3px}
+.ld-ind-detail{font-size:12px;color:var(--silver-light);margin-top:3px}
+.ld-trigger-note{font-size:11.5px;color:var(--silver-light);padding:6px 12px;border-top:1px solid var(--border-tint-soft);font-style:italic}
 .ld-empty{padding:40px 22px;text-align:center;color:var(--silver-light)}
 .ld-overlay{position:fixed;inset:0;background:rgba(2,24,12,.38);z-index:900}
 .ld-drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100vw);background:var(--cream);z-index:901;box-shadow:var(--shadow-e3);display:flex;flex-direction:column}
@@ -678,7 +692,7 @@ details.ld-team summary::-webkit-details-marker{display:none}
         <div class="page-head">
           <div>
             <h1>Key SLA Milestones</h1>
-            <div class="sub">Every active shipment by phase, rolled up live from the tasks the Ops team completes in the Progress tab.</div>
+            <div class="sub">Leadership progress indicators for every active shipment, updated live from the Ops team's work in the Progress tab.</div>
           </div>
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
             <label class="ld-search"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4-4" stroke-linecap="round"></path></svg><input type="search" id="ld-search" placeholder="Shipment or customer"></label>
@@ -3361,24 +3375,85 @@ el('comm-search-input').addEventListener('input', (e)=>{
 });
 
 /* ==========================================================================
-   Leadership — SLA Milestones by phase
-   Reads the same SHIPMENTS[ref].milestones the Ops team completes and flags
-   in each shipment's Progress tab. Nothing here keeps its own copy: every
-   render rolls the live milestone list up into the key milestones leadership
-   has chosen, so a Mark Complete or a Flag in Progress shows up here.
+   Leadership — SLA progress indicators
+   Leadership sees its own progress indicators, not the Ops team's task list.
+   Every indicator feeds off the same SHIPMENTS[ref].milestones the Ops team
+   completes and flags in each shipment's Progress tab, so a Mark Complete or
+   a Flag there shows up here on the next render.
    ========================================================================== */
-// Leadership phases are the Service Workbook stages of each task
-const LD_PHASES = ['Prospect','Pre-Booking','Booking','Post Booking'];
 const LD_STAGE_INDEX = {'Prospecting':0, 'Pre-Booking':1, 'Booking':2, 'Post-Booking':3};
 function ldProduct(s){ const p = productOf(s); return { tier1:p.tier1, tier2:p.tier2 }; }
+
+// Leadership indicators for the Booking and Post-Booking stages (numbers are
+// the steps on the leadership process map). `sla`, `primary` and `support`
+// are the leadership wording. `trigger` is PROVISIONAL until the real
+// triggers are agreed: for now an indicator is complete when every workbook
+// task whose name matches `tasks` is complete on that shipment. Swap `trigger`
+// for a system event (e.g. credit approved, survey response received) once
+// those are defined. An indicator with no matching tasks for a service
+// combination shows as Not applicable.
+const LD_INDICATORS = [
+  { id:'job-opened', stage:'Booking', no:8, label:'Job opened', detail:'Same job ID · budget from quote · doc checklist · milestones · Ops owner named',
+    sla:'Automatic', primary:'Head of Ops · Ops owner', support:'Sales exec · CS · Finance',
+    trigger:{ kind:'system', note:'Auto-opens when credit is approved', tasks:/^(File entry and activation|Build shipment on)/ } },
+  { id:'booking', stage:'Booking', no:9, label:'Booking', detail:'Carrier booking ref · cut-offs · Form M + PFI checked · customer notified',
+    sla:'2 days', primary:'Ops owner · CS · Customer (Form M, PFI)', support:'Sales exec · Pricing · Finance',
+    trigger:{ kind:'tasks', note:'No Form M means the job cannot reach Sailed', tasks:/./, stageOnly:'Booking', exclude:'job-opened' } },
+  { id:'origin', stage:'Post-Booking', no:10, label:'Origin & sailing', detail:'Gate-in · loaded · BL draft checked vs Form M · sailed · ETA posted',
+    sla:'BL check 1 day', primary:'Ops owner · CS', support:'Finance (freight invoice) · Sales',
+    trigger:{ kind:'tasks', note:'Sailing starts the freight invoice (13)', tasks:/Submit SI|draft BL|Vessel confirmation|Loading on vessel|shipping clearance|gate in to port|Stuff container|outside stuffing|Pick up empty|Update EDI|Confirm cargo (handover|readiness)|Submit AWB details|Confirm flight departure|Track (flight|vessel)|deliver to airport export warehouse/ } },
+  { id:'clearing', stage:'Post-Booking', no:11, label:'Pre-arrival & clearing', detail:'PAAR · SONCAP · duty · DO · terminal · release · exit · demurrage clock visible',
+    sla:'Within free days', primary:'C&F officers · Finance (duty)', support:'CS · Sales · Kemi · COO on red',
+    trigger:{ kind:'tasks', tasks:/rotation number|assessment|duty|Delivery Order|Trigger Customs|THC|scanning or examination|scanned|agencies' report|exit and gate pass|Clear cargo|Export customs|CCI|NESS|Inspection Act|Arrival notice|Receive original documents/i } },
+  { id:'cost', stage:'Post-Booking', no:12, label:'Cost capture & check', detail:'Every vendor charge on a job line · duplicate check · variance > 5% · unbilled = 0',
+    sla:'1 day of receipt', primary:'Finance analyst · Ops owner · Kemi approves', support:'Chioma (quote accuracy) · COO',
+    trigger:{ kind:'tasks', tasks:/Reconcile|Obtain freight and local invoices|Pay invoices|Obtain shipping invoice|Obtain airline invoice|Airline invoice and payment|Warehouse invoice|Obtain and pay freight invoice|Pay air freight/ } },
+  { id:'invoice', stage:'Post-Booking', no:13, label:'Invoice & collect', detail:'Invoice per tier · A/R ageing · reminders +3 · Sales +7 · CEO/COO +14',
+    sla:'Invoice ≤ 1 day', primary:'Finance · Sales exec at +7 · CEO/COO at +14', support:'Ops owner · CS',
+    trigger:{ kind:'tasks', tasks:/Final invoice|Issue (final|customer) invoice|send to Finance for invoicing/ } },
+  { id:'paid', stage:'Post-Booking', no:null, label:'Paid · docs released', detail:'Documents held until paid · if unpaid: reminders +3 · Sales +7 · CEO/COO +14',
+    sla:'Gate', primary:'Finance posts receipt', support:'Ops owner (release) · Sales',
+    trigger:{ kind:'finance', note:'Finance posts the receipt; yes → documents released', tasks:/Release original documents|Release OBL|Approve and dispatch OBL|Approve dispatch of documents|approve delivery of documents/ } },
+  { id:'delivery', stage:'Post-Booking', no:14, label:'Delivery & handover', detail:'POD · empties · detention closed · docs on PAID (Trail, Basic) or on terms (Prime)',
+    sla:'—', primary:'Ops owner · CS · Customer', support:'Finance (final costs) · Sales',
+    trigger:{ kind:'tasks', tasks:/^Deliver(;| cargo)|proof of delivery|Return empty|Customer offloads|waybill from driver|Load containers for dispatch|Allocate vendor and truck/ } },
+  { id:'ack', stage:'Post-Booking', no:null, label:'Handover acknowledged', detail:'Customer confirms by portal click or signed form · automatic status updates throughout',
+    sla:'—', primary:'Customer · CS', support:'Sales exec',
+    trigger:{ kind:'customer', note:'Customer action: portal click or signed form', tasks:/acknowledgement|closure email|closing documents|Dispatch documents/ } },
+  { id:'survey', stage:'Post-Booking', no:null, label:'Survey answered', detail:'3 questions + 0–10 recommend · auto-sent on DELIVERED · reminder +3 days · job CLOSED on response or at +7 days',
+    sla:'Reminder +3 days', primary:'Customer', support:'CS · Sales exec',
+    trigger:{ kind:'customer', note:'Customer action: survey auto-sent on Delivered', tasks:/Gate 2|Close shipment|Close file|close the file/ } },
+];
+const LD_PRE_COLUMNS = [ {stage:'Prospecting', label:'Prospect'}, {stage:'Pre-Booking', label:'Pre-Booking'} ];
+const LD_STAGE_LABEL = {'Booking':'Booking', 'Post-Booking':'Post Booking'};
+
+// Which of a shipment's tasks feed each indicator (provisional; first match wins)
+function ldIndicatorTasks(s){
+  const taken = new Set(), out = {};
+  LD_INDICATORS.forEach(ind=>{
+    const tr = ind.trigger;
+    out[ind.id] = s.milestones.filter(m=>{
+      if(taken.has(m) || !isProgressStage(m.stage)) return false;
+      if(tr.stageOnly && m.stage !== tr.stageOnly) return false;
+      return tr.tasks.test(m.name);
+    });
+    // Job opened: until the credit-approved event exists, use the first Booking task
+    if(ind.id==='job-opened' && !out[ind.id].length){
+      const first = s.milestones.find(m=>m.stage==='Booking');
+      if(first) out[ind.id] = [first];
+    }
+    out[ind.id].forEach(m=>taken.add(m));
+  });
+  return out;
+}
 const ldState = { q:'', open:null };
 const ldHas = (o,k) => Object.prototype.hasOwnProperty.call(o,k);
 const ldDone = m => m.status === 'Completed';
-const LD_SEV = {breached:4, atrisk:3, ontrack:2, upcoming:1, late:0, done:0, na:0};
+const LD_SEV = {breached:4, atrisk:3, ontrack:2, upcoming:1, late:0, done:0, na:0, unset:0};
 const LD_STATE = {
   done:{label:'Hit SLA', chip:'chip-success'}, late:{label:'Completed after breach', chip:'chip-error'},
   breached:{label:'Breached', chip:'chip-error'}, atrisk:{label:'At risk', chip:'chip-warning'},
-  ontrack:{label:'In progress', chip:'chip-neutral'}, upcoming:{label:'Not started', chip:'chip-neutral'}, na:{label:'No team tasks', chip:'chip-neutral'},
+  ontrack:{label:'In progress', chip:'chip-neutral'}, upcoming:{label:'Not started', chip:'chip-neutral'}, na:{label:'Not applicable', chip:'chip-neutral'}, unset:{label:'Trigger not set', chip:'chip-neutral'},
 };
 const LD_HEALTH = { breached:{label:'Breached', chip:'chip-error'}, atrisk:{label:'At risk', chip:'chip-warning'}, ontrack:{label:'On track', chip:'chip-success'}, complete:{label:'Complete', chip:'chip-success'} };
 const LD_ICON = {
@@ -3401,58 +3476,71 @@ const ldWhen = d => d ? formatDueDateTime(d) : 'No due date';
 function ldLastFlag(m){ const h = m.flagHistory||[]; return h.length ? h[h.length-1] : null; }
 function ldOwnerOf(s, m){ return resolveTaskOwners(s, m.responsibility)[0] || null; }
 
-function ldStages(s){
-  return LD_PHASES.map((label,p)=>{
-    const tasks = s.milestones.filter(m=>LD_STAGE_INDEX[m.stage]===p);
-    return {label, phase:p, tasks, trigger: tasks.length ? tasks[tasks.length-1] : null};
-  });
-}
-// Same SLA rule the Progress tab uses (computeLiveSlaHealth), plus escalation:
-// an overdue or flagged team task inside a stage puts its key milestone at risk.
-function ldEval(st, prevDone){
-  const now = Date.now(), t = st.trigger;
-  const doneCount = st.tasks.filter(ldDone).length, base = {doneCount, total:st.tasks.length};
-  if(!t) return {...base, state:'na'};
-  if(st.tasks.every(ldDone)) return {...base, state: t.completedSlaHealth==='Breached' ? 'late' : 'done'};
-  const flagged = st.tasks.find(m=>!ldDone(m) && m.flagged);
-  const overdue = st.tasks.find(m=>!ldDone(m) && m!==t && m.dueDate && m.dueDate.getTime() < now);
-  const live = computeLiveSlaHealth(t.dueDate);
-  if(live==='Breached') return {...base, state:'breached', reason:`Overdue by ${ldDur(now - t.dueDate)}`, task:t, flagTask:flagged};
-  if(flagged){ const f = ldLastFlag(flagged); return {...base, state:'atrisk', reason:`Blocker on “${flagged.name}”${f ? ': '+f.note : ''}`, task:flagged, flagTask:flagged}; }
-  if(overdue) return {...base, state:'atrisk', reason:`Team task “${overdue.name}” is ${ldDur(now - overdue.dueDate)} overdue`, task:overdue};
-  if(live==='At-Risk') return {...base, state:'atrisk', reason:`Due ${ldWhen(t.dueDate)}`, task:t};
-  return {...base, state: (prevDone || doneCount>0) ? 'ontrack' : 'upcoming'};
+// One rule for every column: complete when all its tasks are complete;
+// breached as soon as any open task is overdue; at risk when a task is
+// flagged or due within 2 days (the Progress tab's own SLA rule).
+function ldEvalGroup(tasks, prevDone){
+  const now = Date.now();
+  if(!tasks.length) return {state:'na', doneCount:0, total:0};
+  const doneCount = tasks.filter(ldDone).length, base = {doneCount, total:tasks.length};
+  const last = [...tasks].sort((a,b)=>(a.dueDate||0)-(b.dueDate||0))[tasks.length-1];
+  const due = last.dueDate || null;
+  if(doneCount === tasks.length){
+    const lastDone = [...tasks].sort((a,b)=>a.completedAt-b.completedAt)[tasks.length-1];
+    const late = tasks.some(m=>m.completedSlaHealth==='Breached');
+    return {...base, state: late ? 'late' : 'done', completedAt:lastDone.completedAt, due};
+  }
+  const open = tasks.filter(m=>!ldDone(m));
+  const overdue = open.filter(m=>m.dueDate && m.dueDate.getTime() < now).sort((a,b)=>a.dueDate-b.dueDate)[0];
+  const flagged = open.find(m=>m.flagged);
+  if(overdue) return {...base, state:'breached', due, overdueBy: now - overdue.dueDate, reason:`Overdue by ${ldDur(now - overdue.dueDate)}`, flag:flagged};
+  if(flagged){ const f = ldLastFlag(flagged); return {...base, state:'atrisk', due, reason:`Blocker flagged${f ? ': '+f.note : ''}`, flag:flagged}; }
+  const soon = open.find(m=>computeLiveSlaHealth(m.dueDate)==='At-Risk');
+  if(soon) return {...base, state:'atrisk', due, reason:`Due ${ldWhen(soon.dueDate)}`};
+  return {...base, state: (prevDone || doneCount>0) ? 'ontrack' : 'upcoming', due};
 }
 function ldAnalyse(s){
+  const feed = ldIndicatorTasks(s);
+  const cols = [];
   let prevDone = true;
-  const stages = ldStages(s).map(st=>{
-    const ev = ldEval(st, prevDone);
-    if(st.trigger) prevDone = st.tasks.every(ldDone);
-    return {...st, ev};
+  LD_PRE_COLUMNS.forEach(c=>{
+    const tasks = s.milestones.filter(m=>m.stage===c.stage);
+    const ev = ldEvalGroup(tasks, prevDone);
+    if(ev.state!=='na') prevDone = ev.state==='done' || ev.state==='late';
+    cols.push({kind:'stage', label:c.label, stage:c.stage, tasks, ev});
   });
-  const keys = stages;
-  const tracked = keys.filter(k=>k.trigger);
-  const worst = tracked.reduce((w,k)=> LD_SEV[k.ev.state] > LD_SEV[w] ? k.ev.state : w, 'done');
-  const health = worst==='breached' ? 'breached' : worst==='atrisk' ? 'atrisk' : tracked.every(k=>k.tasks.every(ldDone)) ? 'complete' : 'ontrack';
+  LD_INDICATORS.forEach(ind=>{
+    const tasks = feed[ind.id];
+    // Finance and customer events with no Ops task to stand in yet: trigger still to be defined
+    const ev = (!tasks.length && (ind.trigger.kind==='finance' || ind.trigger.kind==='customer'))
+      ? {state:'unset', doneCount:0, total:0}
+      : ldEvalGroup(tasks, prevDone);
+    if(ev.state!=='na') prevDone = ev.state==='done' || ev.state==='late';
+    cols.push({kind:'indicator', ind, label:ind.label, stage:ind.stage, tasks, ev});
+  });
+  const tracked = cols.filter(c=>c.ev.state!=='na' && c.ev.state!=='unset');
+  const worst = tracked.reduce((w,c)=> LD_SEV[c.ev.state] > LD_SEV[w] ? c.ev.state : w, 'done');
+  const health = worst==='breached' ? 'breached' : worst==='atrisk' ? 'atrisk'
+    : tracked.every(c=>c.ev.state==='done'||c.ev.state==='late') ? 'complete' : 'ontrack';
   const team = progressMilestones(s);
-  return {stages, keys, health, done: team.filter(ldDone).length, total: team.length};
+  return {cols, health, done: team.filter(ldDone).length, total: team.length};
 }
 
 function ldGlyph(state, flagged){
   if(state==='na') return `<span class="ld-glyph ld-g-na">–</span>`;
+  if(state==='unset') return `<span class="ld-glyph ld-g-unset">?</span>`;
   const inner = {done:LD_ICON.check, late:LD_ICON.check, breached:LD_ICON.bang, atrisk:LD_ICON.clock}[state] || '';
   return `<span class="ld-glyph ld-g-${state}">${inner}${flagged ? `<span class="ld-flagmark">${LD_ICON.flag}</span>` : ''}</span>`;
 }
-function ldCellLabel(k){
-  const t = k.trigger, e = k.ev;
-  if(e.state==='na') return 'Not tracked';
-  if(e.state==='done') return ldDay(t.completedAt);
-  if(e.state==='late') return `${ldDay(t.completedAt)} · late`;
-  if(e.state==='breached') return `${ldDur(Date.now() - t.dueDate)} over`;
-  const due = t.dueDate || ([...k.tasks].reverse().find(m=>m.dueDate)||{}).dueDate;
-  return ldDay(due);
+function ldCellLabel(ev){
+  if(ev.state==='na') return 'N/A';
+  if(ev.state==='unset') return 'Not set';
+  if(ev.state==='done') return ldDay(ev.completedAt);
+  if(ev.state==='late') return `${ldDay(ev.completedAt)} · late`;
+  if(ev.state==='breached') return `${ldDur(ev.overdueBy)} over`;
+  return ldDay(ev.due);
 }
-const ldOpenFlag = k => !!k.trigger && k.tasks.some(m=>!ldDone(m) && m.flagged);
+const ldColFlag = c => c.tasks.some(m=>!ldDone(m) && m.flagged);
 
 function renderLeadership(){
   const q = ldState.q.trim().toLowerCase();
@@ -3462,17 +3550,30 @@ function renderLeadership(){
     .map(s=>({s, a:ldAnalyse(s)}))
     .sort((a,b)=> order[a.a.health]-order[b.a.health] || a.s.jobRef.localeCompare(b.s.jobRef));
   if(!rows.length){ el('ld-pipeline').innerHTML = `<div class="ld-empty">No active shipments match “${escapeHtml(ldState.q)}”.</div>`; return; }
+  const bookingInds = LD_INDICATORS.filter(i=>i.stage==='Booking'), postInds = LD_INDICATORS.filter(i=>i.stage==='Post-Booking');
+  const indHead = i => `<th class="key ind" title="${escapeHtml(i.detail)} · SLA: ${escapeHtml(i.sla)}">${i.no ? `<span class="ind-no">${i.no}</span>` : ''}${escapeHtml(i.label)}</th>`;
   el('ld-pipeline').innerHTML = `<div class="ld-tbl-wrap"><table class="ld-matrix">
-    <thead><tr><th>Shipment</th><th>Product</th><th>Owner</th>${LD_PHASES.map(p=>`<th class="key">${p}</th>`).join('')}<th>Team tasks</th><th>Health</th></tr></thead>
+    <thead>
+      <tr class="ld-group-row">
+        <th rowspan="2">Shipment</th><th rowspan="2">Product</th><th rowspan="2">Owner</th><th rowspan="2">Health</th>
+        <th rowspan="2" class="key">Prospect</th><th rowspan="2" class="key">Pre-Booking</th>
+        <th colspan="${bookingInds.length}" class="grp grp-booking">Booking</th>
+        <th colspan="${postInds.length}" class="grp grp-post">Post Booking</th>
+      </tr>
+      <tr>${bookingInds.map(indHead).join('')}${postInds.map(indHead).join('')}</tr>
+    </thead>
     <tbody>${rows.map(({s,a})=>{
       const lead = s.owners.primary, prod = ldProduct(s);
       return `<tr class="ld-row" data-ld-ref="${s.jobRef}" tabindex="0">
         <td><div class="ld-ref">${s.jobRef}</div><div class="ld-cust">${escapeHtml(s.customer)}</div><div class="ld-route">${escapeHtml(s.route)}</div></td>
         <td><div class="ld-tier1">${escapeHtml(prod.tier1)}</div><div class="ld-tier2">${escapeHtml(prod.tier2)}</div></td>
         <td><div class="avatar avatar-sm" style="${avatarFillStyle(lead.fill)}" title="${escapeHtml(lead.name)}">${lead.initials}</div></td>
-        ${a.keys.map((k,i)=>`<td class="${i===0?'ld-first':''}" title="${escapeHtml(k.label)}: ${LD_STATE[k.ev.state].label}${k.ev.reason ? ' — '+escapeHtml(k.ev.reason) : ''}"><div class="ld-ms ${k.ev.state}">${ldGlyph(k.ev.state, ldOpenFlag(k))}<span class="lbl">${ldCellLabel(k)}</span></div></td>`).join('')}
-        <td class="ld-tasks">${a.done} / ${a.total}<div class="bar"><i style="width:${a.done/a.total*100}%"></i></div></td>
         <td><span class="chip ${LD_HEALTH[a.health].chip}">${LD_HEALTH[a.health].label}</span></td>
+        ${a.cols.map((c,i)=>{
+          const st = c.ev.state, label = LD_STATE[st].label;
+          const cls = [i===0?'ld-first':'', c.kind==='indicator' && c.ind.id===bookingInds[0].id ? 'grp-start' : '', c.kind==='indicator' && c.ind.id===postInds[0].id ? 'grp-start' : ''].join(' ');
+          return `<td class="${cls}" title="${escapeHtml(c.label)}: ${label}${c.ev.reason ? ' — '+escapeHtml(c.ev.reason) : ''}"><div class="ld-ms ${st}">${ldGlyph(st, ldColFlag(c))}<span class="lbl">${ldCellLabel(c.ev)}</span></div></td>`;
+        }).join('')}
       </tr>`; }).join('')}</tbody>
   </table></div>`;
 }
@@ -3480,7 +3581,47 @@ function renderLeadership(){
 function renderLeadershipDrawer(){
   const s = SHIPMENTS[ldState.open]; if(!s) return;
   const a = ldAnalyse(s);
-  const lastDue = [...s.milestones].reverse().find(m=>m.dueDate);
+  const lastDue = [...progressMilestones(s)].reverse().find(m=>m.dueDate);
+  const taskRow = m => {
+    const done = ldDone(m), over = !done && m.dueDate && m.dueDate.getTime() < Date.now();
+    const owner = ldOwnerOf(s, m), flag = ldLastFlag(m);
+    const right = done
+      ? `<div class="td ${m.completedSlaHealth==='Breached'?'bad':'ok'}">${m.completedSlaHealth==='Breached'?'After breach':'Done'}<br><span style="font-weight:400;color:var(--silver-light)">${m.completedAt ? ldDay(m.completedAt) : ''}</span></div>`
+      : `<div class="td ${over?'bad':''}">${over ? ldDur(Date.now()-m.dueDate)+' over' : 'Due'}<br><span style="font-weight:400">${ldWhen(m.dueDate)}</span></div>`;
+    return `<div class="ld-task">
+      <span class="tick ${done?'on':''}">${done ? LD_ICON.check : ''}</span>
+      <div><div class="tn">${escapeHtml(m.name)}</div>
+        <div class="tm">${owner ? escapeHtml(owner.name)+' · ' : ''}${escapeHtml(m.responsibility)}</div>
+        ${!done && m.flagged && flag ? `<div class="tf">⚑ ${escapeHtml(flag.note)} <span style="color:var(--silver-light)">— ${escapeHtml(flag.by)}, ${formatDateTime(new Date(flag.at))}</span></div>` : ''}
+      </div>${right}</div>`;
+  };
+  const block = (c, isLast) => {
+    const e = c.ev, st = e.state, chip = LD_STATE[st].chip, label = LD_STATE[st].label;
+    const ind = c.kind==='indicator' ? c.ind : null;
+    const sub = st==='unset'
+      ? `${escapeHtml(ind.trigger.note || 'Trigger to be defined')}. No Ops task stands in for it on ${escapeHtml(productOf(s).tier2)} yet.`
+      : st==='na'
+      ? `Not part of ${escapeHtml(productOf(s).tier1)} · ${escapeHtml(productOf(s).tier2)}.`
+      : (st==='done'||st==='late') ? `Completed ${formatDateTime(e.completedAt)}` : `Due ${ldWhen(e.due)}`;
+    const meta = ind ? `<div class="ld-ind-meta"><span><b>SLA</b> ${escapeHtml(ind.sla)}</span><span><b>P</b> ${escapeHtml(ind.primary)}</span><span><b>S</b> ${escapeHtml(ind.support)}</span></div>
+      <div class="ld-ind-detail">${escapeHtml(ind.detail)}</div>` : '';
+    const isOpen = (st==='breached'||st==='atrisk'||st==='ontrack');
+    const feed = c.tasks.length ? `<details class="ld-team" ${isOpen?'open':''}>
+        <summary><span>${ind ? 'Provisional trigger · fed by Ops tasks' : 'Tasks in this stage'}</span><span style="color:var(--silver-light);font-weight:500">${e.doneCount}/${e.total} done</span></summary>
+        ${ind && ind.trigger.note ? `<div class="ld-trigger-note">${escapeHtml(ind.trigger.note)}</div>` : ''}
+        ${c.tasks.map(taskRow).join('')}
+      </details>` : '';
+    return `<div class="ld-stage">
+      <div class="ld-spine">${ldGlyph(st, ldColFlag(c))}<span class="line"></span></div>
+      <div class="ld-sbody">
+        <div class="ld-stop"><h4 ${st==='na'||st==='unset'?'style="color:var(--silver-light)"':''}>${ind && ind.no ? `<span class="ind-no">${ind.no}</span>` : ''}${escapeHtml(c.label)}</h4><span class="chip ${chip}">${label}</span></div>
+        <div class="ld-ssub">${sub}</div>
+        ${e.reason ? `<div class="ld-reason ${st==='breached'?'bad':'warn'}">${escapeHtml(e.reason)}</div>` : ''}
+        ${meta}${feed}
+      </div></div>`;
+  };
+  const section = (title, cols) => `<div class="ld-dsection"><div class="ld-dsection-head">${title}</div>${cols.map(c=>block(c)).join('')}</div>`;
+  const pre = a.cols.filter(c=>c.kind==='stage'), bk = a.cols.filter(c=>c.stage==='Booking'), pb = a.cols.filter(c=>c.stage==='Post-Booking');
   el('ld-drawer').innerHTML = `
     <div class="ld-dhead">
       <div class="row1">
@@ -3493,45 +3634,16 @@ function renderLeadershipDrawer(){
         <div><div class="k">Health</div><div class="v"><span class="chip ${LD_HEALTH[a.health].chip}">${LD_HEALTH[a.health].label}</span></div></div>
         <div><div class="k">ETD</div><div class="v">${escapeHtml(s.etd)}</div></div>
         <div><div class="k">Last task due</div><div class="v">${lastDue ? ldDay(lastDue.dueDate) : '—'}</div></div>
-        <div><div class="k">Team tasks</div><div class="v">${a.done} of ${a.total} done</div></div>
+        <div><div class="k">Ops tasks</div><div class="v">${a.done} of ${a.total} done</div></div>
       </div>
     </div>
     <div class="ld-dbody">
-      ${a.stages.map(st=>{
-        const e = st.ev, t = st.trigger;
-        const head = t
-          ? `<div class="ld-stop"><h4>${escapeHtml(st.label)}</h4><span class="chip ${LD_STATE[e.state].chip}">${LD_STATE[e.state].label}</span></div>
-             <div class="ld-ssub">${st.tasks.every(ldDone)
-               ? `All ${st.tasks.length} team task${st.tasks.length===1?'':'s'} done · last completed ${formatDateTime(t.completedAt)}${t.completedBy ? ' by '+escapeHtml(t.completedBy) : ''}`
-               : `${st.tasks.length - e.doneCount} of ${st.tasks.length} team task${st.tasks.length===1?'':'s'} open · phase due ${ldWhen(t.dueDate)}`}</div>
-             ${e.reason ? `<div class="ld-reason ${e.state==='breached'?'bad':'warn'}">${escapeHtml(e.reason)}</div>` : ''}`
-          : `<div class="ld-stop"><h4 style="color:var(--silver-light)">${escapeHtml(st.label)}</h4><span class="chip chip-neutral">No team tasks</span></div><div class="ld-ssub">No Service Delivery task is mapped to this phase for ${escapeHtml(s.mode)}.</div>`;
-        if(!t) return `<div class="ld-stage"><div class="ld-spine">${ldGlyph('na')}<span class="line"></span></div><div class="ld-sbody">${head}</div></div>`;
-        const isOpen = !st.tasks.every(ldDone) && (e.state==='breached' || e.state==='atrisk' || e.state==='ontrack');
-        return `<div class="ld-stage">
-          <div class="ld-spine">${t ? ldGlyph(e.state, ldOpenFlag(st)) : ldGlyph('upcoming')}<span class="line"></span></div>
-          <div class="ld-sbody">${head}
-            <details class="ld-team" ${isOpen ? 'open' : ''}>
-              <summary><span>Team tasks in this stage</span><span style="color:var(--silver-light);font-weight:500">${e.doneCount}/${e.total} done</span></summary>
-              ${st.tasks.map(m=>{
-                const done = ldDone(m), over = !done && m.dueDate && m.dueDate.getTime() < Date.now();
-                const owner = ldOwnerOf(s, m), flag = ldLastFlag(m);
-                const right = done
-                  ? `<div class="td ${m.completedSlaHealth==='Breached'?'bad':'ok'}">${m.completedSlaHealth==='Breached'?'After breach':'Done'}<br><span style="font-weight:400;color:var(--silver-light)">${m.completedAt ? ldDay(m.completedAt) : ''}</span></div>`
-                  : `<div class="td ${over?'bad':''}">${over ? ldDur(Date.now()-m.dueDate)+' over' : 'Due'}<br><span style="font-weight:400">${ldWhen(m.dueDate)}</span></div>`;
-                return `<div class="ld-task">
-                  <span class="tick ${done?'on':''}">${done ? LD_ICON.check : ''}</span>
-                  <div><div class="tn">${escapeHtml(m.name)}</div>
-                    <div class="tm">${owner ? escapeHtml(owner.name)+' · ' : (isProgressStage(m.stage) && !isExternalOwner(m.responsibility) ? 'Unassigned · ' : '')}${escapeHtml(m.responsibility)}</div>
-                    ${!done && m.flagged && flag ? `<div class="tf">⚑ ${escapeHtml(flag.note)} <span style="color:var(--silver-light)">— ${escapeHtml(flag.by)}, ${formatDateTime(new Date(flag.at))}</span></div>` : ''}
-                  </div>${right}</div>`;
-              }).join('')}
-            </details>
-          </div></div>`;
-      }).join('')}
+      ${section('Before booking', pre)}
+      ${section('Booking', bk)}
+      ${section('Post Booking', pb)}
     </div>
     <div class="ld-dfoot">
-      <span>The Ops team completes and flags these tasks in the Progress tab.</span>
+      <span>Indicators update from the Ops team's work in the Progress tab.</span>
       <button class="btn btn-solid btn-sm" data-ld-goto="${s.jobRef}">Open Progress tab →</button>
     </div>`;
 }
@@ -3554,6 +3666,7 @@ document.addEventListener('keydown', (e)=>{
   if(e.key==='Enter' && e.target.matches && e.target.matches('[data-ld-ref]')) ldOpenDrawer(e.target.dataset.ldRef);
 });
 setInterval(()=>{ if(state.currentView==='leadership'){ renderLeadership(); if(ldState.open) renderLeadershipDrawer(); } }, 60000);
+
 
 /* ==========================================================================
    Init
