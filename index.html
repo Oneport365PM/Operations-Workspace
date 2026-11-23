@@ -548,6 +548,7 @@ td.ld-first .ld-ms::before{display:none}
 .ld-ms.na .lbl,.ld-ms.unset .lbl{font-style:italic}
 .ld-matrix th.key{min-width:92px}
 .ind-no{display:inline-block;font-size:10px;font-weight:700;color:var(--silver-light);margin-right:4px;font-variant-numeric:tabular-nums}
+.ld-owner{display:flex;align-items:center;gap:8px;white-space:nowrap;font-size:12.5px;color:var(--silver-dark)}
 .ld-ind-list{margin-top:10px;display:flex;flex-direction:column;gap:8px}
 .ld-ind{background:var(--white);border:1px solid var(--border-tint-soft);border-radius:10px;padding:10px 12px}
 .ld-ind-top{display:flex;align-items:center;gap:10px}
@@ -3579,7 +3580,7 @@ function renderLeadership(){
       return `<tr class="ld-row" data-ld-ref="${s.jobRef}" tabindex="0">
         <td><div class="ld-ref">${s.jobRef}</div><div class="ld-cust">${escapeHtml(s.customer)}</div><div class="ld-route">${escapeHtml(s.route)}</div></td>
         <td><div class="ld-tier1">${escapeHtml(prod.tier1)}</div><div class="ld-tier2">${escapeHtml(prod.tier2)}</div></td>
-        <td><div class="avatar avatar-sm" style="${avatarFillStyle(lead.fill)}" title="${escapeHtml(lead.name)}">${lead.initials}</div></td>
+        <td><div class="ld-owner"><div class="avatar avatar-sm" style="${avatarFillStyle(lead.fill)}">${lead.initials}</div><span>${escapeHtml(lead.name)}</span></div></td>
         ${a.stages.map((c,i)=>`<td class="${i===0?'ld-first':''}" title="${escapeHtml(c.label)}: ${LD_STATE[c.ev.state].label}${c.ev.reason ? ' — '+escapeHtml(c.ev.reason) : ''}"><div class="ld-ms ${c.ev.state}">${ldGlyph(c.ev.state, ldColFlag(c))}<span class="lbl">${ldCellLabel(c.ev)}</span></div></td>`).join('')}
         <td class="ld-tasks">${a.done} / ${a.total}<div class="bar"><i style="width:${a.done/a.total*100}%"></i></div></td>
         <td><span class="chip ${LD_HEALTH[a.health].chip}">${LD_HEALTH[a.health].label}</span></td>
@@ -3614,10 +3615,7 @@ function renderLeadershipDrawer(){
         <div class="ld-ind-name"><b>${ind.no ? `<span class="ind-no">${ind.no}</span>` : ''}${escapeHtml(ind.label)}</b><span>${sub}</span></div>
         <span class="chip ${LD_STATE[st].chip}">${LD_STATE[st].label}</span>
       </div>
-      ${st!=='na' ? `<div class="ld-ind-body">
-        ${e.reason ? `<div class="ld-reason ${st==='breached'?'bad':'warn'}">${escapeHtml(e.reason)}</div>` : ''}
-        <div class="ld-ind-meta"><span><b>SLA</b> ${escapeHtml(ind.sla)}</span><span><b>P</b> ${escapeHtml(ind.primary)}</span><span><b>S</b> ${escapeHtml(ind.support)}</span></div>
-      </div>` : ''}
+      ${e.reason ? `<div class="ld-ind-body"><div class="ld-reason ${st==='breached'?'bad':'warn'}">${escapeHtml(e.reason)}</div></div>` : ''}
     </div>`;
   };
   const stageBlock = c => {
@@ -3631,7 +3629,7 @@ function renderLeadershipDrawer(){
         <div class="ld-stop"><h4>${escapeHtml(c.label)}</h4><span class="chip ${LD_STATE[st].chip}">${LD_STATE[st].label}</span></div>
         <div class="ld-ssub">${sub}</div>
         ${c.indicators
-          ? `<div class="ld-ind-list">${c.indicators.map(indicatorRow).join('')}</div>`
+          ? `<div class="ld-ind-list">${c.indicators.filter(i=>i.ev.state!=='na').map(indicatorRow).join('')}</div>`
           : `<details class="ld-team"><summary><span>Tasks in this stage</span><span style="color:var(--silver-light);font-weight:500">${e.doneCount}/${e.total} done</span></summary>${c.tasks.map(taskRow).join('')}</details>`}
       </div></div>`;
   };
