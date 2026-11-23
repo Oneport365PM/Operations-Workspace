@@ -478,6 +478,99 @@ textarea.field-control{resize:vertical;min-height:70px}
 @media (max-width:900px){
   .form-grid{grid-template-columns:1fr}
 }
+
+/* ==========================================================================
+   Leadership view (key SLA milestones)
+   ========================================================================== */
+.ld-search{display:flex;align-items:center;gap:8px;border:1px solid var(--border-tint);border-radius:var(--radius-md);padding:8px 12px;background:var(--white);width:280px;max-width:100%}
+.ld-search input{border:0;outline:0;background:transparent;width:100%;font-size:13px}
+.ld-card{padding:0;overflow:hidden}
+.ld-group-head{display:flex;align-items:baseline;gap:10px;padding:18px 22px 8px}
+.ld-group-head h3{font-size:14px}
+.ld-group-head span{font-size:12px;color:var(--silver-light)}
+.ld-group + .ld-group{border-top:1px solid var(--border-tint-soft)}
+.ld-tbl-wrap{overflow-x:auto}
+table.ld-matrix{border-collapse:separate;border-spacing:0;width:100%;min-width:860px}
+.ld-matrix th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--silver-light);font-weight:700;text-align:left;padding:8px 10px;border-bottom:1px solid var(--border-tint-soft);white-space:nowrap;background:var(--white)}
+.ld-matrix th.key{text-align:center;text-transform:none;letter-spacing:0;font-size:11.5px;color:var(--green-dark);white-space:normal;min-width:100px;line-height:1.25}
+.ld-matrix th.key small{display:block;font-weight:500;color:var(--silver-light);font-size:10.5px;margin-top:2px}
+.ld-matrix td{padding:11px 10px;border-bottom:1px solid var(--border-tint-soft);vertical-align:middle}
+.ld-matrix tr:last-child td{border-bottom:0}
+.ld-matrix tr.ld-row{cursor:pointer}
+.ld-matrix tr.ld-row:hover td{background:var(--green-light-surface)}
+.ld-matrix th:first-child,.ld-matrix td:first-child{padding-left:22px;position:sticky;left:0;z-index:1;background:var(--white)}
+.ld-matrix tr.ld-row:hover td:first-child{background:var(--green-light-surface)}
+.ld-ref{font-weight:700;color:var(--green-dark);font-size:13px}
+.ld-cust{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.ld-route{font-size:11.5px;color:var(--silver-light);white-space:nowrap}
+.ld-tasks{min-width:104px;font-size:12px;color:var(--silver-light);font-variant-numeric:tabular-nums}
+.ld-tasks .bar{height:6px;border-radius:4px;background:var(--green-chip-bg);overflow:hidden;margin-top:4px}
+.ld-tasks .bar i{display:block;height:100%;background:var(--success)}
+.ld-ms{display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;position:relative}
+.ld-ms::before{content:"";position:absolute;top:11px;left:-50%;width:100%;height:2px;background:var(--border-tint-soft)}
+td.ld-first .ld-ms::before{display:none}
+.ld-ms .lbl{font-size:11px;line-height:1.2;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--silver-light)}
+.ld-ms.late .lbl,.ld-ms.breached .lbl{color:var(--error-text)}
+.ld-ms.breached .lbl{font-weight:700}
+.ld-ms.atrisk .lbl{color:var(--gold-text);font-weight:600}
+.ld-ms.ontrack .lbl{color:var(--green-dark);font-weight:600}
+.ld-glyph{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;position:relative;z-index:1;flex-shrink:0;box-sizing:border-box}
+.ld-g-done{background:var(--success);color:var(--white)}
+.ld-g-late{background:var(--white);border:2px solid var(--error);color:var(--error)}
+.ld-g-breached{background:var(--error);color:var(--white)}
+.ld-g-atrisk{background:var(--gold);color:var(--green-dark)}
+.ld-g-ontrack{background:var(--white);border:2px solid var(--green-dark)}
+.ld-g-ontrack::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--green-dark)}
+.ld-g-upcoming{background:var(--white);border:2px solid #C3CABB}
+.ld-flagmark{position:absolute;top:-4px;right:-6px;width:14px;height:14px;border-radius:50%;background:var(--white);color:var(--error);display:grid;place-items:center}
+.ld-empty{padding:40px 22px;text-align:center;color:var(--silver-light)}
+.ld-overlay{position:fixed;inset:0;background:rgba(2,24,12,.38);z-index:900}
+.ld-drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100vw);background:var(--cream);z-index:901;box-shadow:var(--shadow-e3);display:flex;flex-direction:column}
+.ld-overlay[hidden],.ld-drawer[hidden]{display:none}
+.ld-dhead{padding:20px 24px 16px;background:var(--white);border-bottom:1px solid var(--border-tint-soft);display:flex;flex-direction:column;gap:12px}
+.ld-dhead .row1{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.ld-eyebrow{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--silver-light)}
+.ld-dhead h2{font-size:19px}
+.ld-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 14px;font-size:12px}
+.ld-facts .k{color:var(--silver-light)} .ld-facts .v{color:var(--green-dark);font-weight:600}
+.ld-dbody{overflow:auto;padding:20px 24px 28px;flex:1}
+.ld-dfoot{padding:14px 24px;background:var(--white);border-top:1px solid var(--border-tint-soft);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--silver-light)}
+.ld-stage{display:grid;grid-template-columns:22px minmax(0,1fr);gap:0 12px}
+.ld-spine{display:flex;flex-direction:column;align-items:center}
+.ld-spine .line{flex:1;width:2px;background:var(--border-tint);margin:4px 0}
+.ld-stage:last-child .ld-spine .line{display:none}
+.ld-sbody{padding-bottom:18px;min-width:0}
+.ld-stop{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;min-height:22px}
+.ld-stop h4{font-size:14.5px}
+.ld-ssub{font-size:12px;color:var(--silver-light);margin-top:2px}
+.ld-reason{font-size:12.5px;margin-top:6px;padding:7px 10px;border-radius:8px}
+.ld-reason.bad{background:var(--error-bg);color:var(--error-text)}
+.ld-reason.warn{background:var(--gold-bg);color:var(--gold-text)}
+details.ld-team{margin-top:8px;border:1px solid var(--border-tint-soft);border-radius:10px;background:var(--white)}
+details.ld-team summary{cursor:pointer;padding:8px 12px;font-size:12.5px;font-weight:600;color:var(--green-dark);display:flex;justify-content:space-between;gap:8px;list-style:none}
+details.ld-team summary::-webkit-details-marker{display:none}
+.ld-task{display:grid;grid-template-columns:18px minmax(0,1fr) auto;gap:10px;align-items:start;padding:8px 12px;border-top:1px solid var(--border-tint-soft);font-size:12.5px}
+.ld-task .tick{width:16px;height:16px;border-radius:50%;border:1.5px solid #C3CABB;display:grid;place-items:center;margin-top:1px}
+.ld-task .tick.on{background:var(--success);border-color:var(--success);color:var(--white)}
+.ld-task .tn{font-weight:600;color:var(--green-dark)}
+.ld-task .tn .star{color:var(--gold);margin-left:4px}
+.ld-task .tm{color:var(--silver-light);font-size:11.5px}
+.ld-task .tf{margin-top:4px;color:var(--error-text);font-size:11.5px}
+.ld-task .td{font-size:11.5px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--silver-light)}
+.ld-task .td.bad{color:var(--error-text);font-weight:700}
+.ld-task .td.ok{color:var(--success-text)}
+.ld-cfg-tabs{display:inline-flex;background:var(--green-light-surface);border-radius:9px;padding:3px;gap:2px;flex-wrap:wrap;margin-bottom:6px}
+.ld-cfg-tabs button{border:0;background:transparent;padding:6px 12px;border-radius:7px;font-size:12.5px;font-weight:600;color:var(--silver-light)}
+.ld-cfg-tabs button.on{background:var(--white);color:var(--green-dark);box-shadow:var(--shadow-e1)}
+.ld-cfg-row{display:grid;grid-template-columns:26px minmax(0,1fr) minmax(0,1fr) 70px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-tint-soft);font-size:13px}
+.ld-cfg-row .n{color:var(--silver-light);font-size:12px;text-align:right;font-variant-numeric:tabular-nums}
+.ld-cfg-row .nm{font-weight:600;color:var(--green-dark)}
+.ld-cfg-row .nm small{display:block;font-weight:400;color:var(--silver-light);font-size:11.5px}
+.ld-cfg-row input[type=text]{width:100%;border:1px solid var(--border-tint);border-radius:7px;padding:6px 9px;font-size:12.5px}
+.ld-cfg-row input[type=text]:disabled{opacity:.35;background:transparent}
+.ld-cfg-row label{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--silver-light);cursor:pointer;justify-self:end}
+.ld-cfg-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--success)}
+@media (max-width:640px){ .ld-cfg-row{grid-template-columns:22px minmax(0,1fr) 60px} .ld-cfg-row .lab{grid-column:2 / -1;grid-row:2} .ld-facts{grid-template-columns:repeat(2,minmax(0,1fr))} }
 </style>
 </head>
 <body>
@@ -494,7 +587,7 @@ textarea.field-control{resize:vertical;min-height:70px}
       </div>
     </div>
 
-    <div class="nav-section-label">Menu</div>
+    <div class="nav-section-label">Operations</div>
     <ul class="nav-list">
       <li><a href="#" class="nav-item" data-nav="dashboard">
         <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"></rect><rect x="14" y="3" width="7" height="5" rx="1.5"></rect><rect x="14" y="12" width="7" height="9" rx="1.5"></rect><rect x="3" y="16" width="7" height="5" rx="1.5"></rect></svg>
@@ -507,6 +600,14 @@ textarea.field-control{resize:vertical;min-height:70px}
       <li><a href="#" class="nav-item active" data-nav="shipments">
         <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="7" width="15" height="11" rx="1.5"></rect><path d="M16 10h3.5L22 13.5V18h-6"></path><circle cx="6" cy="20" r="2"></circle><circle cx="17.5" cy="20" r="2"></circle></svg>
         Shipments
+      </a></li>
+    </ul>
+
+    <div class="nav-section-label" style="margin-top:22px">Leadership</div>
+    <ul class="nav-list">
+      <li><a href="#" class="nav-item" data-nav="leadership">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke-linecap="round"></path></svg>
+        SLA Milestones
       </a></li>
     </ul>
 
@@ -559,6 +660,24 @@ textarea.field-control{resize:vertical;min-height:70px}
             <span class="placeholder-tag">Coming soon</span>
           </div>
         </div>
+      </section>
+
+      <!-- ===================== LEADERSHIP: KEY SLA MILESTONES ===================== -->
+      <section class="view" id="view-leadership">
+        <div class="page-head">
+          <div>
+            <h1>Key SLA Milestones</h1>
+            <div class="sub">Rolled up live from the tasks the Ops team completes in each shipment's Progress tab.</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <label class="ld-search"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4-4" stroke-linecap="round"></path></svg><input type="search" id="ld-search" placeholder="Shipment or customer"></label>
+            <button class="btn btn-outline btn-sm" id="ld-btn-config">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.5 7L12 17.6 5.7 21.1l1.5-7L2 9.3l7-.8z" stroke-linejoin="round"></path></svg>
+              Choose key milestones
+            </button>
+          </div>
+        </div>
+        <div class="card ld-card" id="ld-pipeline"></div>
       </section>
 
       <!-- ===================== SHIPMENTS LIST ===================== -->
@@ -1120,6 +1239,27 @@ textarea.field-control{resize:vertical;min-height:70px}
   </div>
 </div>
 
+<!-- Leadership: shipment drill-down + key milestone configuration -->
+<div class="ld-overlay" id="ld-overlay" hidden></div>
+<aside class="ld-drawer" id="ld-drawer" hidden aria-label="Shipment key milestones"></aside>
+<div class="modal-overlay" id="modal-ld-config">
+  <div class="modal modal-wide">
+    <div class="modal-head">
+      <div>
+        <h3>Choose key milestones</h3>
+        <p>Pick which Service Delivery tasks leadership sees. When the Ops team completes a key task in the Progress tab, the milestone it triggers updates here.</p>
+      </div>
+      <button class="modal-close" data-close-modal><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"></path></svg></button>
+    </div>
+    <div class="modal-body" id="ld-config-body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="ld-config-reset" style="margin-right:auto">Reset to defaults</button>
+      <button class="btn btn-outline" data-close-modal>Cancel</button>
+      <button class="btn btn-accent" id="ld-config-save">Save</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast-wrap"></div>
 
 <script>
@@ -1397,6 +1537,10 @@ function assignResponsibilities(shipTeamIds, seed){
   return resp;
 }
 
+function resolveOwnersFor(teamIds, responsibilities, responsibility){
+  return teamIds.filter(uid => (responsibilities[uid]||[]).includes(responsibility)).map(teamMember);
+}
+
 // Build a fleshed-out shipment detail object from a light list record + a seed for variety
 function buildShipmentDetail(base, seed){
   const primary = teamMember(base.ownerId);
@@ -1436,7 +1580,10 @@ function buildShipmentDetail(base, seed){
     if(isDone){
       completedSlaHealth = ((i+seed) % 5 === 0) ? 'Breached' : ((i+seed) % 7 === 0) ? 'At-Risk' : 'Healthy';
       completedBy = teamMember(shipTeamIds[(i+seed+1)%shipTeamIds.length]).name;
-      completedAt = new Date(Date.now() - (template.length-i)*86400000);
+      const offsetH = completedSlaHealth==='Breached' ? 26 : completedSlaHealth==='At-Risk' ? -3 : -8;
+      completedAt = dueDate
+        ? new Date(Math.min(dueDate.getTime() + offsetH*3600000, Date.now() - 3600000))
+        : new Date(Date.now() - (template.length-i)*86400000);
       comment = (i%3===0) ? 'Cleared without exceptions.' : '';
       // A milestone that breached SLA on the way to completion plausibly had
       // a blocker along the way — seed a small, realistic field activity
@@ -1472,6 +1619,13 @@ function buildShipmentDetail(base, seed){
       comments,
     };
   });
+  // Seeded open blocker, flagged by the field team on the next task due
+  if(base.openFlag && milestones[completedCount]){
+    const m = milestones[completedCount];
+    const flagger = resolveOwnersFor(shipTeamIds, responsibilities, m.responsibility)[0] || primary;
+    m.flagged = true;
+    m.flagHistory = [{ note: base.openFlag, by: flagger.name, at: new Date(Date.now() - 5*3600000) }];
+  }
 
   const trackedCount = Math.min(PHYSICAL_TRACKING_TEMPLATE.length, 2 + (seed % 5));
   const physicalTracking = PHYSICAL_TRACKING_TEMPLATE.map((t,i)=>({
@@ -1519,13 +1673,31 @@ function buildShipmentDetail(base, seed){
   };
 }
 
+// Sample dates are planned around today so SLA health reads realistically in
+// both the Ops Progress tab and the Leadership view. `lead` is how many days
+// ahead (+) or behind (−) the next open task's due date sits from now.
+function demoDates(mode, completed, spanDays, lead){
+  const n = milestoneTemplateOf({mode}).length;
+  const now = Date.now();
+  const etd = new Date(now + (lead - spanDays*completed/(n-1))*86400000);
+  const eta = new Date(etd.getTime() + spanDays*86400000);
+  return { etd: formatDate(etd), eta: formatDate(eta) };
+}
+
 const SHIPMENT_LIST_BASE = [
-  {jobRef:'ZELO000001', customer:'Dangote Industries', route:'Shanghai → Lagos', mode:'Ocean Import', status:'Active', slaHealth:'Healthy', eta:'02 Aug 2026', ownerId:'u1', supportingOwnerIds:['u5','u6'], completedMilestones:4, quoteRef:'OP-QT-8821', bl:'MEDUSH0123456', incoterm:'CIF', origin:'Shanghai, China', destination:'Lagos, Nigeria', pol:'Shanghai Yangshan Port', pod:'Apapa Port, Lagos', etd:'12 Jul 2026', serviceType:'FCL'},
-  {jobRef:'ZELO000002', customer:'Nestlé West Africa', route:'Rotterdam → Tema', mode:'Ocean Import', status:'Active', slaHealth:'At-Risk', eta:'29 Jul 2026', ownerId:'u2', supportingOwnerIds:['u4'], completedMilestones:6, quoteRef:'OP-QT-8790', bl:'MSCURTM998211', incoterm:'FOB', origin:'Rotterdam, Netherlands', destination:'Tema, Ghana', pol:'Port of Rotterdam', pod:'Tema Port', etd:'05 Jul 2026', serviceType:'FCL'},
-  {jobRef:'ZELO000003', customer:'Julius Berger Nigeria', route:'Hamburg → Lagos', mode:'Ocean Import', status:'Active', slaHealth:'Breached', eta:'20 Jul 2026', ownerId:'u3', supportingOwnerIds:[], completedMilestones:1, quoteRef:'OP-QT-8744', bl:'HLCUHAM774410', incoterm:'CFR', origin:'Hamburg, Germany', destination:'Lagos, Nigeria', pol:'Port of Hamburg', pod:'Apapa Port, Lagos', etd:'01 Jul 2026', serviceType:'Break Bulk'},
-  {jobRef:'ZELO000004', customer:'MTN Nigeria', route:'Shenzhen → Lagos', mode:'Air Import', status:'Cancelled', slaHealth:'Healthy', eta:'31 Jul 2026', ownerId:'u4', supportingOwnerIds:['u1'], completedMilestones:2, quoteRef:'OP-QT-8701', bl:'MAWB-176-882130', incoterm:'FCA', origin:'Shenzhen, China', destination:'Lagos, Nigeria', pol:'Shenzhen Bao\'an Airport', pod:'Murtala Muhammed Airport', etd:'27 Jul 2026', serviceType:'Air Freight'},
-  {jobRef:'ZELO000005', customer:'Dufil Prima Foods', route:'Lagos → Douala', mode:'Ocean Export', status:'Active', slaHealth:'Healthy', eta:'26 Jul 2026', ownerId:'u5', supportingOwnerIds:['u2','u3'], completedMilestones:7, quoteRef:'OP-QT-8650', bl:'OOLU2384910X', incoterm:'CIF', origin:'Lagos, Nigeria', destination:'Douala, Cameroon', pol:'Apapa Port, Lagos', pod:'Port of Douala', etd:'14 Jul 2026', serviceType:'FCL'},
-  {jobRef:'ZELO000006', customer:'Nigerian Breweries', route:'Antwerp → Lagos', mode:'Ocean Import', status:'Completed', slaHealth:'Healthy', eta:'10 Jul 2026', ownerId:'u6', supportingOwnerIds:[], completedMilestones:10, quoteRef:'OP-QT-8590', bl:'APLU5567234B', incoterm:'CIF', origin:'Antwerp, Belgium', destination:'Lagos, Nigeria', pol:'Port of Antwerp', pod:'Apapa Port, Lagos', etd:'20 Jun 2026', serviceType:'FCL'},
+  {jobRef:'ZELO000001', customer:'Dangote Industries', route:'Shanghai → Lagos', mode:'Ocean Import', status:'Active', slaHealth:'Healthy', ownerId:'u1', supportingOwnerIds:['u5','u6'], completedMilestones:4, quoteRef:'OP-QT-8821', bl:'MEDUSH0123456', incoterm:'CIF', origin:'Shanghai, China', destination:'Lagos, Nigeria', pol:'Shanghai Yangshan Port', pod:'Apapa Port, Lagos', serviceType:'FCL', ...demoDates('Ocean Import', 4, 24, 0.5)},
+  {jobRef:'ZELO000002', customer:'Nestlé West Africa', route:'Rotterdam → Tema', mode:'Ocean Import', status:'Active', slaHealth:'At-Risk', ownerId:'u2', supportingOwnerIds:['u4'], completedMilestones:6, quoteRef:'OP-QT-8790', bl:'MSCURTM998211', incoterm:'FOB', origin:'Rotterdam, Netherlands', destination:'Tema, Ghana', pol:'Port of Rotterdam', pod:'Tema Port', serviceType:'FCL', ...demoDates('Ocean Import', 6, 24, 1)},
+  {jobRef:'ZELO000003', customer:'Julius Berger Nigeria', route:'Hamburg → Lagos', mode:'Ocean Import', status:'Active', slaHealth:'Breached', ownerId:'u3', supportingOwnerIds:[], completedMilestones:1, quoteRef:'OP-QT-8744', bl:'HLCUHAM774410', incoterm:'CFR', origin:'Hamburg, Germany', destination:'Lagos, Nigeria', pol:'Port of Hamburg', pod:'Apapa Port, Lagos', serviceType:'Break Bulk', ...demoDates('Ocean Import', 1, 24, -3)},
+  {jobRef:'ZELO000004', customer:'MTN Nigeria', route:'Shenzhen → Lagos', mode:'Air Import', status:'Cancelled', slaHealth:'Healthy', ownerId:'u4', supportingOwnerIds:['u1'], completedMilestones:2, quoteRef:'OP-QT-8701', bl:'MAWB-176-882130', incoterm:'FCA', origin:'Shenzhen, China', destination:'Lagos, Nigeria', pol:'Shenzhen Bao\'an Airport', pod:'Murtala Muhammed Airport', serviceType:'Air Freight', ...demoDates('Air Import', 2, 6, 1)},
+  {jobRef:'ZELO000005', customer:'Dufil Prima Foods', route:'Lagos → Douala', mode:'Ocean Export', status:'Active', slaHealth:'Healthy', ownerId:'u5', supportingOwnerIds:['u2','u3'], completedMilestones:7, quoteRef:'OP-QT-8650', bl:'OOLU2384910X', incoterm:'CIF', origin:'Lagos, Nigeria', destination:'Douala, Cameroon', pol:'Apapa Port, Lagos', pod:'Port of Douala', serviceType:'FCL', ...demoDates('Ocean Export', 7, 19, 3.5)},
+  {jobRef:'ZELO000006', customer:'Nigerian Breweries', route:'Antwerp → Lagos', mode:'Ocean Import', status:'Completed', slaHealth:'Healthy', ownerId:'u6', supportingOwnerIds:[], completedMilestones:10, quoteRef:'OP-QT-8590', bl:'APLU5567234B', incoterm:'CIF', origin:'Antwerp, Belgium', destination:'Lagos, Nigeria', pol:'Port of Antwerp', pod:'Apapa Port, Lagos', serviceType:'FCL', ...demoDates('Ocean Import', 10, 24, -30)},
+  {jobRef:'ZELO000007', customer:'Flour Mills of Nigeria', route:'Santos → Lagos', mode:'Ocean Import', status:'Active', slaHealth:'Healthy', ownerId:'u2', supportingOwnerIds:['u4','u5'], completedMilestones:5, quoteRef:'OP-QT-8904', bl:'MAEUSSZ551203', incoterm:'CFR', origin:'Santos, Brazil', destination:'Lagos, Nigeria', pol:'Port of Santos', pod:'Tin Can Island Port, Lagos', serviceType:'FCL', ...demoDates('Ocean Import', 5, 26, 3.5)},
+  {jobRef:'ZELO000008', customer:'Lafarge Africa', route:'Izmir → Onne', mode:'Ocean Import', status:'Active', slaHealth:'At-Risk', ownerId:'u1', supportingOwnerIds:['u4'], completedMilestones:9, quoteRef:'OP-QT-8911', bl:'CMAUIZM220871', incoterm:'CIF', origin:'Izmir, Turkey', destination:'Onne, Nigeria', pol:'Port of Izmir', pod:'Onne Port', serviceType:'Break Bulk', openFlag:'Examination booked but the terminal is congested; NCS officers not on site.', ...demoDates('Ocean Import', 9, 24, 3)},
+  {jobRef:'ZELO000009', customer:'Olam Agri', route:'Lagos → Antwerp', mode:'Ocean Export', status:'Active', slaHealth:'Healthy', ownerId:'u5', supportingOwnerIds:['u3'], completedMilestones:2, quoteRef:'OP-QT-8920', bl:'MSCULOS734520', incoterm:'FOB', origin:'Lagos, Nigeria', destination:'Antwerp, Belgium', pol:'Apapa Port, Lagos', pod:'Port of Antwerp', serviceType:'FCL', ...demoDates('Ocean Export', 2, 19, 4)},
+  {jobRef:'ZELO000010', customer:'Seplat Energy', route:'Houston → Port Harcourt', mode:'Air Import', status:'Active', slaHealth:'Breached', ownerId:'u4', supportingOwnerIds:['u2'], completedMilestones:5, quoteRef:'OP-QT-8932', bl:'MAWB-001-447820', incoterm:'EXW', origin:'Houston, USA', destination:'Port Harcourt, Nigeria', pol:'George Bush Intercontinental Airport', pod:'Port Harcourt International Airport', serviceType:'Air Freight', openFlag:'Customs yet to release; awaiting PAAR confirmation.', ...demoDates('Air Import', 5, 7, -1.5)},
+  {jobRef:'ZELO000011', customer:'Cadbury Nigeria', route:'Lagos → Rotterdam', mode:'Ocean Export', status:'Active', slaHealth:'Breached', ownerId:'u3', supportingOwnerIds:['u6'], completedMilestones:4, quoteRef:'OP-QT-8940', bl:'HLCULOS118342', incoterm:'FOB', origin:'Lagos, Nigeria', destination:'Rotterdam, Netherlands', pol:'Apapa Port, Lagos', pod:'Port of Rotterdam', serviceType:'FCL', ...demoDates('Ocean Export', 4, 19, -2)},
+  {jobRef:'ZELO000012', customer:'Unilever Nigeria', route:'Lagos → London', mode:'Air Export', status:'Active', slaHealth:'At-Risk', ownerId:'u2', supportingOwnerIds:['u5','u6'], completedMilestones:6, quoteRef:'OP-QT-8952', bl:'MAWB-125-903311', incoterm:'FCA', origin:'Lagos, Nigeria', destination:'London, United Kingdom', pol:'Murtala Muhammed Airport', pod:'London Heathrow Airport', serviceType:'Air Freight', openFlag:'Airline offloaded the cargo to the next flight for lack of space.', ...demoDates('Air Export', 6, 7, 1.5)},
+  {jobRef:'ZELO000013', customer:'GZ Industries', route:'Ningbo → Lagos', mode:'Ocean Import', status:'Active', slaHealth:'Healthy', ownerId:'u6', supportingOwnerIds:['u1'], completedMilestones:3, quoteRef:'OP-QT-8960', bl:'OOLUNGB660214', incoterm:'CFR', origin:'Ningbo, China', destination:'Lagos, Nigeria', pol:'Port of Ningbo', pod:'Tin Can Island Port, Lagos', serviceType:'FCL', ...demoDates('Ocean Import', 3, 28, 4)},
 ];
 
 const SHIPMENTS = {};
@@ -1840,6 +2012,7 @@ function navTo(view){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.nav===view));
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   el('view-'+view).classList.add('active');
+  if(view==='leadership') renderLeadership();
   renderBreadcrumbs();
   window.scrollTo(0,0);
 }
@@ -1867,6 +2040,8 @@ function renderBreadcrumbs(){
     bc.innerHTML = `<span class="crumb">Dashboard</span>`;
   } else if(state.currentView==='quotes'){
     bc.innerHTML = `<span class="crumb">Quotes</span>`;
+  } else if(state.currentView==='leadership'){
+    bc.innerHTML = `<span class="crumb">Leadership</span><span class="sep">/</span><span class="crumb crumb-current">SLA Milestones</span>`;
   } else if(state.currentView==='shipments'){
     bc.innerHTML = `<span class="crumb">Shipments</span>`;
   } else if(state.currentView==='shipment-detail'){
@@ -3151,10 +3326,266 @@ el('comm-search-input').addEventListener('input', (e)=>{
 });
 
 /* ==========================================================================
+   Leadership — Key SLA Milestones
+   Reads the same SHIPMENTS[ref].milestones the Ops team completes and flags
+   in each shipment's Progress tab. Nothing here keeps its own copy: every
+   render rolls the live milestone list up into the key milestones leadership
+   has chosen, so a Mark Complete or a Flag in Progress shows up here.
+   ========================================================================== */
+const LD_TPL = {
+  oi:{label:'Ocean Import', tasks:OCEAN_IMPORT_TEMPLATE},
+  oe:{label:'Ocean Export', tasks:OCEAN_EXPORT_TEMPLATE},
+  ai:{label:'Air Import', tasks:AIR_IMPORT_TEMPLATE},
+  ae:{label:'Air Export', tasks:AIR_EXPORT_TEMPLATE},
+};
+const LD_ORDER = ['oi','oe','ai','ae'];
+function ldTplOf(s){
+  const air = s.mode.includes('Air'), exp = s.mode.includes('Export');
+  return air ? (exp?'ae':'ai') : (exp?'oe':'oi');
+}
+// Which Service Delivery task triggers each key milestone, and the name leadership sees
+const LD_DEFAULT_KEYS = {
+  oi:{'Documentation':'Docs received','Duty Payment':'Duty paid','Arrival':'Vessel arrived','Customs Release':'Customs released','Delivery':'Delivered','Closure':'Job closed'},
+  oe:{'Booking':'Booking confirmed','Stuffing':'Cargo stuffed','Customs':'Export cleared','Vessel':'Vessel sailed','Closure':'Job closed'},
+  ai:{'Track Cargo Arrival':'Cargo arrived','Customs Clearance & Release':'Customs released','Delivery':'Delivered','Close Shipment':'Job closed'},
+  ae:{'Obtain Booking Confirmation':'Space confirmed','Coordinate Customs Processing':'Export cleared','Monitor Flight Departure':'Flight departed','Close Shipment':'Job closed'},
+};
+const LD_STORE = 'oneport-leadership-keys-v1';
+function ldClone(o){ return JSON.parse(JSON.stringify(o)); }
+function ldLoadKeys(){
+  try{ const raw = localStorage.getItem(LD_STORE); if(raw){ const k = JSON.parse(raw); if(LD_ORDER.every(t=>k[t])) return k; } }catch(e){}
+  return ldClone(LD_DEFAULT_KEYS);
+}
+let LD_KEYS = ldLoadKeys();
+const ldState = { q:'', open:null, cfgTpl:'oi', draft:null };
+const ldHas = (o,k) => Object.prototype.hasOwnProperty.call(o,k);
+const ldDone = m => m.status === 'Completed';
+const LD_SEV = {breached:4, atrisk:3, ontrack:2, upcoming:1, late:0, done:0};
+const LD_STATE = {
+  done:{label:'Hit SLA', chip:'chip-success'}, late:{label:'Completed after breach', chip:'chip-error'},
+  breached:{label:'Breached', chip:'chip-error'}, atrisk:{label:'At risk', chip:'chip-warning'},
+  ontrack:{label:'In progress', chip:'chip-neutral'}, upcoming:{label:'Not started', chip:'chip-neutral'},
+};
+const LD_HEALTH = { breached:{label:'Breached', chip:'chip-error'}, atrisk:{label:'At risk', chip:'chip-warning'}, ontrack:{label:'On track', chip:'chip-success'}, complete:{label:'Complete', chip:'chip-success'} };
+const LD_ICON = {
+  check:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  bang:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2"><path d="M12 6v8M12 18.5v.5" stroke-linecap="round"/></svg>',
+  clock:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"><path d="M12 7v5l3 2" stroke-linecap="round"/></svg>',
+  flag:'<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3v18h2v-7h9l-1.5-3.5L16 7H7V3z"/></svg>',
+};
+
+function ldDur(ms){
+  const m = Math.max(1, Math.round(ms/60000));
+  if(m < 60) return `${m}m`;
+  const h = Math.round(m/60);
+  if(h < 24) return `${h}h`;
+  const d = Math.floor(h/24), rh = h%24;
+  return rh ? `${d}d ${rh}h` : `${d}d`;
+}
+const ldDay = d => d ? d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) : '—';
+const ldWhen = d => d ? formatDueDateTime(d) : 'No due date';
+function ldLastFlag(m){ const h = m.flagHistory||[]; return h.length ? h[h.length-1] : null; }
+function ldOwnerOf(s, m){ return resolveTaskOwners(s, m.responsibility)[0] || null; }
+
+function ldStages(s){
+  const keys = LD_KEYS[ldTplOf(s)] || {};
+  const out = []; let cur = [];
+  s.milestones.forEach(m=>{
+    cur.push(m);
+    if(ldHas(keys, m.name)){ out.push({label: keys[m.name] || m.name, trigger:m, tasks:cur}); cur = []; }
+  });
+  if(cur.length) out.push({label:'After the last key milestone', trigger:null, tasks:cur});
+  return out;
+}
+// Same SLA rule the Progress tab uses (computeLiveSlaHealth), plus escalation:
+// an overdue or flagged team task inside a stage puts its key milestone at risk.
+function ldEval(st, prevDone){
+  const now = Date.now(), t = st.trigger;
+  const doneCount = st.tasks.filter(ldDone).length, base = {doneCount, total:st.tasks.length};
+  if(!t) return {...base, state:'upcoming'};
+  if(ldDone(t)) return {...base, state: t.completedSlaHealth==='Breached' ? 'late' : 'done'};
+  const flagged = st.tasks.find(m=>!ldDone(m) && m.flagged);
+  const overdue = st.tasks.find(m=>!ldDone(m) && m!==t && m.dueDate && m.dueDate.getTime() < now);
+  const live = computeLiveSlaHealth(t.dueDate);
+  if(live==='Breached') return {...base, state:'breached', reason:`Overdue by ${ldDur(now - t.dueDate)}`, task:t, flagTask:flagged};
+  if(flagged){ const f = ldLastFlag(flagged); return {...base, state:'atrisk', reason:`Blocker on “${flagged.name}”${f ? ': '+f.note : ''}`, task:flagged, flagTask:flagged}; }
+  if(overdue) return {...base, state:'atrisk', reason:`Team task “${overdue.name}” is ${ldDur(now - overdue.dueDate)} overdue`, task:overdue};
+  if(live==='At-Risk') return {...base, state:'atrisk', reason:`Due ${ldWhen(t.dueDate)}`, task:t};
+  return {...base, state: (prevDone || doneCount>0) ? 'ontrack' : 'upcoming'};
+}
+function ldAnalyse(s){
+  let prevDone = true;
+  const stages = ldStages(s).map(st=>{
+    const ev = ldEval(st, prevDone);
+    if(st.trigger) prevDone = ldDone(st.trigger);
+    return {...st, ev};
+  });
+  const keys = stages.filter(st=>st.trigger);
+  const worst = keys.reduce((w,k)=> LD_SEV[k.ev.state] > LD_SEV[w] ? k.ev.state : w, 'done');
+  const health = worst==='breached' ? 'breached' : worst==='atrisk' ? 'atrisk' : keys.every(k=>ldDone(k.trigger)) ? 'complete' : 'ontrack';
+  return {stages, keys, health, done: s.milestones.filter(ldDone).length, total: s.milestones.length};
+}
+
+function ldGlyph(state, flagged){
+  const inner = {done:LD_ICON.check, late:LD_ICON.check, breached:LD_ICON.bang, atrisk:LD_ICON.clock}[state] || '';
+  return `<span class="ld-glyph ld-g-${state}">${inner}${flagged ? `<span class="ld-flagmark">${LD_ICON.flag}</span>` : ''}</span>`;
+}
+function ldCellLabel(k){
+  const t = k.trigger, e = k.ev;
+  if(e.state==='done') return ldDay(t.completedAt);
+  if(e.state==='late') return `${ldDay(t.completedAt)} · late`;
+  if(e.state==='breached') return `${ldDur(Date.now() - t.dueDate)} over`;
+  return ldDay(t.dueDate);
+}
+const ldOpenFlag = k => !ldDone(k.trigger) && k.tasks.some(m=>!ldDone(m) && m.flagged);
+
+function renderLeadership(){
+  const q = ldState.q.trim().toLowerCase();
+  const rows = Object.values(SHIPMENTS)
+    .filter(s=> s.status==='Active' && (!q || s.jobRef.toLowerCase().includes(q) || s.customer.toLowerCase().includes(q)))
+    .map(s=>({s, a:ldAnalyse(s)}));
+  const order = {breached:0, atrisk:1, ontrack:2, complete:3};
+  const groups = LD_ORDER.map(t=>({t, rows: rows.filter(x=>ldTplOf(x.s)===t).sort((a,b)=> order[a.a.health]-order[b.a.health] || a.s.jobRef.localeCompare(b.s.jobRef))})).filter(g=>g.rows.length);
+  if(!groups.length){ el('ld-pipeline').innerHTML = `<div class="ld-empty">No active shipments match “${escapeHtml(ldState.q)}”.</div>`; return; }
+  el('ld-pipeline').innerHTML = groups.map(g=>{
+    const keys = LD_KEYS[g.t], tasks = LD_TPL[g.t].tasks;
+    const cols = tasks.filter(t=>ldHas(keys, t.name));
+    return `<div class="ld-group">
+      <div class="ld-group-head"><h3>${LD_TPL[g.t].label}</h3><span>${g.rows.length} active shipment${g.rows.length===1?'':'s'} · ${cols.length} key milestones from ${tasks.length} team tasks</span></div>
+      <div class="ld-tbl-wrap"><table class="ld-matrix">
+        <thead><tr><th>Shipment</th><th>Owner</th>${cols.map(t=>`<th class="key">${escapeHtml(keys[t.name]||t.name)}<small>${escapeHtml(t.name)}</small></th>`).join('')}<th>Team tasks</th><th>Health</th></tr></thead>
+        <tbody>${g.rows.map(({s,a})=>{
+          const lead = s.owners.primary;
+          return `<tr class="ld-row" data-ld-ref="${s.jobRef}" tabindex="0">
+            <td><div class="ld-ref">${s.jobRef}</div><div class="ld-cust">${escapeHtml(s.customer)}</div><div class="ld-route">${escapeHtml(s.route)}</div></td>
+            <td><div class="avatar avatar-sm" style="${avatarFillStyle(lead.fill)}" title="${escapeHtml(lead.name)}">${lead.initials}</div></td>
+            ${a.keys.map((k,i)=>`<td class="${i===0?'ld-first':''}" title="${escapeHtml(k.label)}: ${LD_STATE[k.ev.state].label}${k.ev.reason ? ' — '+escapeHtml(k.ev.reason) : ''}"><div class="ld-ms ${k.ev.state}">${ldGlyph(k.ev.state, ldOpenFlag(k))}<span class="lbl">${ldCellLabel(k)}</span></div></td>`).join('')}
+            <td class="ld-tasks">${a.done} / ${a.total}<div class="bar"><i style="width:${a.done/a.total*100}%"></i></div></td>
+            <td><span class="chip ${LD_HEALTH[a.health].chip}">${LD_HEALTH[a.health].label}</span></td>
+          </tr>`; }).join('')}</tbody>
+      </table></div></div>`;
+  }).join('');
+}
+
+function renderLeadershipDrawer(){
+  const s = SHIPMENTS[ldState.open]; if(!s) return;
+  const a = ldAnalyse(s);
+  const lastDue = [...s.milestones].reverse().find(m=>m.dueDate);
+  el('ld-drawer').innerHTML = `
+    <div class="ld-dhead">
+      <div class="row1">
+        <div><div class="ld-eyebrow">${escapeHtml(s.mode)} · ${escapeHtml(s.serviceType||'')}</div><h2>${s.jobRef} · ${escapeHtml(s.customer)}</h2></div>
+        <button class="btn btn-ghost btn-icon" data-ld-close title="Close"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"></path></svg></button>
+      </div>
+      <div class="ld-facts">
+        <div><div class="k">Route</div><div class="v">${escapeHtml(s.route)}</div></div>
+        <div><div class="k">Primary owner</div><div class="v">${escapeHtml(s.owners.primary.name)}</div></div>
+        <div><div class="k">Health</div><div class="v"><span class="chip ${LD_HEALTH[a.health].chip}">${LD_HEALTH[a.health].label}</span></div></div>
+        <div><div class="k">ETD</div><div class="v">${escapeHtml(s.etd)}</div></div>
+        <div><div class="k">Last task due</div><div class="v">${lastDue ? ldDay(lastDue.dueDate) : '—'}</div></div>
+        <div><div class="k">Team tasks</div><div class="v">${a.done} of ${a.total} done</div></div>
+      </div>
+    </div>
+    <div class="ld-dbody">
+      ${a.stages.map(st=>{
+        const e = st.ev, t = st.trigger;
+        const isOpen = t && !ldDone(t) && (e.state==='breached' || e.state==='atrisk' || e.state==='ontrack');
+        const head = t
+          ? `<div class="ld-stop"><h4>${escapeHtml(st.label)}</h4><span class="chip ${LD_STATE[e.state].chip}">${LD_STATE[e.state].label}</span></div>
+             <div class="ld-ssub">${ldDone(t)
+               ? `Triggered by “${escapeHtml(t.name)}” · completed ${formatDateTime(t.completedAt)}${t.completedBy ? ' by '+escapeHtml(t.completedBy) : ''}`
+               : `Triggered by “${escapeHtml(t.name)}” · due ${ldWhen(t.dueDate)}${t.slaLabel ? ' · '+escapeHtml(t.slaLabel) : ''}`}</div>
+             ${e.reason ? `<div class="ld-reason ${e.state==='breached'?'bad':'warn'}">${escapeHtml(e.reason)}</div>` : ''}`
+          : `<div class="ld-stop"><h4 style="color:var(--silver-light)">${escapeHtml(st.label)}</h4></div><div class="ld-ssub">Team tasks that don't feed a key milestone.</div>`;
+        return `<div class="ld-stage">
+          <div class="ld-spine">${t ? ldGlyph(e.state, ldOpenFlag(st)) : ldGlyph('upcoming')}<span class="line"></span></div>
+          <div class="ld-sbody">${head}
+            <details class="ld-team" ${isOpen ? 'open' : ''}>
+              <summary><span>Team tasks in this stage</span><span style="color:var(--silver-light);font-weight:500">${e.doneCount}/${e.total} done</span></summary>
+              ${st.tasks.map(m=>{
+                const done = ldDone(m), over = !done && m.dueDate && m.dueDate.getTime() < Date.now();
+                const owner = ldOwnerOf(s, m), flag = ldLastFlag(m);
+                const right = done
+                  ? `<div class="td ${m.completedSlaHealth==='Breached'?'bad':'ok'}">${m.completedSlaHealth==='Breached'?'After breach':'Done'}<br><span style="font-weight:400;color:var(--silver-light)">${m.completedAt ? ldDay(m.completedAt) : ''}</span></div>`
+                  : `<div class="td ${over?'bad':''}">${over ? ldDur(Date.now()-m.dueDate)+' over' : 'Due'}<br><span style="font-weight:400">${ldWhen(m.dueDate)}</span></div>`;
+                return `<div class="ld-task">
+                  <span class="tick ${done?'on':''}">${done ? LD_ICON.check : ''}</span>
+                  <div><div class="tn">${escapeHtml(m.name)}${m===t ? '<span class="star" title="Triggers this key milestone">★</span>' : ''}</div>
+                    <div class="tm">${owner ? escapeHtml(owner.name) : 'Unassigned'} · ${escapeHtml(m.responsibility)}</div>
+                    ${!done && m.flagged && flag ? `<div class="tf">⚑ ${escapeHtml(flag.note)} <span style="color:var(--silver-light)">— ${escapeHtml(flag.by)}, ${formatDateTime(new Date(flag.at))}</span></div>` : ''}
+                  </div>${right}</div>`;
+              }).join('')}
+            </details>
+          </div></div>`;
+      }).join('')}
+    </div>
+    <div class="ld-dfoot">
+      <span>The Ops team completes and flags these tasks in the Progress tab.</span>
+      <button class="btn btn-solid btn-sm" data-ld-goto="${s.jobRef}">Open Progress tab →</button>
+    </div>`;
+}
+function ldOpenDrawer(ref){ ldState.open = ref; renderLeadershipDrawer(); el('ld-overlay').hidden = false; el('ld-drawer').hidden = false; }
+function ldCloseDrawer(){ ldState.open = null; el('ld-overlay').hidden = true; el('ld-drawer').hidden = true; }
+
+function renderLeadershipConfig(){
+  const t = ldState.cfgTpl, d = ldState.draft[t], tasks = LD_TPL[t].tasks;
+  el('ld-config-body').innerHTML = `
+    <div class="ld-cfg-tabs">${LD_ORDER.map(x=>`<button type="button" class="${x===t?'on':''}" data-ld-cfg-tpl="${x}">${LD_TPL[x].label} <span style="opacity:.6">${Object.keys(ldState.draft[x]).length}</span></button>`).join('')}</div>
+    ${tasks.map((task,i)=>{ const on = ldHas(d, task.name);
+      return `<div class="ld-cfg-row">
+        <span class="n">${i+1}</span>
+        <div class="nm">${escapeHtml(task.name)}<small>${escapeHtml(task.responsibility)}${task.slaLabel ? ' · '+escapeHtml(task.slaLabel) : ''}</small></div>
+        <div class="lab"><input type="text" id="ld-cfg-${t}-${i}" data-ld-cfg-label="${escapeHtml(task.name)}" value="${on ? escapeHtml(d[task.name]) : ''}" placeholder="${on ? 'Name leadership sees' : 'Not shown to leadership'}" ${on ? '' : 'disabled'}></div>
+        <label><input type="checkbox" data-ld-cfg-key="${escapeHtml(task.name)}" ${on ? 'checked' : ''}> Key</label>
+      </div>`; }).join('')}`;
+  el('ld-config-save').disabled = !LD_ORDER.every(x=>Object.keys(ldState.draft[x]).length);
+}
+
+document.addEventListener('click', (e)=>{
+  const t = e.target;
+  if(t.closest('[data-ld-close]') || t.id==='ld-overlay'){ ldCloseDrawer(); return; }
+  const go = t.closest('[data-ld-goto]');
+  if(go){ ldCloseDrawer(); openShipment(go.dataset.ldGoto); switchTab('progress'); return; }
+  const row = t.closest('[data-ld-ref]');
+  if(row){ ldOpenDrawer(row.dataset.ldRef); return; }
+  if(t.closest('#ld-btn-config')){
+    ldState.draft = ldClone(LD_KEYS);
+    ldState.cfgTpl = 'oi';
+    renderLeadershipConfig(); openModal('modal-ld-config'); return;
+  }
+  const tab = t.closest('[data-ld-cfg-tpl]');
+  if(tab){ ldState.cfgTpl = tab.dataset.ldCfgTpl; renderLeadershipConfig(); return; }
+  if(t.closest('#ld-config-reset')){ ldState.draft = ldClone(LD_DEFAULT_KEYS); renderLeadershipConfig(); return; }
+  if(t.closest('#ld-config-save')){
+    LD_KEYS = ldState.draft;
+    try{ localStorage.setItem(LD_STORE, JSON.stringify(LD_KEYS)); }catch(err){}
+    closeModal('modal-ld-config'); renderLeadership(); showToast('Key milestones saved'); return;
+  }
+});
+document.addEventListener('change', (e)=>{
+  const cb = e.target.closest('[data-ld-cfg-key]'); if(!cb) return;
+  const name = cb.dataset.ldCfgKey, d = ldState.draft[ldState.cfgTpl];
+  if(cb.checked) d[name] = (LD_DEFAULT_KEYS[ldState.cfgTpl][name]) || name; else delete d[name];
+  renderLeadershipConfig();
+});
+document.addEventListener('input', (e)=>{
+  if(e.target.id==='ld-search'){ ldState.q = e.target.value; renderLeadership(); return; }
+  const lab = e.target.closest('[data-ld-cfg-label]');
+  if(lab) ldState.draft[ldState.cfgTpl][lab.dataset.ldCfgLabel] = lab.value;
+});
+document.addEventListener('keydown', (e)=>{
+  if(e.key==='Escape' && ldState.open) ldCloseDrawer();
+  if(e.key==='Enter' && e.target.matches && e.target.matches('[data-ld-ref]')) ldOpenDrawer(e.target.dataset.ldRef);
+});
+setInterval(()=>{ if(state.currentView==='leadership'){ renderLeadership(); if(ldState.open) renderLeadershipDrawer(); } }, 60000);
+
+/* ==========================================================================
    Init
    ========================================================================== */
 renderShipmentsList();
 renderBreadcrumbs();
+if(location.hash === '#leadership') navTo('leadership');
+window.addEventListener('hashchange', ()=>{ if(location.hash === '#leadership') navTo('leadership'); });
 </script>
 </body>
 </html>
