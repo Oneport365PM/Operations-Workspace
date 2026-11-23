@@ -523,6 +523,13 @@ td.ld-first .ld-ms::before{display:none}
 .ld-g-ontrack::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--green-dark)}
 .ld-g-upcoming{background:var(--white);border:2px solid #C3CABB}
 .ld-flagmark{position:absolute;top:-4px;right:-6px;width:14px;height:14px;border-radius:50%;background:var(--white);color:var(--error);display:grid;place-items:center}
+.ld-tier1{font-weight:700;color:var(--green-dark);font-size:12.5px;white-space:nowrap}
+.ld-tier2{font-size:11.5px;color:var(--silver-light);white-space:nowrap}
+.ld-g-na{background:var(--green-chip-bg);color:var(--silver-light);font-size:12px;font-weight:700}
+.ld-ms.na .lbl{font-style:italic}
+.ld-matrix th.key{min-width:120px}
+.ld-cfg-sum{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--silver-light);margin:6px 0 4px}
+.ld-cfg-sum b{color:var(--green-dark)}
 .ld-empty{padding:40px 22px;text-align:center;color:var(--silver-light)}
 .ld-overlay{position:fixed;inset:0;background:rgba(2,24,12,.38);z-index:900}
 .ld-drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100vw);background:var(--cream);z-index:901;box-shadow:var(--shadow-e3);display:flex;flex-direction:column}
@@ -562,7 +569,7 @@ details.ld-team summary::-webkit-details-marker{display:none}
 .ld-cfg-tabs{display:inline-flex;background:var(--green-light-surface);border-radius:9px;padding:3px;gap:2px;flex-wrap:wrap;margin-bottom:6px}
 .ld-cfg-tabs button{border:0;background:transparent;padding:6px 12px;border-radius:7px;font-size:12.5px;font-weight:600;color:var(--silver-light)}
 .ld-cfg-tabs button.on{background:var(--white);color:var(--green-dark);box-shadow:var(--shadow-e1)}
-.ld-cfg-row{display:grid;grid-template-columns:26px minmax(0,1fr) minmax(0,1fr) 70px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-tint-soft);font-size:13px}
+.ld-cfg-row{display:grid;grid-template-columns:26px minmax(0,1fr) 190px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-tint-soft);font-size:13px}
 .ld-cfg-row .n{color:var(--silver-light);font-size:12px;text-align:right;font-variant-numeric:tabular-nums}
 .ld-cfg-row .nm{font-weight:600;color:var(--green-dark)}
 .ld-cfg-row .nm small{display:block;font-weight:400;color:var(--silver-light);font-size:11.5px}
@@ -570,7 +577,7 @@ details.ld-team summary::-webkit-details-marker{display:none}
 .ld-cfg-row input[type=text]:disabled{opacity:.35;background:transparent}
 .ld-cfg-row label{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--silver-light);cursor:pointer;justify-self:end}
 .ld-cfg-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--success)}
-@media (max-width:640px){ .ld-cfg-row{grid-template-columns:22px minmax(0,1fr) 60px} .ld-cfg-row .lab{grid-column:2 / -1;grid-row:2} .ld-facts{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:640px){ .ld-cfg-row{grid-template-columns:22px minmax(0,1fr)} .ld-cfg-row select{grid-column:2 / -1} .ld-facts{grid-template-columns:repeat(2,minmax(0,1fr))} }
 </style>
 </head>
 <body>
@@ -667,13 +674,13 @@ details.ld-team summary::-webkit-details-marker{display:none}
         <div class="page-head">
           <div>
             <h1>Key SLA Milestones</h1>
-            <div class="sub">Rolled up live from the tasks the Ops team completes in each shipment's Progress tab.</div>
+            <div class="sub">Every active shipment by phase, rolled up live from the tasks the Ops team completes in the Progress tab.</div>
           </div>
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
             <label class="ld-search"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4-4" stroke-linecap="round"></path></svg><input type="search" id="ld-search" placeholder="Shipment or customer"></label>
             <button class="btn btn-outline btn-sm" id="ld-btn-config">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.5 7L12 17.6 5.7 21.1l1.5-7L2 9.3l7-.8z" stroke-linejoin="round"></path></svg>
-              Choose key milestones
+              Map tasks to phases
             </button>
           </div>
         </div>
@@ -1246,8 +1253,8 @@ details.ld-team summary::-webkit-details-marker{display:none}
   <div class="modal modal-wide">
     <div class="modal-head">
       <div>
-        <h3>Choose key milestones</h3>
-        <p>Pick which Service Delivery tasks leadership sees. When the Ops team completes a key task in the Progress tab, the milestone it triggers updates here.</p>
+        <h3>Map tasks to phases</h3>
+        <p>Assign each Service Delivery task to a phase. A phase is complete when the Ops team has completed all of its tasks in the Progress tab.</p>
       </div>
       <button class="modal-close" data-close-modal><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"></path></svg></button>
     </div>
@@ -2036,6 +2043,7 @@ function openShipment(jobRef){
 
 function renderBreadcrumbs(){
   const bc = el('breadcrumbs');
+  el('btn-simulate-comm').style.display = state.currentView==='leadership' ? 'none' : '';
   if(state.currentView==='dashboard'){
     bc.innerHTML = `<span class="crumb">Dashboard</span>`;
   } else if(state.currentView==='quotes'){
@@ -3326,7 +3334,7 @@ el('comm-search-input').addEventListener('input', (e)=>{
 });
 
 /* ==========================================================================
-   Leadership — Key SLA Milestones
+   Leadership — SLA Milestones by phase
    Reads the same SHIPMENTS[ref].milestones the Ops team completes and flags
    in each shipment's Progress tab. Nothing here keeps its own copy: every
    render rolls the live milestone list up into the key milestones leadership
@@ -3343,28 +3351,59 @@ function ldTplOf(s){
   const air = s.mode.includes('Air'), exp = s.mode.includes('Export');
   return air ? (exp?'ae':'ai') : (exp?'oe':'oi');
 }
-// Which Service Delivery task triggers each key milestone, and the name leadership sees
-const LD_DEFAULT_KEYS = {
-  oi:{'Documentation':'Docs received','Duty Payment':'Duty paid','Arrival':'Vessel arrived','Customs Release':'Customs released','Delivery':'Delivered','Closure':'Job closed'},
-  oe:{'Booking':'Booking confirmed','Stuffing':'Cargo stuffed','Customs':'Export cleared','Vessel':'Vessel sailed','Closure':'Job closed'},
-  ai:{'Track Cargo Arrival':'Cargo arrived','Customs Clearance & Release':'Customs released','Delivery':'Delivered','Close Shipment':'Job closed'},
-  ae:{'Obtain Booking Confirmation':'Space confirmed','Coordinate Customs Processing':'Export cleared','Monitor Flight Departure':'Flight departed','Close Shipment':'Job closed'},
-};
-const LD_STORE = 'oneport-leadership-keys-v1';
+// Leadership sees four lifecycle phases for every shipment. Each Service
+// Delivery task (the same ones Ops completes in the Progress tab) belongs to
+// one phase; a phase completes when all of its tasks are completed.
+const LD_PHASES = ['Prospect','Pre-Booking','Booking','Post Booking'];
+const LD_DEFAULT_MAP = (()=>{
+  const m = {};
+  const assign = (tpl, groups) => { m[tpl] = {}; groups.forEach((names,p)=>names.forEach(n=>{ m[tpl][n] = p; })); };
+  assign('oi', [
+    ['Pre-Arrival'],
+    ['Documentation','Compliance','Rotation No.','D/F Assessment'],
+    ['Duty Payment','Arrival','Shipping Payment','Terminal','Examination','Customs Release','TDO'],
+    ['Haulage','Delivery','Empty Return','Closure'],
+  ]);
+  assign('oe', [
+    [],
+    ['Booking'],
+    ['Empty Deployment','Stuffing','Gate-In','Terminal','Customs','Shipping Line','Submit Export Docs'],
+    ['Vessel','Post-Shipment','Closure'],
+  ]);
+  assign('ai', [
+    ['Receive Pre-Alert'],
+    ['Review AWB & Shipment Documents','Track Cargo Arrival'],
+    ['Sight Shipment','Coordinate Terminal Handling','Customs Clearance & Release','Confirm Shipment Out of Shed'],
+    ['Delivery','Waybill','Reconcile Shipment Costs','Update & Upload Docs','Close Shipment'],
+  ]);
+  assign('ae', [
+    ['Receive Client Booking'],
+    ['Validate Commercial Documents','Confirm Cargo Details','Confirm Airline Schedule & Space'],
+    ['Obtain Booking Confirmation','Coordinate Cargo Pickup','Complete Export Documentation','Coordinate Customs Processing','Deliver Cargo to Airline/Terminal','Confirm AWB Issuance'],
+    ['Monitor Flight Departure','Send Pre-Alert / Shipping Documents','Update & Upload Docs','Close Shipment'],
+  ]);
+  return m;
+})();
+const LD_STORE = 'oneport-leadership-phases-v1';
 function ldClone(o){ return JSON.parse(JSON.stringify(o)); }
-function ldLoadKeys(){
+function ldLoadMap(){
   try{ const raw = localStorage.getItem(LD_STORE); if(raw){ const k = JSON.parse(raw); if(LD_ORDER.every(t=>k[t])) return k; } }catch(e){}
-  return ldClone(LD_DEFAULT_KEYS);
+  return ldClone(LD_DEFAULT_MAP);
 }
-let LD_KEYS = ldLoadKeys();
+let LD_MAP = ldLoadMap();
+function ldPhaseOf(tpl, name){ const p = LD_MAP[tpl] && LD_MAP[tpl][name]; return (p===undefined || p===null) ? 3 : p; }
+// Product tiers: Tier 1 is the OnePort product, Tier 2 the freight service within it
+function ldProduct(s){
+  return { tier1: templateLabelOf(s), tier2: s.mode.includes('Air') ? 'Air Freight' : `Ocean ${s.serviceType||'Freight'}` };
+}
 const ldState = { q:'', open:null, cfgTpl:'oi', draft:null };
 const ldHas = (o,k) => Object.prototype.hasOwnProperty.call(o,k);
 const ldDone = m => m.status === 'Completed';
-const LD_SEV = {breached:4, atrisk:3, ontrack:2, upcoming:1, late:0, done:0};
+const LD_SEV = {breached:4, atrisk:3, ontrack:2, upcoming:1, late:0, done:0, na:0};
 const LD_STATE = {
   done:{label:'Hit SLA', chip:'chip-success'}, late:{label:'Completed after breach', chip:'chip-error'},
   breached:{label:'Breached', chip:'chip-error'}, atrisk:{label:'At risk', chip:'chip-warning'},
-  ontrack:{label:'In progress', chip:'chip-neutral'}, upcoming:{label:'Not started', chip:'chip-neutral'},
+  ontrack:{label:'In progress', chip:'chip-neutral'}, upcoming:{label:'Not started', chip:'chip-neutral'}, na:{label:'No team tasks', chip:'chip-neutral'},
 };
 const LD_HEALTH = { breached:{label:'Breached', chip:'chip-error'}, atrisk:{label:'At risk', chip:'chip-warning'}, ontrack:{label:'On track', chip:'chip-success'}, complete:{label:'Complete', chip:'chip-success'} };
 const LD_ICON = {
@@ -3388,22 +3427,19 @@ function ldLastFlag(m){ const h = m.flagHistory||[]; return h.length ? h[h.lengt
 function ldOwnerOf(s, m){ return resolveTaskOwners(s, m.responsibility)[0] || null; }
 
 function ldStages(s){
-  const keys = LD_KEYS[ldTplOf(s)] || {};
-  const out = []; let cur = [];
-  s.milestones.forEach(m=>{
-    cur.push(m);
-    if(ldHas(keys, m.name)){ out.push({label: keys[m.name] || m.name, trigger:m, tasks:cur}); cur = []; }
+  const tpl = ldTplOf(s);
+  return LD_PHASES.map((label,p)=>{
+    const tasks = s.milestones.filter(m=>ldPhaseOf(tpl, m.name)===p);
+    return {label, phase:p, tasks, trigger: tasks.length ? tasks[tasks.length-1] : null};
   });
-  if(cur.length) out.push({label:'After the last key milestone', trigger:null, tasks:cur});
-  return out;
 }
 // Same SLA rule the Progress tab uses (computeLiveSlaHealth), plus escalation:
 // an overdue or flagged team task inside a stage puts its key milestone at risk.
 function ldEval(st, prevDone){
   const now = Date.now(), t = st.trigger;
   const doneCount = st.tasks.filter(ldDone).length, base = {doneCount, total:st.tasks.length};
-  if(!t) return {...base, state:'upcoming'};
-  if(ldDone(t)) return {...base, state: t.completedSlaHealth==='Breached' ? 'late' : 'done'};
+  if(!t) return {...base, state:'na'};
+  if(st.tasks.every(ldDone)) return {...base, state: t.completedSlaHealth==='Breached' ? 'late' : 'done'};
   const flagged = st.tasks.find(m=>!ldDone(m) && m.flagged);
   const overdue = st.tasks.find(m=>!ldDone(m) && m!==t && m.dueDate && m.dueDate.getTime() < now);
   const live = computeLiveSlaHealth(t.dueDate);
@@ -3417,54 +3453,53 @@ function ldAnalyse(s){
   let prevDone = true;
   const stages = ldStages(s).map(st=>{
     const ev = ldEval(st, prevDone);
-    if(st.trigger) prevDone = ldDone(st.trigger);
+    if(st.trigger) prevDone = st.tasks.every(ldDone);
     return {...st, ev};
   });
-  const keys = stages.filter(st=>st.trigger);
-  const worst = keys.reduce((w,k)=> LD_SEV[k.ev.state] > LD_SEV[w] ? k.ev.state : w, 'done');
-  const health = worst==='breached' ? 'breached' : worst==='atrisk' ? 'atrisk' : keys.every(k=>ldDone(k.trigger)) ? 'complete' : 'ontrack';
+  const keys = stages;
+  const tracked = keys.filter(k=>k.trigger);
+  const worst = tracked.reduce((w,k)=> LD_SEV[k.ev.state] > LD_SEV[w] ? k.ev.state : w, 'done');
+  const health = worst==='breached' ? 'breached' : worst==='atrisk' ? 'atrisk' : tracked.every(k=>k.tasks.every(ldDone)) ? 'complete' : 'ontrack';
   return {stages, keys, health, done: s.milestones.filter(ldDone).length, total: s.milestones.length};
 }
 
 function ldGlyph(state, flagged){
+  if(state==='na') return `<span class="ld-glyph ld-g-na">–</span>`;
   const inner = {done:LD_ICON.check, late:LD_ICON.check, breached:LD_ICON.bang, atrisk:LD_ICON.clock}[state] || '';
   return `<span class="ld-glyph ld-g-${state}">${inner}${flagged ? `<span class="ld-flagmark">${LD_ICON.flag}</span>` : ''}</span>`;
 }
 function ldCellLabel(k){
   const t = k.trigger, e = k.ev;
+  if(e.state==='na') return 'Not tracked';
   if(e.state==='done') return ldDay(t.completedAt);
   if(e.state==='late') return `${ldDay(t.completedAt)} · late`;
   if(e.state==='breached') return `${ldDur(Date.now() - t.dueDate)} over`;
-  return ldDay(t.dueDate);
+  const due = t.dueDate || ([...k.tasks].reverse().find(m=>m.dueDate)||{}).dueDate;
+  return ldDay(due);
 }
-const ldOpenFlag = k => !ldDone(k.trigger) && k.tasks.some(m=>!ldDone(m) && m.flagged);
+const ldOpenFlag = k => !!k.trigger && k.tasks.some(m=>!ldDone(m) && m.flagged);
 
 function renderLeadership(){
   const q = ldState.q.trim().toLowerCase();
+  const order = {breached:0, atrisk:1, ontrack:2, complete:3};
   const rows = Object.values(SHIPMENTS)
     .filter(s=> s.status==='Active' && (!q || s.jobRef.toLowerCase().includes(q) || s.customer.toLowerCase().includes(q)))
-    .map(s=>({s, a:ldAnalyse(s)}));
-  const order = {breached:0, atrisk:1, ontrack:2, complete:3};
-  const groups = LD_ORDER.map(t=>({t, rows: rows.filter(x=>ldTplOf(x.s)===t).sort((a,b)=> order[a.a.health]-order[b.a.health] || a.s.jobRef.localeCompare(b.s.jobRef))})).filter(g=>g.rows.length);
-  if(!groups.length){ el('ld-pipeline').innerHTML = `<div class="ld-empty">No active shipments match “${escapeHtml(ldState.q)}”.</div>`; return; }
-  el('ld-pipeline').innerHTML = groups.map(g=>{
-    const keys = LD_KEYS[g.t], tasks = LD_TPL[g.t].tasks;
-    const cols = tasks.filter(t=>ldHas(keys, t.name));
-    return `<div class="ld-group">
-      <div class="ld-group-head"><h3>${LD_TPL[g.t].label}</h3><span>${g.rows.length} active shipment${g.rows.length===1?'':'s'} · ${cols.length} key milestones from ${tasks.length} team tasks</span></div>
-      <div class="ld-tbl-wrap"><table class="ld-matrix">
-        <thead><tr><th>Shipment</th><th>Owner</th>${cols.map(t=>`<th class="key">${escapeHtml(keys[t.name]||t.name)}<small>${escapeHtml(t.name)}</small></th>`).join('')}<th>Team tasks</th><th>Health</th></tr></thead>
-        <tbody>${g.rows.map(({s,a})=>{
-          const lead = s.owners.primary;
-          return `<tr class="ld-row" data-ld-ref="${s.jobRef}" tabindex="0">
-            <td><div class="ld-ref">${s.jobRef}</div><div class="ld-cust">${escapeHtml(s.customer)}</div><div class="ld-route">${escapeHtml(s.route)}</div></td>
-            <td><div class="avatar avatar-sm" style="${avatarFillStyle(lead.fill)}" title="${escapeHtml(lead.name)}">${lead.initials}</div></td>
-            ${a.keys.map((k,i)=>`<td class="${i===0?'ld-first':''}" title="${escapeHtml(k.label)}: ${LD_STATE[k.ev.state].label}${k.ev.reason ? ' — '+escapeHtml(k.ev.reason) : ''}"><div class="ld-ms ${k.ev.state}">${ldGlyph(k.ev.state, ldOpenFlag(k))}<span class="lbl">${ldCellLabel(k)}</span></div></td>`).join('')}
-            <td class="ld-tasks">${a.done} / ${a.total}<div class="bar"><i style="width:${a.done/a.total*100}%"></i></div></td>
-            <td><span class="chip ${LD_HEALTH[a.health].chip}">${LD_HEALTH[a.health].label}</span></td>
-          </tr>`; }).join('')}</tbody>
-      </table></div></div>`;
-  }).join('');
+    .map(s=>({s, a:ldAnalyse(s)}))
+    .sort((a,b)=> order[a.a.health]-order[b.a.health] || a.s.jobRef.localeCompare(b.s.jobRef));
+  if(!rows.length){ el('ld-pipeline').innerHTML = `<div class="ld-empty">No active shipments match “${escapeHtml(ldState.q)}”.</div>`; return; }
+  el('ld-pipeline').innerHTML = `<div class="ld-tbl-wrap"><table class="ld-matrix">
+    <thead><tr><th>Shipment</th><th>Product</th><th>Owner</th>${LD_PHASES.map(p=>`<th class="key">${p}</th>`).join('')}<th>Team tasks</th><th>Health</th></tr></thead>
+    <tbody>${rows.map(({s,a})=>{
+      const lead = s.owners.primary, prod = ldProduct(s);
+      return `<tr class="ld-row" data-ld-ref="${s.jobRef}" tabindex="0">
+        <td><div class="ld-ref">${s.jobRef}</div><div class="ld-cust">${escapeHtml(s.customer)}</div><div class="ld-route">${escapeHtml(s.route)}</div></td>
+        <td><div class="ld-tier1">${escapeHtml(prod.tier1)}</div><div class="ld-tier2">${escapeHtml(prod.tier2)}</div></td>
+        <td><div class="avatar avatar-sm" style="${avatarFillStyle(lead.fill)}" title="${escapeHtml(lead.name)}">${lead.initials}</div></td>
+        ${a.keys.map((k,i)=>`<td class="${i===0?'ld-first':''}" title="${escapeHtml(k.label)}: ${LD_STATE[k.ev.state].label}${k.ev.reason ? ' — '+escapeHtml(k.ev.reason) : ''}"><div class="ld-ms ${k.ev.state}">${ldGlyph(k.ev.state, ldOpenFlag(k))}<span class="lbl">${ldCellLabel(k)}</span></div></td>`).join('')}
+        <td class="ld-tasks">${a.done} / ${a.total}<div class="bar"><i style="width:${a.done/a.total*100}%"></i></div></td>
+        <td><span class="chip ${LD_HEALTH[a.health].chip}">${LD_HEALTH[a.health].label}</span></td>
+      </tr>`; }).join('')}</tbody>
+  </table></div>`;
 }
 
 function renderLeadershipDrawer(){
@@ -3474,7 +3509,7 @@ function renderLeadershipDrawer(){
   el('ld-drawer').innerHTML = `
     <div class="ld-dhead">
       <div class="row1">
-        <div><div class="ld-eyebrow">${escapeHtml(s.mode)} · ${escapeHtml(s.serviceType||'')}</div><h2>${s.jobRef} · ${escapeHtml(s.customer)}</h2></div>
+        <div><div class="ld-eyebrow">${escapeHtml(ldProduct(s).tier1)} · ${escapeHtml(ldProduct(s).tier2)}</div><h2>${s.jobRef} · ${escapeHtml(s.customer)}</h2></div>
         <button class="btn btn-ghost btn-icon" data-ld-close title="Close"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"></path></svg></button>
       </div>
       <div class="ld-facts">
@@ -3489,14 +3524,15 @@ function renderLeadershipDrawer(){
     <div class="ld-dbody">
       ${a.stages.map(st=>{
         const e = st.ev, t = st.trigger;
-        const isOpen = t && !ldDone(t) && (e.state==='breached' || e.state==='atrisk' || e.state==='ontrack');
         const head = t
           ? `<div class="ld-stop"><h4>${escapeHtml(st.label)}</h4><span class="chip ${LD_STATE[e.state].chip}">${LD_STATE[e.state].label}</span></div>
-             <div class="ld-ssub">${ldDone(t)
-               ? `Triggered by “${escapeHtml(t.name)}” · completed ${formatDateTime(t.completedAt)}${t.completedBy ? ' by '+escapeHtml(t.completedBy) : ''}`
-               : `Triggered by “${escapeHtml(t.name)}” · due ${ldWhen(t.dueDate)}${t.slaLabel ? ' · '+escapeHtml(t.slaLabel) : ''}`}</div>
+             <div class="ld-ssub">${st.tasks.every(ldDone)
+               ? `All ${st.tasks.length} team task${st.tasks.length===1?'':'s'} done · last completed ${formatDateTime(t.completedAt)}${t.completedBy ? ' by '+escapeHtml(t.completedBy) : ''}`
+               : `${st.tasks.length - e.doneCount} of ${st.tasks.length} team task${st.tasks.length===1?'':'s'} open · phase due ${ldWhen(t.dueDate)}`}</div>
              ${e.reason ? `<div class="ld-reason ${e.state==='breached'?'bad':'warn'}">${escapeHtml(e.reason)}</div>` : ''}`
-          : `<div class="ld-stop"><h4 style="color:var(--silver-light)">${escapeHtml(st.label)}</h4></div><div class="ld-ssub">Team tasks that don't feed a key milestone.</div>`;
+          : `<div class="ld-stop"><h4 style="color:var(--silver-light)">${escapeHtml(st.label)}</h4><span class="chip chip-neutral">No team tasks</span></div><div class="ld-ssub">No Service Delivery task is mapped to this phase for ${escapeHtml(s.mode)}.</div>`;
+        if(!t) return `<div class="ld-stage"><div class="ld-spine">${ldGlyph('na')}<span class="line"></span></div><div class="ld-sbody">${head}</div></div>`;
+        const isOpen = !st.tasks.every(ldDone) && (e.state==='breached' || e.state==='atrisk' || e.state==='ontrack');
         return `<div class="ld-stage">
           <div class="ld-spine">${t ? ldGlyph(e.state, ldOpenFlag(st)) : ldGlyph('upcoming')}<span class="line"></span></div>
           <div class="ld-sbody">${head}
@@ -3510,7 +3546,7 @@ function renderLeadershipDrawer(){
                   : `<div class="td ${over?'bad':''}">${over ? ldDur(Date.now()-m.dueDate)+' over' : 'Due'}<br><span style="font-weight:400">${ldWhen(m.dueDate)}</span></div>`;
                 return `<div class="ld-task">
                   <span class="tick ${done?'on':''}">${done ? LD_ICON.check : ''}</span>
-                  <div><div class="tn">${escapeHtml(m.name)}${m===t ? '<span class="star" title="Triggers this key milestone">★</span>' : ''}</div>
+                  <div><div class="tn">${escapeHtml(m.name)}</div>
                     <div class="tm">${owner ? escapeHtml(owner.name) : 'Unassigned'} · ${escapeHtml(m.responsibility)}</div>
                     ${!done && m.flagged && flag ? `<div class="tf">⚑ ${escapeHtml(flag.note)} <span style="color:var(--silver-light)">— ${escapeHtml(flag.by)}, ${formatDateTime(new Date(flag.at))}</span></div>` : ''}
                   </div>${right}</div>`;
@@ -3530,15 +3566,15 @@ function ldCloseDrawer(){ ldState.open = null; el('ld-overlay').hidden = true; e
 function renderLeadershipConfig(){
   const t = ldState.cfgTpl, d = ldState.draft[t], tasks = LD_TPL[t].tasks;
   el('ld-config-body').innerHTML = `
-    <div class="ld-cfg-tabs">${LD_ORDER.map(x=>`<button type="button" class="${x===t?'on':''}" data-ld-cfg-tpl="${x}">${LD_TPL[x].label} <span style="opacity:.6">${Object.keys(ldState.draft[x]).length}</span></button>`).join('')}</div>
-    ${tasks.map((task,i)=>{ const on = ldHas(d, task.name);
-      return `<div class="ld-cfg-row">
+    <div class="ld-cfg-tabs">${LD_ORDER.map(x=>`<button type="button" class="${x===t?'on':''}" data-ld-cfg-tpl="${x}">${LD_TPL[x].label}</button>`).join('')}</div>
+    <div class="ld-cfg-sum">${LD_PHASES.map((p,i)=>{ const n = tasks.filter(x=>(d[x.name] ?? 3)===i).length; return `<span><b>${p}</b> ${n} task${n===1?'':'s'}</span>`; }).join('')}</div>
+    ${tasks.map((task,i)=>`<div class="ld-cfg-row">
         <span class="n">${i+1}</span>
         <div class="nm">${escapeHtml(task.name)}<small>${escapeHtml(task.responsibility)}${task.slaLabel ? ' · '+escapeHtml(task.slaLabel) : ''}</small></div>
-        <div class="lab"><input type="text" id="ld-cfg-${t}-${i}" data-ld-cfg-label="${escapeHtml(task.name)}" value="${on ? escapeHtml(d[task.name]) : ''}" placeholder="${on ? 'Name leadership sees' : 'Not shown to leadership'}" ${on ? '' : 'disabled'}></div>
-        <label><input type="checkbox" data-ld-cfg-key="${escapeHtml(task.name)}" ${on ? 'checked' : ''}> Key</label>
-      </div>`; }).join('')}`;
-  el('ld-config-save').disabled = !LD_ORDER.every(x=>Object.keys(ldState.draft[x]).length);
+        <select class="field-control" id="ld-cfg-${t}-${i}" data-ld-cfg-phase="${escapeHtml(task.name)}" aria-label="Phase for ${escapeHtml(task.name)}">
+          ${LD_PHASES.map((p,pi)=>`<option value="${pi}" ${(d[task.name] ?? 3)===pi?'selected':''}>${p}</option>`).join('')}
+        </select>
+      </div>`).join('')}`;
 }
 
 document.addEventListener('click', (e)=>{
@@ -3549,29 +3585,26 @@ document.addEventListener('click', (e)=>{
   const row = t.closest('[data-ld-ref]');
   if(row){ ldOpenDrawer(row.dataset.ldRef); return; }
   if(t.closest('#ld-btn-config')){
-    ldState.draft = ldClone(LD_KEYS);
+    ldState.draft = ldClone(LD_MAP);
     ldState.cfgTpl = 'oi';
     renderLeadershipConfig(); openModal('modal-ld-config'); return;
   }
   const tab = t.closest('[data-ld-cfg-tpl]');
   if(tab){ ldState.cfgTpl = tab.dataset.ldCfgTpl; renderLeadershipConfig(); return; }
-  if(t.closest('#ld-config-reset')){ ldState.draft = ldClone(LD_DEFAULT_KEYS); renderLeadershipConfig(); return; }
+  if(t.closest('#ld-config-reset')){ ldState.draft = ldClone(LD_DEFAULT_MAP); renderLeadershipConfig(); return; }
   if(t.closest('#ld-config-save')){
-    LD_KEYS = ldState.draft;
-    try{ localStorage.setItem(LD_STORE, JSON.stringify(LD_KEYS)); }catch(err){}
-    closeModal('modal-ld-config'); renderLeadership(); showToast('Key milestones saved'); return;
+    LD_MAP = ldState.draft;
+    try{ localStorage.setItem(LD_STORE, JSON.stringify(LD_MAP)); }catch(err){}
+    closeModal('modal-ld-config'); renderLeadership(); showToast('Phase mapping saved'); return;
   }
 });
 document.addEventListener('change', (e)=>{
-  const cb = e.target.closest('[data-ld-cfg-key]'); if(!cb) return;
-  const name = cb.dataset.ldCfgKey, d = ldState.draft[ldState.cfgTpl];
-  if(cb.checked) d[name] = (LD_DEFAULT_KEYS[ldState.cfgTpl][name]) || name; else delete d[name];
+  const sel = e.target.closest('[data-ld-cfg-phase]'); if(!sel) return;
+  ldState.draft[ldState.cfgTpl][sel.dataset.ldCfgPhase] = +sel.value;
   renderLeadershipConfig();
 });
 document.addEventListener('input', (e)=>{
-  if(e.target.id==='ld-search'){ ldState.q = e.target.value; renderLeadership(); return; }
-  const lab = e.target.closest('[data-ld-cfg-label]');
-  if(lab) ldState.draft[ldState.cfgTpl][lab.dataset.ldCfgLabel] = lab.value;
+  if(e.target.id==='ld-search'){ ldState.q = e.target.value; renderLeadership(); }
 });
 document.addEventListener('keydown', (e)=>{
   if(e.key==='Escape' && ldState.open) ldCloseDrawer();
