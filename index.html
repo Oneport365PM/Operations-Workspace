@@ -3526,8 +3526,10 @@ function ldAnalyse(s){
   const worst = tracked.reduce((w,c)=> LD_SEV[c.ev.state] > LD_SEV[w] ? c.ev.state : w, 'done');
   const health = worst==='breached' ? 'breached' : worst==='atrisk' ? 'atrisk'
     : tracked.every(c=>c.ev.state==='done'||c.ev.state==='late') ? 'complete' : 'ontrack';
-  const team = progressMilestones(s);
-  return {stages, health, done: team.filter(ldDone).length, total: team.length};
+  // Indicator count for the table: applicable Booking and Post-Booking
+  // indicators (Not applicable and Trigger-not-set ones are left out)
+  const live = stages.filter(c=>c.indicators).flatMap(c=>c.indicators).filter(i=>i.ev.state!=='na' && i.ev.state!=='unset');
+  return {stages, health, done: live.filter(i=>i.ev.state==='done'||i.ev.state==='late').length, total: live.length};
 }
 // A stage's status rolls up from its indicators: complete when every
 // applicable indicator is complete, otherwise its most urgent open indicator.
@@ -3582,7 +3584,7 @@ function renderLeadership(){
         <td><div class="ld-tier1">${escapeHtml(prod.tier1)}</div><div class="ld-tier2">${escapeHtml(prod.tier2)}</div></td>
         <td><div class="ld-owner"><div class="avatar avatar-sm" style="${avatarFillStyle(lead.fill)}">${lead.initials}</div><span>${escapeHtml(lead.name)}</span></div></td>
         ${a.stages.map((c,i)=>`<td class="${i===0?'ld-first':''}" title="${escapeHtml(c.label)}: ${LD_STATE[c.ev.state].label}${c.ev.reason ? ' — '+escapeHtml(c.ev.reason) : ''}"><div class="ld-ms ${c.ev.state}">${ldGlyph(c.ev.state, ldColFlag(c))}<span class="lbl">${ldCellLabel(c.ev)}</span></div></td>`).join('')}
-        <td class="ld-tasks">${a.done} / ${a.total}<div class="bar"><i style="width:${a.done/a.total*100}%"></i></div></td>
+        <td class="ld-tasks" title="${a.done} of ${a.total} indicators complete">${a.done} / ${a.total}<div class="bar"><i style="width:${a.total ? a.done/a.total*100 : 0}%"></i></div></td>
         <td><span class="chip ${LD_HEALTH[a.health].chip}">${LD_HEALTH[a.health].label}</span></td>
       </tr>`; }).join('')}</tbody>
   </table></div>`;
