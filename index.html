@@ -547,15 +547,18 @@ td.ld-first .ld-ms::before{display:none}
 .ld-g-na{background:var(--green-chip-bg);color:var(--silver-light);font-size:12px;font-weight:700}
 .ld-ms.na .lbl,.ld-ms.unset .lbl{font-style:italic}
 .ld-matrix th.key{min-width:92px}
-.ld-matrix tr.ld-group-row th{vertical-align:bottom}
-.ld-matrix th.grp{text-align:center;font-family:var(--font-display);font-size:12px;letter-spacing:.04em;padding:7px 8px;border-bottom:0}
-.ld-matrix th.grp-booking{background:var(--gold-bg);color:var(--gold-text);border-left:2px solid var(--white)}
-.ld-matrix th.grp-post{background:var(--success-bg);color:var(--success-text);border-left:2px solid var(--white)}
-.ld-matrix th.key.ind{min-width:86px;max-width:100px;font-size:11px;vertical-align:top}
 .ind-no{display:inline-block;font-size:10px;font-weight:700;color:var(--silver-light);margin-right:4px;font-variant-numeric:tabular-nums}
-.ld-matrix td.grp-start{box-shadow:inset 2px 0 0 var(--border-tint-soft)}
-.ld-dsection{margin-bottom:6px}
-.ld-dsection-head{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--silver-light);margin:4px 0 12px}
+.ld-ind-list{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.ld-ind{background:var(--white);border:1px solid var(--border-tint-soft);border-radius:10px;padding:10px 12px}
+.ld-ind-top{display:flex;align-items:center;gap:10px}
+.ld-ind-top .ld-glyph{width:20px;height:20px}
+.ld-ind-name{flex:1;min-width:0;display:flex;flex-direction:column}
+.ld-ind-name b{font-family:var(--font-display);font-weight:600;color:var(--green-dark);font-size:13.5px}
+.ld-ind-name span{font-size:11.5px;color:var(--silver-light)}
+.ld-ind.na,.ld-ind.unset{background:transparent;border-style:dashed}
+.ld-ind.na .ld-ind-name b,.ld-ind.unset .ld-ind-name b{color:var(--silver-light)}
+.ld-ind-body{margin:6px 0 0 30px}
+.ld-ind-body .ld-team{margin-top:8px}
 .ld-ind-meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--silver-dark);margin-top:6px}
 .ld-ind-meta b{color:var(--green-dark);margin-right:3px}
 .ld-ind-detail{font-size:12px;color:var(--silver-light);margin-top:3px}
@@ -3501,29 +3504,51 @@ function ldEvalGroup(tasks, prevDone){
 }
 function ldAnalyse(s){
   const feed = ldIndicatorTasks(s);
-  const cols = [];
   let prevDone = true;
+  const stages = [];
   LD_PRE_COLUMNS.forEach(c=>{
     const tasks = s.milestones.filter(m=>m.stage===c.stage);
     const ev = ldEvalGroup(tasks, prevDone);
     if(ev.state!=='na') prevDone = ev.state==='done' || ev.state==='late';
-    cols.push({kind:'stage', label:c.label, stage:c.stage, tasks, ev});
+    stages.push({label:c.label, stage:c.stage, tasks, indicators:null, ev});
   });
-  LD_INDICATORS.forEach(ind=>{
-    const tasks = feed[ind.id];
-    // Finance and customer events with no Ops task to stand in yet: trigger still to be defined
-    const ev = (!tasks.length && (ind.trigger.kind==='finance' || ind.trigger.kind==='customer'))
-      ? {state:'unset', doneCount:0, total:0}
-      : ldEvalGroup(tasks, prevDone);
-    if(ev.state!=='na') prevDone = ev.state==='done' || ev.state==='late';
-    cols.push({kind:'indicator', ind, label:ind.label, stage:ind.stage, tasks, ev});
+  ['Booking','Post-Booking'].forEach(stage=>{
+    const indicators = LD_INDICATORS.filter(i=>i.stage===stage).map(ind=>{
+      const tasks = feed[ind.id];
+      // Finance and customer events with no Ops task to stand in yet: trigger still to be defined
+      const ev = (!tasks.length && (ind.trigger.kind==='finance' || ind.trigger.kind==='customer'))
+        ? {state:'unset', doneCount:0, total:0}
+        : ldEvalGroup(tasks, prevDone);
+      if(ev.state!=='na' && ev.state!=='unset') prevDone = ev.state==='done' || ev.state==='late';
+      return {kind:'indicator', ind, label:ind.label, stage, tasks, ev};
+    });
+    stages.push({label:LD_STAGE_LABEL[stage], stage, tasks:indicators.flatMap(i=>i.tasks), indicators, ev:ldRollUp(indicators)});
   });
-  const tracked = cols.filter(c=>c.ev.state!=='na' && c.ev.state!=='unset');
+  const tracked = stages.filter(c=>c.ev.state!=='na' && c.ev.state!=='unset');
   const worst = tracked.reduce((w,c)=> LD_SEV[c.ev.state] > LD_SEV[w] ? c.ev.state : w, 'done');
   const health = worst==='breached' ? 'breached' : worst==='atrisk' ? 'atrisk'
     : tracked.every(c=>c.ev.state==='done'||c.ev.state==='late') ? 'complete' : 'ontrack';
   const team = progressMilestones(s);
-  return {cols, health, done: team.filter(ldDone).length, total: team.length};
+  return {stages, health, done: team.filter(ldDone).length, total: team.length};
+}
+// A stage's status rolls up from its indicators: complete when every
+// applicable indicator is complete, otherwise its most urgent open indicator.
+function ldRollUp(indicators){
+  const live = indicators.filter(i=>i.ev.state!=='na' && i.ev.state!=='unset');
+  const doneCount = live.filter(i=>i.ev.state==='done'||i.ev.state==='late').length;
+  const base = {doneCount, total:live.length};
+  if(!live.length) return {...base, state:'na'};
+  const dues = live.map(i=>i.ev.due).filter(Boolean);
+  const due = dues.length ? new Date(Math.max(...dues)) : null;
+  if(doneCount===live.length){
+    return {...base, state: live.some(i=>i.ev.state==='late') ? 'late' : 'done', due,
+      completedAt: new Date(Math.max(...live.map(i=>i.ev.completedAt)))};
+  }
+  const breached = live.filter(i=>i.ev.state==='breached').sort((x,y)=>y.ev.overdueBy-x.ev.overdueBy)[0];
+  if(breached) return {...base, state:'breached', due, overdueBy:breached.ev.overdueBy, reason:`${breached.label}: ${breached.ev.reason}`};
+  const risk = live.find(i=>i.ev.state==='atrisk');
+  if(risk) return {...base, state:'atrisk', due, reason:`${risk.label}: ${risk.ev.reason}`};
+  return {...base, state: live.some(i=>i.ev.state==='ontrack') || doneCount>0 ? 'ontrack' : 'upcoming', due};
 }
 
 function ldGlyph(state, flagged){
@@ -3550,30 +3575,17 @@ function renderLeadership(){
     .map(s=>({s, a:ldAnalyse(s)}))
     .sort((a,b)=> order[a.a.health]-order[b.a.health] || a.s.jobRef.localeCompare(b.s.jobRef));
   if(!rows.length){ el('ld-pipeline').innerHTML = `<div class="ld-empty">No active shipments match “${escapeHtml(ldState.q)}”.</div>`; return; }
-  const bookingInds = LD_INDICATORS.filter(i=>i.stage==='Booking'), postInds = LD_INDICATORS.filter(i=>i.stage==='Post-Booking');
-  const indHead = i => `<th class="key ind" title="${escapeHtml(i.detail)} · SLA: ${escapeHtml(i.sla)}">${i.no ? `<span class="ind-no">${i.no}</span>` : ''}${escapeHtml(i.label)}</th>`;
   el('ld-pipeline').innerHTML = `<div class="ld-tbl-wrap"><table class="ld-matrix">
-    <thead>
-      <tr class="ld-group-row">
-        <th rowspan="2">Shipment</th><th rowspan="2">Product</th><th rowspan="2">Owner</th><th rowspan="2">Health</th>
-        <th rowspan="2" class="key">Prospect</th><th rowspan="2" class="key">Pre-Booking</th>
-        <th colspan="${bookingInds.length}" class="grp grp-booking">Booking</th>
-        <th colspan="${postInds.length}" class="grp grp-post">Post Booking</th>
-      </tr>
-      <tr>${bookingInds.map(indHead).join('')}${postInds.map(indHead).join('')}</tr>
-    </thead>
+    <thead><tr><th>Shipment</th><th>Product</th><th>Owner</th>${rows[0].a.stages.map(c=>`<th class="key">${c.label}</th>`).join('')}<th>Team tasks</th><th>Health</th></tr></thead>
     <tbody>${rows.map(({s,a})=>{
       const lead = s.owners.primary, prod = ldProduct(s);
       return `<tr class="ld-row" data-ld-ref="${s.jobRef}" tabindex="0">
         <td><div class="ld-ref">${s.jobRef}</div><div class="ld-cust">${escapeHtml(s.customer)}</div><div class="ld-route">${escapeHtml(s.route)}</div></td>
         <td><div class="ld-tier1">${escapeHtml(prod.tier1)}</div><div class="ld-tier2">${escapeHtml(prod.tier2)}</div></td>
         <td><div class="avatar avatar-sm" style="${avatarFillStyle(lead.fill)}" title="${escapeHtml(lead.name)}">${lead.initials}</div></td>
+        ${a.stages.map((c,i)=>`<td class="${i===0?'ld-first':''}" title="${escapeHtml(c.label)}: ${LD_STATE[c.ev.state].label}${c.ev.reason ? ' — '+escapeHtml(c.ev.reason) : ''}"><div class="ld-ms ${c.ev.state}">${ldGlyph(c.ev.state, ldColFlag(c))}<span class="lbl">${ldCellLabel(c.ev)}</span></div></td>`).join('')}
+        <td class="ld-tasks">${a.done} / ${a.total}<div class="bar"><i style="width:${a.done/a.total*100}%"></i></div></td>
         <td><span class="chip ${LD_HEALTH[a.health].chip}">${LD_HEALTH[a.health].label}</span></td>
-        ${a.cols.map((c,i)=>{
-          const st = c.ev.state, label = LD_STATE[st].label;
-          const cls = [i===0?'ld-first':'', c.kind==='indicator' && c.ind.id===bookingInds[0].id ? 'grp-start' : '', c.kind==='indicator' && c.ind.id===postInds[0].id ? 'grp-start' : ''].join(' ');
-          return `<td class="${cls}" title="${escapeHtml(c.label)}: ${label}${c.ev.reason ? ' — '+escapeHtml(c.ev.reason) : ''}"><div class="ld-ms ${st}">${ldGlyph(st, ldColFlag(c))}<span class="lbl">${ldCellLabel(c.ev)}</span></div></td>`;
-        }).join('')}
       </tr>`; }).join('')}</tbody>
   </table></div>`;
 }
@@ -3582,6 +3594,7 @@ function renderLeadershipDrawer(){
   const s = SHIPMENTS[ldState.open]; if(!s) return;
   const a = ldAnalyse(s);
   const lastDue = [...progressMilestones(s)].reverse().find(m=>m.dueDate);
+  const prod = productOf(s);
   const taskRow = m => {
     const done = ldDone(m), over = !done && m.dueDate && m.dueDate.getTime() < Date.now();
     const owner = ldOwnerOf(s, m), flag = ldLastFlag(m);
@@ -3595,37 +3608,48 @@ function renderLeadershipDrawer(){
         ${!done && m.flagged && flag ? `<div class="tf">⚑ ${escapeHtml(flag.note)} <span style="color:var(--silver-light)">— ${escapeHtml(flag.by)}, ${formatDateTime(new Date(flag.at))}</span></div>` : ''}
       </div>${right}</div>`;
   };
-  const block = (c, isLast) => {
-    const e = c.ev, st = e.state, chip = LD_STATE[st].chip, label = LD_STATE[st].label;
-    const ind = c.kind==='indicator' ? c.ind : null;
-    const sub = st==='unset'
-      ? `${escapeHtml(ind.trigger.note || 'Trigger to be defined')}. No Ops task stands in for it on ${escapeHtml(productOf(s).tier2)} yet.`
-      : st==='na'
-      ? `Not part of ${escapeHtml(productOf(s).tier1)} · ${escapeHtml(productOf(s).tier2)}.`
-      : (st==='done'||st==='late') ? `Completed ${formatDateTime(e.completedAt)}` : `Due ${ldWhen(e.due)}`;
-    const meta = ind ? `<div class="ld-ind-meta"><span><b>SLA</b> ${escapeHtml(ind.sla)}</span><span><b>P</b> ${escapeHtml(ind.primary)}</span><span><b>S</b> ${escapeHtml(ind.support)}</span></div>
-      <div class="ld-ind-detail">${escapeHtml(ind.detail)}</div>` : '';
-    const isOpen = (st==='breached'||st==='atrisk'||st==='ontrack');
-    const feed = c.tasks.length ? `<details class="ld-team" ${isOpen?'open':''}>
-        <summary><span>${ind ? 'Provisional trigger · fed by Ops tasks' : 'Tasks in this stage'}</span><span style="color:var(--silver-light);font-weight:500">${e.doneCount}/${e.total} done</span></summary>
-        ${ind && ind.trigger.note ? `<div class="ld-trigger-note">${escapeHtml(ind.trigger.note)}</div>` : ''}
-        ${c.tasks.map(taskRow).join('')}
-      </details>` : '';
+  const whenLine = e => (e.state==='done'||e.state==='late') ? `Completed ${formatDateTime(e.completedAt)}` : e.due ? `Due ${ldWhen(e.due)}` : '';
+  const indicatorRow = c => {
+    const e = c.ev, st = e.state, ind = c.ind;
+    const sub = st==='unset' ? `${escapeHtml(ind.trigger.note || 'Trigger to be defined')} · trigger not set yet`
+      : st==='na' ? `Not part of ${escapeHtml(prod.tier2)}` : whenLine(e);
+    const isOpen = st==='breached' || st==='atrisk';
+    return `<div class="ld-ind ${st}">
+      <div class="ld-ind-top">${ldGlyph(st, ldColFlag(c))}
+        <div class="ld-ind-name"><b>${ind.no ? `<span class="ind-no">${ind.no}</span>` : ''}${escapeHtml(ind.label)}</b><span>${sub}</span></div>
+        <span class="chip ${LD_STATE[st].chip}">${LD_STATE[st].label}</span>
+      </div>
+      ${st!=='na' ? `<div class="ld-ind-body">
+        ${e.reason ? `<div class="ld-reason ${st==='breached'?'bad':'warn'}">${escapeHtml(e.reason)}</div>` : ''}
+        <div class="ld-ind-meta"><span><b>SLA</b> ${escapeHtml(ind.sla)}</span><span><b>P</b> ${escapeHtml(ind.primary)}</span><span><b>S</b> ${escapeHtml(ind.support)}</span></div>
+        <div class="ld-ind-detail">${escapeHtml(ind.detail)}</div>
+        ${c.tasks.length ? `<details class="ld-team" ${isOpen?'open':''}>
+          <summary><span>Provisional trigger · fed by Ops tasks</span><span style="color:var(--silver-light);font-weight:500">${e.doneCount}/${e.total} done</span></summary>
+          ${ind.trigger.note ? `<div class="ld-trigger-note">${escapeHtml(ind.trigger.note)}</div>` : ''}
+          ${c.tasks.map(taskRow).join('')}
+        </details>` : ''}
+      </div>` : ''}
+    </div>`;
+  };
+  const stageBlock = c => {
+    const e = c.ev, st = e.state;
+    const sub = c.indicators
+      ? `${e.doneCount} of ${e.total} indicators complete${whenLine(e) ? ' · '+whenLine(e) : ''}`
+      : whenLine(e);
     return `<div class="ld-stage">
       <div class="ld-spine">${ldGlyph(st, ldColFlag(c))}<span class="line"></span></div>
       <div class="ld-sbody">
-        <div class="ld-stop"><h4 ${st==='na'||st==='unset'?'style="color:var(--silver-light)"':''}>${ind && ind.no ? `<span class="ind-no">${ind.no}</span>` : ''}${escapeHtml(c.label)}</h4><span class="chip ${chip}">${label}</span></div>
+        <div class="ld-stop"><h4>${escapeHtml(c.label)}</h4><span class="chip ${LD_STATE[st].chip}">${LD_STATE[st].label}</span></div>
         <div class="ld-ssub">${sub}</div>
-        ${e.reason ? `<div class="ld-reason ${st==='breached'?'bad':'warn'}">${escapeHtml(e.reason)}</div>` : ''}
-        ${meta}${feed}
+        ${c.indicators
+          ? `<div class="ld-ind-list">${c.indicators.map(indicatorRow).join('')}</div>`
+          : `<details class="ld-team"><summary><span>Tasks in this stage</span><span style="color:var(--silver-light);font-weight:500">${e.doneCount}/${e.total} done</span></summary>${c.tasks.map(taskRow).join('')}</details>`}
       </div></div>`;
   };
-  const section = (title, cols) => `<div class="ld-dsection"><div class="ld-dsection-head">${title}</div>${cols.map(c=>block(c)).join('')}</div>`;
-  const pre = a.cols.filter(c=>c.kind==='stage'), bk = a.cols.filter(c=>c.stage==='Booking'), pb = a.cols.filter(c=>c.stage==='Post-Booking');
   el('ld-drawer').innerHTML = `
     <div class="ld-dhead">
       <div class="row1">
-        <div><div class="ld-eyebrow">${escapeHtml(ldProduct(s).tier1)} · ${escapeHtml(ldProduct(s).tier2)}</div><h2>${s.jobRef} · ${escapeHtml(s.customer)}</h2></div>
+        <div><div class="ld-eyebrow">${escapeHtml(prod.tier1)} · ${escapeHtml(prod.tier2)}</div><h2>${s.jobRef} · ${escapeHtml(s.customer)}</h2></div>
         <button class="btn btn-ghost btn-icon" data-ld-close title="Close"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"></path></svg></button>
       </div>
       <div class="ld-facts">
@@ -3634,14 +3658,10 @@ function renderLeadershipDrawer(){
         <div><div class="k">Health</div><div class="v"><span class="chip ${LD_HEALTH[a.health].chip}">${LD_HEALTH[a.health].label}</span></div></div>
         <div><div class="k">ETD</div><div class="v">${escapeHtml(s.etd)}</div></div>
         <div><div class="k">Last task due</div><div class="v">${lastDue ? ldDay(lastDue.dueDate) : '—'}</div></div>
-        <div><div class="k">Ops tasks</div><div class="v">${a.done} of ${a.total} done</div></div>
+        <div><div class="k">Team tasks</div><div class="v">${a.done} of ${a.total} done</div></div>
       </div>
     </div>
-    <div class="ld-dbody">
-      ${section('Before booking', pre)}
-      ${section('Booking', bk)}
-      ${section('Post Booking', pb)}
-    </div>
+    <div class="ld-dbody">${a.stages.map(stageBlock).join('')}</div>
     <div class="ld-dfoot">
       <span>Indicators update from the Ops team's work in the Progress tab.</span>
       <button class="btn btn-solid btn-sm" data-ld-goto="${s.jobRef}">Open Progress tab →</button>
