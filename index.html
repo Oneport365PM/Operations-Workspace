@@ -482,6 +482,24 @@ textarea.field-control{resize:vertical;min-height:70px}
 /* ==========================================================================
    Leadership view (key SLA milestones)
    ========================================================================== */
+.list-tier1{font-weight:700;color:var(--green-dark);font-size:13px;white-space:nowrap}
+.list-tier2{font-size:12px;color:var(--silver-light);max-width:150px;line-height:1.35}
+.strip-sub{display:block;font-size:12px;font-weight:500;color:var(--silver-light)}
+.sd-stage-row td{background:var(--green-light-surface);padding:9px 14px !important;border-bottom:1px solid var(--border-tint)}
+.sd-stage-name{font-family:var(--font-display);font-weight:600;color:var(--green-dark);font-size:13px;margin-right:10px}
+.sd-stage-count{font-size:12px;color:var(--silver-light)}
+.task-title{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.task-no{font-size:11px;color:var(--silver-light);font-variant-numeric:tabular-nums;min-width:18px}
+.task-draft-badge{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--gold-text);background:var(--gold-bg);padding:2px 7px;border-radius:5px}
+.task-cond{font-size:11.5px;color:var(--silver-light);margin:3px 0 0 26px}
+.task-sla{font-size:11.5px;color:var(--silver-light);margin-top:3px;max-width:190px;white-space:normal}
+#service-delivery-tbody td:first-child{min-width:210px}
+.task-owner-role{font-size:11px;color:var(--silver-light);margin-top:4px}
+.task-owner-external{font-size:12px;font-weight:600;color:#4a5a3f;background:var(--green-chip-bg);padding:3px 8px;border-radius:6px}
+.ms-workbook{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px 18px;margin-top:14px;font-size:13px;border:1px solid var(--border-tint-soft);border-radius:var(--radius-md);padding:14px 18px}
+.ms-workbook .k{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--silver-light);font-weight:700;padding-top:2px}
+.ms-workbook .v{color:var(--silver-dark)}
+.ms-workbook .draft{grid-column:1/-1;background:var(--gold-bg);color:var(--gold-text);border-radius:6px;padding:8px 10px;font-size:12.5px}
 .ld-search{display:flex;align-items:center;gap:8px;border:1px solid var(--border-tint);border-radius:var(--radius-md);padding:8px 12px;background:var(--white);width:280px;max-width:100%}
 .ld-search input{border:0;outline:0;background:transparent;width:100%;font-size:13px}
 .ld-card{padding:0;overflow:hidden}
@@ -524,12 +542,10 @@ td.ld-first .ld-ms::before{display:none}
 .ld-g-upcoming{background:var(--white);border:2px solid #C3CABB}
 .ld-flagmark{position:absolute;top:-4px;right:-6px;width:14px;height:14px;border-radius:50%;background:var(--white);color:var(--error);display:grid;place-items:center}
 .ld-tier1{font-weight:700;color:var(--green-dark);font-size:12.5px;white-space:nowrap}
-.ld-tier2{font-size:11.5px;color:var(--silver-light);white-space:nowrap}
+.ld-tier2{font-size:11.5px;color:var(--silver-light);max-width:150px;line-height:1.35}
 .ld-g-na{background:var(--green-chip-bg);color:var(--silver-light);font-size:12px;font-weight:700}
 .ld-ms.na .lbl{font-style:italic}
-.ld-matrix th.key{min-width:120px}
-.ld-cfg-sum{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--silver-light);margin:6px 0 4px}
-.ld-cfg-sum b{color:var(--green-dark)}
+.ld-matrix th.key{min-width:92px}
 .ld-empty{padding:40px 22px;text-align:center;color:var(--silver-light)}
 .ld-overlay{position:fixed;inset:0;background:rgba(2,24,12,.38);z-index:900}
 .ld-drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100vw);background:var(--cream);z-index:901;box-shadow:var(--shadow-e3);display:flex;flex-direction:column}
@@ -566,19 +582,7 @@ details.ld-team summary::-webkit-details-marker{display:none}
 .ld-task .td{font-size:11.5px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--silver-light)}
 .ld-task .td.bad{color:var(--error-text);font-weight:700}
 .ld-task .td.ok{color:var(--success-text)}
-.ld-cfg-tabs{display:inline-flex;background:var(--green-light-surface);border-radius:9px;padding:3px;gap:2px;flex-wrap:wrap;margin-bottom:6px}
-.ld-cfg-tabs button{border:0;background:transparent;padding:6px 12px;border-radius:7px;font-size:12.5px;font-weight:600;color:var(--silver-light)}
-.ld-cfg-tabs button.on{background:var(--white);color:var(--green-dark);box-shadow:var(--shadow-e1)}
-.ld-cfg-row{display:grid;grid-template-columns:26px minmax(0,1fr) 190px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-tint-soft);font-size:13px}
-.ld-cfg-row .n{color:var(--silver-light);font-size:12px;text-align:right;font-variant-numeric:tabular-nums}
-.ld-cfg-row .nm{font-weight:600;color:var(--green-dark)}
-.ld-cfg-row .nm small{display:block;font-weight:400;color:var(--silver-light);font-size:11.5px}
-.ld-cfg-row input[type=text]{width:100%;border:1px solid var(--border-tint);border-radius:7px;padding:6px 9px;font-size:12.5px}
-.ld-cfg-row input[type=text]:disabled{opacity:.35;background:transparent}
-.ld-cfg-row label{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--silver-light);cursor:pointer;justify-self:end}
-.ld-cfg-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--success)}
-@media (max-width:640px){ .ld-cfg-row{grid-template-columns:22px minmax(0,1fr)} .ld-cfg-row select{grid-column:2 / -1} .ld-facts{grid-template-columns:repeat(2,minmax(0,1fr))} }
-</style>
+@media (max-width:640px){ </style>
 </head>
 <body>
 
@@ -678,10 +682,6 @@ details.ld-team summary::-webkit-details-marker{display:none}
           </div>
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
             <label class="ld-search"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4-4" stroke-linecap="round"></path></svg><input type="search" id="ld-search" placeholder="Shipment or customer"></label>
-            <button class="btn btn-outline btn-sm" id="ld-btn-config">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.5 7L12 17.6 5.7 21.1l1.5-7L2 9.3l7-.8z" stroke-linejoin="round"></path></svg>
-              Map tasks to phases
-            </button>
           </div>
         </div>
         <div class="card ld-card" id="ld-pipeline"></div>
@@ -725,6 +725,7 @@ details.ld-team summary::-webkit-details-marker{display:none}
                 <tr>
                   <th>Shipment Number</th>
                   <th>Customer</th>
+                  <th>Product</th>
                   <th>POL</th>
                   <th>POD</th>
                   <th>Transport Mode</th>
@@ -818,7 +819,7 @@ details.ld-team summary::-webkit-details-marker{display:none}
                 <h3 class="section-title" style="margin-bottom:0">Service Delivery</h3>
                 <span class="chip chip-neutral" id="service-delivery-template-pill"></span>
               </div>
-              <p class="section-sub">Milestones for this shipment. Completion is logged manually.</p>
+              <p class="section-sub">Booking and Post-Booking tasks for this service combination, from the OnePort Service Workbook. Completion is logged manually.</p>
               <div class="table-wrap">
                 <table class="data-table">
                   <thead>
@@ -1048,6 +1049,7 @@ details.ld-team summary::-webkit-details-marker{display:none}
         <div class="ms-sla-label" id="ms-sla-label"></div>
       </div>
       <div class="ms-info-grid" id="ms-info-grid"></div>
+      <div class="ms-workbook" id="ms-workbook"></div>
       <div class="form-field" style="margin-top:16px">
         <label class="field-label">Completion Note</label>
         <textarea class="field-control" id="input-milestone-comment" rows="2" placeholder="Add any relevant detail..."></textarea>
@@ -1249,26 +1251,9 @@ details.ld-team summary::-webkit-details-marker{display:none}
 <!-- Leadership: shipment drill-down + key milestone configuration -->
 <div class="ld-overlay" id="ld-overlay" hidden></div>
 <aside class="ld-drawer" id="ld-drawer" hidden aria-label="Shipment key milestones"></aside>
-<div class="modal-overlay" id="modal-ld-config">
-  <div class="modal modal-wide">
-    <div class="modal-head">
-      <div>
-        <h3>Map tasks to phases</h3>
-        <p>Assign each Service Delivery task to a phase. A phase is complete when the Ops team has completed all of its tasks in the Progress tab.</p>
-      </div>
-      <button class="modal-close" data-close-modal><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"></path></svg></button>
-    </div>
-    <div class="modal-body" id="ld-config-body"></div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" id="ld-config-reset" style="margin-right:auto">Reset to defaults</button>
-      <button class="btn btn-outline" data-close-modal>Cancel</button>
-      <button class="btn btn-accent" id="ld-config-save">Save</button>
-    </div>
-  </div>
-</div>
-
 <div id="toast-wrap"></div>
 
+<script src="data/service-milestones.js"></script>
 <script>
 /* ==========================================================================
    Icon helpers (used sparingly across the interface)
@@ -1311,7 +1296,8 @@ function avatarFillStyle(fill){
   return 'background:var(--green-dark);color:var(--green-accent)';
 }
 
-const RESPONSIBILITIES = ['Operations Manager','Operations Officer','Documentation Officer','Finance Officer','QA Officer','CX Officer','Clearing Officer','Transport Officer','Customer Success'];
+// Owner roles from the Service Workbook's Booking and Post-Booking tasks
+const RESPONSIBILITIES = ['Operations Manager','QA Manager','Clearing Officer','Customer Success Officer','Finance','Documentation Officer / Admin','Transport Manager','Transport Officer','Vendor Manager'];
 
 // Document checklist — Ops Feedback doc (Back Office 2.0), sections 1-2.
 // Driven purely by shipment direction (Import/Export), not transport mode, so
@@ -1357,7 +1343,7 @@ function renderStatusChip(status, sizeClass=''){
 
 function shipmentTypeOf(s){ return s.mode.includes('Import') ? 'Import' : s.mode.includes('Export') ? 'Export' : 'Cross-trade'; }
 function transportLabelOf(s){ return s.mode.includes('Ocean') ? 'Ocean Freight' : s.mode.includes('Air') ? 'Air Freight' : s.mode; }
-function templateLabelOf(s){ return s.mode.includes('Export') ? 'OneExport' : 'OneImport'; }
+function templateLabelOf(s){ return productOf(s).tier1; }
 
 const PORTS = [
   {code:'CNSHA', name:'Shanghai Yangshan Port'},
@@ -1376,6 +1362,29 @@ const PORTS = [
   {code:'KRPUS', name:'Port of Busan'},
   {code:'CNTAO', name:'Port of Qingdao'},
   {code:'AEJEA', name:'Jebel Ali Port, Dubai'},
+  {code:'NGTIN', name:'Tin Can Island Port, Lagos'},
+  {code:'NGLKK', name:'Lekki Deep Sea Port'},
+  {code:'NGONN', name:'Onne Port'},
+  {code:'NGPHC', name:'Port Harcourt International Airport'},
+  {code:'NGABV', name:'Nnamdi Azikiwe International Airport'},
+  {code:'NGKAN', name:'Mallam Aminu Kano International Airport'},
+  {code:'USHOU', name:'Port of Houston'},
+  {code:'USBAL', name:'Port of Baltimore'},
+  {code:'BRSSZ', name:'Port of Santos'},
+  {code:'CIABJ', name:'Port of Abidjan'},
+  {code:'TGLFW', name:'Port of Lomé'},
+  {code:'BJCOO', name:'Port of Cotonou'},
+  {code:'USIAH', name:'George Bush Intercontinental Airport'},
+  {code:'DEFRA', name:'Frankfurt Airport'},
+  {code:'GBLHR', name:'London Heathrow Airport'},
+  {code:'AEDXB', name:'Dubai International Airport'},
+  {code:'HKHKG', name:'Hong Kong International Airport'},
+  {code:'INBOM', name:'Chhatrapati Shivaji Maharaj International Airport'},
+  {code:'FRCDG', name:'Paris Charles de Gaulle Airport'},
+  {code:'ITMXP', name:'Milan Malpensa Airport'},
+  {code:'GBABZ', name:'Aberdeen Airport'},
+  {code:'SGSIN', name:'Singapore Changi Airport'},
+  {code:'NLAMS', name:'Amsterdam Schiphol Airport'},
 ];
 const LOCODE_MAP = Object.fromEntries(PORTS.map(p=>[p.name, p.code]));
 function locodeOf(portName){ return LOCODE_MAP[portName] || portName; }
@@ -1385,6 +1394,9 @@ const LOCATIONS = [
   'Shenzhen, China','Douala, Cameroon','Antwerp, Belgium','Singapore','Dubai, UAE',
   'Mombasa, Kenya','Durban, South Africa','New York, USA','Felixstowe, United Kingdom',
   'Valencia, Spain','Tianjin, China','Busan, South Korea','Qingdao, China','Ningbo, China','Santos, Brazil',
+  'Port Harcourt, Nigeria','Abuja, Nigeria','Kano, Nigeria','Houston, USA','Baltimore, USA','Lomé, Togo','Cotonou, Benin',
+  "Abidjan, Côte d'Ivoire",'Frankfurt, Germany','London, United Kingdom','Hong Kong','Mumbai, India','Paris, France',
+  'Milan, Italy','Aberdeen, United Kingdom','Amsterdam, Netherlands',
 ];
 
 const MONTH_MAP = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
@@ -1430,86 +1442,50 @@ function computeLiveSlaHealth(dueDate){
   return 'Healthy';
 }
 
-// Service Delivery task tables — Ops Feedback doc (Back Office 2.0), sections 3-5.
-// slaLabel is the real SLA/Timeline wording from that document, shown to users
-// verbatim; slaDays is only an approximate day-equivalent used where a number
-// is needed (e.g. the modal's due-date math), not a re-derivation of slaLabel.
-// Where a task named more than one possible owner, the first-listed role was
-// kept as the single accountable owner — except Ocean Import's "D/F
-// Assessment", deliberately assigned to Customer Success (the new role the
-// document introduces) rather than losing it to the tie-break.
-const OCEAN_EXPORT_TEMPLATE = [
-  {name:'Booking', responsibility:'QA Officer', slaLabel:'1 working day', slaDays:1},
-  {name:'Empty Deployment', responsibility:'Transport Officer', slaLabel:'Within 48 hrs of booking', slaDays:2},
-  {name:'Stuffing', responsibility:'Clearing Officer', slaLabel:'48 hrs after arrival at warehouse', slaDays:2},
-  {name:'Gate-In', responsibility:'Clearing Officer', slaLabel:'48–72 hrs after stuffing', slaDays:3},
-  {name:'Terminal', responsibility:'Clearing Officer', slaLabel:'Same day', slaDays:1},
-  {name:'Customs', responsibility:'Clearing Officer', slaLabel:'1–2 working days after CCI issuance', slaDays:2},
-  {name:'Shipping Line', responsibility:'QA Officer', slaLabel:'Before shipping-line cut-off', slaDays:1},
-  {name:'Submit Export Docs', responsibility:'Clearing Officer', slaLabel:'Within 4 hrs of receipt', slaDays:1},
-  {name:'Vessel', responsibility:'QA Officer', slaLabel:'As per sailing schedule', slaDays:2},
-  {name:'Post-Shipment', responsibility:'Documentation Officer', slaLabel:'2–4 working days after liner payment', slaDays:3},
-  {name:'Closure', responsibility:'Clearing Officer', slaLabel:'Within 24 hrs', slaDays:1},
-];
-const OCEAN_IMPORT_TEMPLATE = [
-  {name:'Pre-Arrival', responsibility:'QA Officer', slaLabel:'Before vessel arrival', slaDays:2},
-  {name:'Documentation', responsibility:'Clearing Officer', slaLabel:'Within 4 working hrs', slaDays:1},
-  {name:'Compliance', responsibility:'QA Officer', slaLabel:'14 days before arrival', slaDays:1},
-  {name:'Rotation No.', responsibility:'Clearing Officer', slaLabel:'5 working days before ATA', slaDays:2},
-  {name:'D/F Assessment', responsibility:'Customer Success', slaLabel:'24 hrs after rotation no.', slaDays:1},
-  {name:'Duty Payment', responsibility:'Clearing Officer', slaLabel:'Before arrival where possible', slaDays:2},
-  {name:'Arrival', responsibility:'Clearing Officer', slaLabel:'Same day', slaDays:1},
-  {name:'Shipping Payment', responsibility:'Finance Officer', slaLabel:'24 hrs after vessel arrival', slaDays:1},
-  {name:'Terminal', responsibility:'Finance Officer', slaLabel:'24 hrs after ATA', slaDays:1},
-  {name:'Examination', responsibility:'Clearing Officer', slaLabel:'Within terminal SLA', slaDays:2},
-  {name:'Customs Release', responsibility:'Clearing Officer', slaLabel:'48 hrs after examination', slaDays:2},
-  {name:'TDO', responsibility:'Clearing Officer', slaLabel:'12 hrs after NCS gate release', slaDays:1},
-  {name:'Haulage', responsibility:'Transport Officer', slaLabel:'24–48 hrs before TDO', slaDays:2},
-  {name:'Delivery', responsibility:'Transport Officer', slaLabel:'As scheduled', slaDays:1},
-  {name:'Empty Return', responsibility:'Transport Officer', slaLabel:'Within agreed shipping-line free period', slaDays:2},
-  {name:'Closure', responsibility:'QA Officer', slaLabel:'Within 24–48 hrs', slaDays:2},
-];
-// Air tables in the source document carry no SLA/Timeline column — these
-// tasks show the computed due date only (same as today), no slaLabel text.
-const AIR_EXPORT_TEMPLATE = [
-  {name:'Receive Client Booking', responsibility:'Operations Officer', slaDays:1},
-  {name:'Validate Commercial Documents', responsibility:'Operations Manager', slaDays:1},
-  {name:'Confirm Cargo Details', responsibility:'QA Officer', slaDays:1},
-  {name:'Confirm Airline Schedule & Space', responsibility:'Clearing Officer', slaDays:1},
-  {name:'Obtain Booking Confirmation', responsibility:'QA Officer', slaDays:1},
-  {name:'Coordinate Cargo Pickup', responsibility:'Clearing Officer', slaDays:1},
-  {name:'Complete Export Documentation', responsibility:'Clearing Officer', slaDays:1},
-  {name:'Coordinate Customs Processing', responsibility:'Clearing Officer', slaDays:1},
-  {name:'Deliver Cargo to Airline/Terminal', responsibility:'Clearing Officer', slaDays:1},
-  {name:'Confirm AWB Issuance', responsibility:'Clearing Officer', slaDays:1},
-  {name:'Monitor Flight Departure', responsibility:'QA Officer', slaDays:1},
-  {name:'Send Pre-Alert / Shipping Documents', responsibility:'Documentation Officer', slaDays:1},
-  {name:'Update & Upload Docs', responsibility:'QA Officer', slaDays:1},
-  {name:'Close Shipment', responsibility:'QA Officer', slaDays:1},
-];
-const AIR_IMPORT_TEMPLATE = [
-  {name:'Receive Pre-Alert', responsibility:'Operations Officer', slaDays:1},
-  {name:'Review AWB & Shipment Documents', responsibility:'Operations Manager', slaDays:1},
-  {name:'Track Cargo Arrival', responsibility:'QA Officer', slaDays:1},
-  {name:'Sight Shipment', responsibility:'Clearing Officer', slaDays:1},
-  {name:'Coordinate Terminal Handling', responsibility:'Clearing Officer', slaDays:1},
-  {name:'Customs Clearance & Release', responsibility:'Clearing Officer', slaDays:1},
-  {name:'Confirm Shipment Out of Shed', responsibility:'Clearing Officer', slaDays:1},
-  {name:'Delivery', responsibility:'Clearing Officer', slaDays:1},
-  {name:'Waybill', responsibility:'QA Officer', slaDays:1},
-  {name:'Reconcile Shipment Costs', responsibility:'QA Officer', slaDays:1},
-  {name:'Update & Upload Docs', responsibility:'QA Officer', slaDays:1},
-  {name:'Close Shipment', responsibility:'QA Officer', slaDays:1},
-];
+// Service Delivery milestones come from the OnePort 365 Service Workbook
+// (data/service-milestones.js). Every shipment carries one Tier 2 service
+// combination; that combination's Booking and Post-Booking tasks are the
+// Progress-tab milestones the Ops team completes. Its Prospecting and
+// Pre-Booking tasks stay on the record (already complete by the time a
+// shipment exists) but are not shown in the Progress tab.
+const WORKBOOK = window.SERVICE_WORKBOOK;
+const SERVICE_COMBOS = Object.fromEntries(WORKBOOK.service_combinations.map(c=>[c.service_id, c]));
+const PROGRESS_STAGES = ['Booking','Post-Booking'];
+function isProgressStage(stage){ return PROGRESS_STAGES.includes(stage); }
+function progressMilestones(s){ return s.milestones.filter(m=>isProgressStage(m.stage)); }
+function productOf(s){
+  const c = SERVICE_COMBOS[s.serviceId];
+  return c ? { tier1:c.tier1_product, tier2:c.tier2_service_combination, direction:c.direction, sourceStatus:c.source_status, e2e:c.end_to_end_sla }
+           : { tier1:'—', tier2:'—', direction:'', sourceStatus:'', e2e:null };
+}
+// Owners outside the shipment team: tasks the customer or a terminal does.
+const EXTERNAL_OWNERS = ['Customer','Terminal Operator (external)'];
+function isExternalOwner(role){ return EXTERNAL_OWNERS.includes(role); }
 
-// Picks the Service Delivery task table for a shipment by transport mode AND
-// direction (previously this only branched on Export vs Import, so every Air
-// shipment silently received the Ocean template).
-function milestoneTemplateOf(s){
-  const isExport = s.mode.includes('Export');
-  const isAir = s.mode.includes('Air');
-  if(isAir) return isExport ? AIR_EXPORT_TEMPLATE : AIR_IMPORT_TEMPLATE;
-  return isExport ? OCEAN_EXPORT_TEMPLATE : OCEAN_IMPORT_TEMPLATE;
+// Lays a combination's Progress tasks out in time for the sample data. Tasks
+// between the workbook's end-to-end clock start and stop share its upper
+// figure (in calendar days); tasks before the clock start lead into it and
+// tasks after the clock stops (post-shipment admin) trail it. Combinations
+// with no end-to-end SLA yet use 14 days for ocean and 5 for air. The whole
+// plan is then shifted so the next open task is `lead` days from now.
+function planProgressDates(combo, done, lead){
+  const vis = combo.tasks.filter(t=>isProgressStage(t.stage));
+  const n = vis.length, e = combo.end_to_end_sla || {};
+  const idxOf = no => vis.findIndex(t=>t.no===no);
+  let si = 0, ei = n-1;
+  const cs = e.clock_starts, ce = e.clock_stops;
+  if(cs && cs.task_no && idxOf(cs.task_no) >= 0) si = idxOf(cs.task_no);
+  else if(cs && cs.between_task_nos && cs.between_task_nos[1] && idxOf(cs.between_task_nos[1]) >= 0) si = idxOf(cs.between_task_nos[1]);
+  if(ce && ce.task_no && idxOf(ce.task_no) >= 0) ei = idxOf(ce.task_no);
+  if(ei <= si){ si = 0; ei = n-1; }
+  const span = (e.range_calendar_days && e.range_calendar_days.max) || (combo.direction.startsWith('Air') ? 5 : 14);
+  const pre = Math.max(2, si*0.6);
+  const off = vis.map((t,i)=> i < si ? -pre*(si-i)/si
+    : i <= ei ? span*(i-si)/Math.max(1, ei-si)
+    : span + 3*(i-ei)/Math.max(1, n-1-ei));
+  const anchor = Date.now() + lead*86400000 - off[Math.min(done, n-1)]*86400000;
+  const due = off.map((o,i)=>{ const d = new Date(anchor + o*86400000); d.setHours(9 + ((i*3)%8), (i%2)*30, 0, 0); return d; });
+  return { vis, due, startIdx:si, stopIdx:ei };
 }
 
 const PHYSICAL_TRACKING_TEMPLATE = [
@@ -1525,21 +1501,18 @@ const SOURCE_TAG_CLASS = {Terminal:'tag-terminal', Vessel:'tag-vessel', Haulage:
 
 function makeId(prefix){ return prefix + '-' + Math.random().toString(36).slice(2,8); }
 
-// Deterministic mock responsibility assignment per shipment team, with one guaranteed
-// "Unassigned" demo case (seed 7 / Dufil, Export template, missing QA Officer coverage)
+// Deterministic mock responsibility assignment: the primary owner is the
+// Operations Manager and every other workbook role is shared round-robin
+// across the shipment team. One guaranteed "Unassigned" demo case
+// (seed 7 / ZELO000005, no QA Manager on the team).
 function assignResponsibilities(shipTeamIds, seed){
   const resp = {};
-  resp[shipTeamIds[0]] = ['Operations Manager'];
+  shipTeamIds.forEach(id=>{ resp[id] = []; });
+  resp[shipTeamIds[0]].push('Operations Manager');
   const pool = RESPONSIBILITIES.filter(r=>r!=='Operations Manager');
-  let poolIdx = seed % pool.length;
-  for(let i=1;i<shipTeamIds.length;i++){
-    const id = shipTeamIds[i];
-    if(!resp[id]) resp[id] = [];
-    resp[id].push(pool[poolIdx % pool.length]); poolIdx++;
-    resp[id].push(pool[poolIdx % pool.length]); poolIdx++;
-  }
+  pool.forEach((r,i)=>{ resp[shipTeamIds[(i + seed) % shipTeamIds.length]].push(r); });
   if(seed===7){
-    Object.keys(resp).forEach(id=>{ resp[id] = resp[id].filter(r=>r!=='QA Officer'); });
+    Object.keys(resp).forEach(id=>{ resp[id] = resp[id].filter(r=>r!=='QA Manager'); });
   }
   return resp;
 }
@@ -1568,29 +1541,51 @@ function buildShipmentDetail(base, seed){
     });
   }
 
-  const template = milestoneTemplateOf(base);
-  const etdDate = parseDisplayDate(base.etd);
-  const etaDate = parseDisplayDate(base.eta);
-  const span = etaDate.getTime() - etdDate.getTime();
-  const completedCount = base.completedMilestones;
+  const combo = SERVICE_COMBOS[base.serviceId];
+  const plan = planProgressDates(combo, base.done, base.lead);
+  const completedCount = Math.min(base.done, plan.vis.length);
+  const fromWorkbook = (t, extra) => ({
+    id: makeId('ms'),
+    no: t.no,
+    stage: t.stage,
+    name: t.task,
+    responsibility: t.owner,
+    module: t.module,
+    slaLabel: t.sla,
+    slaNotSetReason: t.sla_not_set_reason || null,
+    documents: t.documents || [],
+    expectedOutcome: t.expected_outcome || '',
+    worksWith: t.works_with || [],
+    handsOffTo: t.hands_off_to || [],
+    draft: t.status === 'Draft',
+    condition: t.condition || null,
+    lekkiVariant: t.lekki_variant || null,
+    source: t.source || null,
+    comment: '', flagged: false, flagHistory: [], comments: [],
+    ...extra,
+  });
 
-  const milestones = template.map((t,i)=>{
-    const frac = template.length>1 ? i/(template.length-1) : 0;
-    let dueDate = new Date(etdDate.getTime() + span*frac);
-    dueDate.setHours(9 + ((i*3)%8), (i%2)*30, 0, 0);
-    if(i === template.length-1 && seed % 3 === 0) dueDate = null;
-    if(seed===3 && i===4){ dueDate = new Date(); dueDate.setHours(14,30,0,0); }
-    if(seed===4 && i===6){ dueDate = new Date(); dueDate.setDate(dueDate.getDate()+1); dueDate.setHours(10,0,0,0); }
+  // Prospecting and Pre-Booking: done before the file reached Ops (not shown in Progress)
+  const preTasks = combo.tasks.filter(t=>!isProgressStage(t.stage));
+  const firstDue = plan.due[0].getTime();
+  const preMilestones = preTasks.map((t,i)=>{
+    const dueDate = new Date(firstDue - (preTasks.length - i)*0.5*86400000);
+    return fromWorkbook(t, { status:'Completed', dueDate, completedAt:new Date(dueDate.getTime() - 2*3600000), completedBy:t.owner, completedSlaHealth:'Healthy' });
+  });
+
+  // Booking and Post-Booking: the Progress-tab milestones
+  const progress = plan.vis.map((t,i)=>{
+    const dueDate = plan.due[i];
     const isDone = i < completedCount;
     let completedSlaHealth = null, completedBy = '', completedAt = null, comment = '';
     let flagged = false, flagHistory = [], comments = [];
     if(isDone){
       completedSlaHealth = ((i+seed) % 5 === 0) ? 'Breached' : ((i+seed) % 7 === 0) ? 'At-Risk' : 'Healthy';
-      completedBy = teamMember(shipTeamIds[(i+seed+1)%shipTeamIds.length]).name;
+      completedBy = (resolveOwnersFor(shipTeamIds, responsibilities, t.owner)[0] || teamMember(shipTeamIds[(i+seed+1)%shipTeamIds.length])).name;
       const offsetH = completedSlaHealth==='Breached' ? 26 : completedSlaHealth==='At-Risk' ? -3 : -8;
       completedAt = dueDate
         ? new Date(Math.min(dueDate.getTime() + offsetH*3600000, Date.now() - 3600000))
-        : new Date(Date.now() - (template.length-i)*86400000);
+        : new Date(Date.now() - (plan.vis.length-i)*86400000);
       comment = (i%3===0) ? 'Cleared without exceptions.' : '';
       // A milestone that breached SLA on the way to completion plausibly had
       // a blocker along the way — seed a small, realistic field activity
@@ -1609,30 +1604,23 @@ function buildShipmentDetail(base, seed){
         ];
       }
     }
-    return {
-      id: makeId('ms'),
-      name: t.name,
-      responsibility: t.responsibility,
-      slaDays: t.slaDays,
-      slaLabel: t.slaLabel || null,
+    return fromWorkbook(t, {
       status: isDone ? 'Completed' : 'Not Started',
-      dueDate,
-      completedBy,
-      completedAt,
-      completedSlaHealth,
-      comment,
-      flagged,
-      flagHistory,
-      comments,
-    };
+      dueDate, completedBy, completedAt, completedSlaHealth, comment, flagged, flagHistory, comments,
+    });
   });
+  const milestones = [...preMilestones, ...progress];
+
   // Seeded open blocker, flagged by the field team on the next task due
-  if(base.openFlag && milestones[completedCount]){
-    const m = milestones[completedCount];
+  if(base.openFlag && progress[completedCount]){
+    const m = progress[completedCount];
     const flagger = resolveOwnersFor(shipTeamIds, responsibilities, m.responsibility)[0] || primary;
     m.flagged = true;
     m.flagHistory = [{ note: base.openFlag, by: flagger.name, at: new Date(Date.now() - 5*3600000) }];
   }
+  const slaHealth = base.status !== 'Active' ? 'Healthy'
+    : base.lead < 0 ? 'Breached' : (base.lead <= 1 || base.openFlag) ? 'At-Risk' : 'Healthy';
+  const etd = formatDate(plan.due[plan.startIdx]), eta = formatDate(plan.due[plan.stopIdx]);
 
   const trackedCount = Math.min(PHYSICAL_TRACKING_TEMPLATE.length, 2 + (seed % 5));
   const physicalTracking = PHYSICAL_TRACKING_TEMPLATE.map((t,i)=>({
@@ -1671,6 +1659,7 @@ function buildShipmentDetail(base, seed){
 
   return {
     ...base,
+    slaHealth, etd, eta,
     owners: { primary, supporting, responsibilities },
     containers,
     milestones,
@@ -1680,31 +1669,37 @@ function buildShipmentDetail(base, seed){
   };
 }
 
-// Sample dates are planned around today so SLA health reads realistically in
-// both the Ops Progress tab and the Leadership view. `lead` is how many days
-// ahead (+) or behind (−) the next open task's due date sits from now.
-function demoDates(mode, completed, spanDays, lead){
-  const n = milestoneTemplateOf({mode}).length;
-  const now = Date.now();
-  const etd = new Date(now + (lead - spanDays*completed/(n-1))*86400000);
-  const eta = new Date(etd.getTime() + spanDays*86400000);
-  return { etd: formatDate(etd), eta: formatDate(eta) };
-}
-
+// One sample shipment per Tier 2 service combination in the Service Workbook.
+// done = Progress tasks already completed; lead = days until (+) or since (−)
+// the next open task falls due, so SLA health reads realistically for today.
 const SHIPMENT_LIST_BASE = [
-  {jobRef:'ZELO000001', customer:'Dangote Industries', route:'Shanghai → Lagos', mode:'Ocean Import', status:'Active', slaHealth:'Healthy', ownerId:'u1', supportingOwnerIds:['u5','u6'], completedMilestones:4, quoteRef:'OP-QT-8821', bl:'MEDUSH0123456', incoterm:'CIF', origin:'Shanghai, China', destination:'Lagos, Nigeria', pol:'Shanghai Yangshan Port', pod:'Apapa Port, Lagos', serviceType:'FCL', ...demoDates('Ocean Import', 4, 24, 0.5)},
-  {jobRef:'ZELO000002', customer:'Nestlé West Africa', route:'Rotterdam → Tema', mode:'Ocean Import', status:'Active', slaHealth:'At-Risk', ownerId:'u2', supportingOwnerIds:['u4'], completedMilestones:6, quoteRef:'OP-QT-8790', bl:'MSCURTM998211', incoterm:'FOB', origin:'Rotterdam, Netherlands', destination:'Tema, Ghana', pol:'Port of Rotterdam', pod:'Tema Port', serviceType:'FCL', ...demoDates('Ocean Import', 6, 24, 1)},
-  {jobRef:'ZELO000003', customer:'Julius Berger Nigeria', route:'Hamburg → Lagos', mode:'Ocean Import', status:'Active', slaHealth:'Breached', ownerId:'u3', supportingOwnerIds:[], completedMilestones:1, quoteRef:'OP-QT-8744', bl:'HLCUHAM774410', incoterm:'CFR', origin:'Hamburg, Germany', destination:'Lagos, Nigeria', pol:'Port of Hamburg', pod:'Apapa Port, Lagos', serviceType:'Break Bulk', ...demoDates('Ocean Import', 1, 24, -3)},
-  {jobRef:'ZELO000004', customer:'MTN Nigeria', route:'Shenzhen → Lagos', mode:'Air Import', status:'Cancelled', slaHealth:'Healthy', ownerId:'u4', supportingOwnerIds:['u1'], completedMilestones:2, quoteRef:'OP-QT-8701', bl:'MAWB-176-882130', incoterm:'FCA', origin:'Shenzhen, China', destination:'Lagos, Nigeria', pol:'Shenzhen Bao\'an Airport', pod:'Murtala Muhammed Airport', serviceType:'Air Freight', ...demoDates('Air Import', 2, 6, 1)},
-  {jobRef:'ZELO000005', customer:'Dufil Prima Foods', route:'Lagos → Douala', mode:'Ocean Export', status:'Active', slaHealth:'Healthy', ownerId:'u5', supportingOwnerIds:['u2','u3'], completedMilestones:7, quoteRef:'OP-QT-8650', bl:'OOLU2384910X', incoterm:'CIF', origin:'Lagos, Nigeria', destination:'Douala, Cameroon', pol:'Apapa Port, Lagos', pod:'Port of Douala', serviceType:'FCL', ...demoDates('Ocean Export', 7, 19, 3.5)},
-  {jobRef:'ZELO000006', customer:'Nigerian Breweries', route:'Antwerp → Lagos', mode:'Ocean Import', status:'Completed', slaHealth:'Healthy', ownerId:'u6', supportingOwnerIds:[], completedMilestones:10, quoteRef:'OP-QT-8590', bl:'APLU5567234B', incoterm:'CIF', origin:'Antwerp, Belgium', destination:'Lagos, Nigeria', pol:'Port of Antwerp', pod:'Apapa Port, Lagos', serviceType:'FCL', ...demoDates('Ocean Import', 10, 24, -30)},
-  {jobRef:'ZELO000007', customer:'Flour Mills of Nigeria', route:'Santos → Lagos', mode:'Ocean Import', status:'Active', slaHealth:'Healthy', ownerId:'u2', supportingOwnerIds:['u4','u5'], completedMilestones:5, quoteRef:'OP-QT-8904', bl:'MAEUSSZ551203', incoterm:'CFR', origin:'Santos, Brazil', destination:'Lagos, Nigeria', pol:'Port of Santos', pod:'Tin Can Island Port, Lagos', serviceType:'FCL', ...demoDates('Ocean Import', 5, 26, 3.5)},
-  {jobRef:'ZELO000008', customer:'Lafarge Africa', route:'Izmir → Onne', mode:'Ocean Import', status:'Active', slaHealth:'At-Risk', ownerId:'u1', supportingOwnerIds:['u4'], completedMilestones:9, quoteRef:'OP-QT-8911', bl:'CMAUIZM220871', incoterm:'CIF', origin:'Izmir, Turkey', destination:'Onne, Nigeria', pol:'Port of Izmir', pod:'Onne Port', serviceType:'Break Bulk', openFlag:'Examination booked but the terminal is congested; NCS officers not on site.', ...demoDates('Ocean Import', 9, 24, 3)},
-  {jobRef:'ZELO000009', customer:'Olam Agri', route:'Lagos → Antwerp', mode:'Ocean Export', status:'Active', slaHealth:'Healthy', ownerId:'u5', supportingOwnerIds:['u3'], completedMilestones:2, quoteRef:'OP-QT-8920', bl:'MSCULOS734520', incoterm:'FOB', origin:'Lagos, Nigeria', destination:'Antwerp, Belgium', pol:'Apapa Port, Lagos', pod:'Port of Antwerp', serviceType:'FCL', ...demoDates('Ocean Export', 2, 19, 4)},
-  {jobRef:'ZELO000010', customer:'Seplat Energy', route:'Houston → Port Harcourt', mode:'Air Import', status:'Active', slaHealth:'Breached', ownerId:'u4', supportingOwnerIds:['u2'], completedMilestones:5, quoteRef:'OP-QT-8932', bl:'MAWB-001-447820', incoterm:'EXW', origin:'Houston, USA', destination:'Port Harcourt, Nigeria', pol:'George Bush Intercontinental Airport', pod:'Port Harcourt International Airport', serviceType:'Air Freight', openFlag:'Customs yet to release; awaiting PAAR confirmation.', ...demoDates('Air Import', 5, 7, -1.5)},
-  {jobRef:'ZELO000011', customer:'Cadbury Nigeria', route:'Lagos → Rotterdam', mode:'Ocean Export', status:'Active', slaHealth:'Breached', ownerId:'u3', supportingOwnerIds:['u6'], completedMilestones:4, quoteRef:'OP-QT-8940', bl:'HLCULOS118342', incoterm:'FOB', origin:'Lagos, Nigeria', destination:'Rotterdam, Netherlands', pol:'Apapa Port, Lagos', pod:'Port of Rotterdam', serviceType:'FCL', ...demoDates('Ocean Export', 4, 19, -2)},
-  {jobRef:'ZELO000012', customer:'Unilever Nigeria', route:'Lagos → London', mode:'Air Export', status:'Active', slaHealth:'At-Risk', ownerId:'u2', supportingOwnerIds:['u5','u6'], completedMilestones:6, quoteRef:'OP-QT-8952', bl:'MAWB-125-903311', incoterm:'FCA', origin:'Lagos, Nigeria', destination:'London, United Kingdom', pol:'Murtala Muhammed Airport', pod:'London Heathrow Airport', serviceType:'Air Freight', openFlag:'Airline offloaded the cargo to the next flight for lack of space.', ...demoDates('Air Export', 6, 7, 1.5)},
-  {jobRef:'ZELO000013', customer:'GZ Industries', route:'Ningbo → Lagos', mode:'Ocean Import', status:'Active', slaHealth:'Healthy', ownerId:'u6', supportingOwnerIds:['u1'], completedMilestones:3, quoteRef:'OP-QT-8960', bl:'OOLUNGB660214', incoterm:'CFR', origin:'Ningbo, China', destination:'Lagos, Nigeria', pol:'Port of Ningbo', pod:'Tin Can Island Port, Lagos', serviceType:'FCL', ...demoDates('Ocean Import', 3, 28, 4)},
+  {jobRef:"ZELO000001", customer:"Dangote Industries", serviceId:"OI-HCBT", route:"Shanghai → Lagos", mode:"Ocean Import", serviceType:"FCL", status:"Active", ownerId:"u1", supportingOwnerIds:["u5", "u6"], done:9, lead:0.6, quoteRef:"OP-QT-8821", bl:"MEDUSH0123456", incoterm:"CIF", origin:"Shanghai, China", destination:"Lagos, Nigeria", pol:"Shanghai Yangshan Port", pod:"Apapa Port, Lagos"},
+  {jobRef:"ZELO000002", customer:"Nestlé West Africa", serviceId:"FS-OF", route:"Rotterdam → Tema", mode:"Ocean Import", serviceType:"FCL", status:"Active", ownerId:"u2", supportingOwnerIds:["u4"], done:5, lead:1.5, quoteRef:"OP-QT-8790", bl:"MSCURTM998211", incoterm:"FOB", origin:"Rotterdam, Netherlands", destination:"Tema, Ghana", pol:"Port of Rotterdam", pod:"Tema Port"},
+  {jobRef:"ZELO000003", customer:"Julius Berger Nigeria", serviceId:"OI-CBT", route:"Hamburg → Lagos", mode:"Ocean Import", serviceType:"Break Bulk", status:"Active", ownerId:"u3", supportingOwnerIds:[], done:6, lead:-2.5, quoteRef:"OP-QT-8744", bl:"HLCUHAM774410", incoterm:"CFR", origin:"Hamburg, Germany", destination:"Lagos, Nigeria", pol:"Port of Hamburg", pod:"Apapa Port, Lagos", openFlag:"Examination stalled: Customs raised a query on the HS code."},
+  {jobRef:"ZELO000004", customer:"MTN Nigeria", serviceId:"VA-AFH-IMPORT", route:"Shenzhen → Lagos", mode:"Air Import", serviceType:"Air Freight", status:"Cancelled", ownerId:"u4", supportingOwnerIds:["u1"], done:3, lead:1, quoteRef:"OP-QT-8701", bl:"MAWB-176-882130", incoterm:"FCA", origin:"Shenzhen, China", destination:"Lagos, Nigeria", pol:"Shenzhen Bao'an Airport", pod:"Murtala Muhammed Airport"},
+  {jobRef:"ZELO000005", customer:"Dufil Prima Foods", serviceId:"OE-FULL", route:"Lagos → Douala", mode:"Ocean Export", serviceType:"FCL", status:"Active", ownerId:"u5", supportingOwnerIds:["u2", "u3"], done:14, lead:3, quoteRef:"OP-QT-8650", bl:"OOLU2384910X", incoterm:"CIF", origin:"Lagos, Nigeria", destination:"Douala, Cameroon", pol:"Apapa Port, Lagos", pod:"Port of Douala"},
+  {jobRef:"ZELO000006", customer:"Nigerian Breweries", serviceId:"OI-H", route:"Antwerp → Lagos", mode:"Ocean Import", serviceType:"FCL", status:"Completed", ownerId:"u6", supportingOwnerIds:[], done:99, lead:-20, quoteRef:"OP-QT-8590", bl:"APLU5567234B", incoterm:"CIF", origin:"Antwerp, Belgium", destination:"Lagos, Nigeria", pol:"Port of Antwerp", pod:"Apapa Port, Lagos"},
+  {jobRef:"ZELO000007", customer:"Olam Agri", serviceId:"OE-OF", route:"Lagos → Antwerp", mode:"Ocean Export", serviceType:"FCL", status:"Active", ownerId:"u2", supportingOwnerIds:["u4", "u5"], done:4, lead:3.5, quoteRef:"OP-QT-8920", bl:"MSCULOS734520", incoterm:"FOB", origin:"Lagos, Nigeria", destination:"Antwerp, Belgium", pol:"Apapa Port, Lagos", pod:"Port of Antwerp"},
+  {jobRef:"ZELO000008", customer:"Cadbury Nigeria", serviceId:"OE-OFCBT", route:"Lagos → Rotterdam", mode:"Ocean Export", serviceType:"FCL", status:"Active", ownerId:"u3", supportingOwnerIds:["u6"], done:10, lead:-1.5, quoteRef:"OP-QT-8940", bl:"HLCULOS118342", incoterm:"FOB", origin:"Lagos, Nigeria", destination:"Rotterdam, Netherlands", pol:"Tin Can Island Port, Lagos", pod:"Port of Rotterdam"},
+  {jobRef:"ZELO000009", customer:"Indorama Eleme Petrochemicals", serviceId:"OE-CBT", route:"Port Harcourt → Houston", mode:"Ocean Export", serviceType:"FCL", status:"Active", ownerId:"u1", supportingOwnerIds:["u4"], done:6, lead:1, quoteRef:"OP-QT-8951", bl:"MAEUONN204417", incoterm:"FOB", origin:"Port Harcourt, Nigeria", destination:"Houston, USA", pol:"Onne Port", pod:"Port of Houston"},
+  {jobRef:"ZELO000010", customer:"Guinness Nigeria", serviceId:"OE-OFH", route:"Lagos → Abidjan", mode:"Ocean Export", serviceType:"FCL", status:"Active", ownerId:"u6", supportingOwnerIds:["u2"], done:8, lead:4, quoteRef:"OP-QT-8963", bl:"CMAULKK330915", incoterm:"CFR", origin:"Lagos, Nigeria", destination:"Abidjan, Côte d'Ivoire", pol:"Lekki Deep Sea Port", pod:"Port of Abidjan"},
+  {jobRef:"ZELO000011", customer:"Notore Chemical Industries", serviceId:"OE-HCBT", route:"Port Harcourt → Santos", mode:"Ocean Export", serviceType:"Break Bulk", status:"Active", ownerId:"u4", supportingOwnerIds:["u3", "u5"], done:5, lead:0.5, quoteRef:"OP-QT-8970", bl:"GRIMONN557201", incoterm:"FOB", origin:"Port Harcourt, Nigeria", destination:"Santos, Brazil", pol:"Onne Port", pod:"Port of Santos", openFlag:"Truck held at the Onne checkpoint; awaiting escort clearance."},
+  {jobRef:"ZELO000012", customer:"Presco Plc", serviceId:"OE-H", route:"Lagos → Rotterdam", mode:"Ocean Export", serviceType:"FCL", status:"Active", ownerId:"u5", supportingOwnerIds:["u1"], done:3, lead:3, quoteRef:"OP-QT-8977", bl:"MSCULOS990214", incoterm:"FOB", origin:"Lagos, Nigeria", destination:"Rotterdam, Netherlands", pol:"Apapa Port, Lagos", pod:"Port of Rotterdam"},
+  {jobRef:"ZELO000013", customer:"Jumia Nigeria", serviceId:"VA-AF-IMPORT", route:"Dubai → Lagos", mode:"Air Import", serviceType:"Air Freight", status:"Active", ownerId:"u2", supportingOwnerIds:["u6"], done:4, lead:1.5, quoteRef:"OP-QT-8981", bl:"MAWB-176-551038", incoterm:"EXW", origin:"Dubai, UAE", destination:"Lagos, Nigeria", pol:"Dubai International Airport", pod:"Murtala Muhammed Airport"},
+  {jobRef:"ZELO000014", customer:"Huawei Technologies Nigeria", serviceId:"VA-H-IMPORT", route:"Shenzhen → Abuja", mode:"Air Import", serviceType:"Air Freight", status:"Active", ownerId:"u4", supportingOwnerIds:["u2"], done:4, lead:1, quoteRef:"OP-QT-8984", bl:"MAWB-784-300912", incoterm:"DAP", origin:"Shenzhen, China", destination:"Abuja, Nigeria", pol:"Shenzhen Bao'an Airport", pod:"Nnamdi Azikiwe International Airport"},
+  {jobRef:"ZELO000015", customer:"Emzor Pharmaceuticals", serviceId:"VA-CBT-IMPORT", route:"Mumbai → Lagos", mode:"Air Import", serviceType:"Air Freight", status:"Active", ownerId:"u6", supportingOwnerIds:["u3"], done:7, lead:0.4, quoteRef:"OP-QT-8990", bl:"MAWB-098-114522", incoterm:"FCA", origin:"Mumbai, India", destination:"Lagos, Nigeria", pol:"Chhatrapati Shivaji Maharaj International Airport", pod:"Murtala Muhammed Airport", openFlag:"NAFDAC permit not yet uploaded by the customer."},
+  {jobRef:"ZELO000016", customer:"Fidson Healthcare", serviceId:"VA-AFCBT-IMPORT", route:"Frankfurt → Lagos", mode:"Air Import", serviceType:"Air Freight", status:"Active", ownerId:"u1", supportingOwnerIds:["u5"], done:8, lead:2, quoteRef:"OP-QT-8994", bl:"MAWB-020-773109", incoterm:"EXW", origin:"Frankfurt, Germany", destination:"Lagos, Nigeria", pol:"Frankfurt Airport", pod:"Murtala Muhammed Airport"},
+  {jobRef:"ZELO000017", customer:"Transsion Holdings", serviceId:"VA-HCBT-IMPORT", route:"Hong Kong → Lagos", mode:"Air Import", serviceType:"Air Freight", status:"Active", ownerId:"u3", supportingOwnerIds:["u4"], done:9, lead:-0.8, quoteRef:"OP-QT-9002", bl:"MAWB-160-448203", incoterm:"FCA", origin:"Hong Kong", destination:"Lagos, Nigeria", pol:"Hong Kong International Airport", pod:"Murtala Muhammed Airport"},
+  {jobRef:"ZELO000018", customer:"Seplat Energy", serviceId:"VA-FULL-IMPORT", route:"Houston → Port Harcourt", mode:"Air Import", serviceType:"Air Freight", status:"Active", ownerId:"u4", supportingOwnerIds:["u2"], done:10, lead:-1, quoteRef:"OP-QT-8932", bl:"MAWB-001-447820", incoterm:"EXW", origin:"Houston, USA", destination:"Port Harcourt, Nigeria", pol:"George Bush Intercontinental Airport", pod:"Port Harcourt International Airport", openFlag:"Customs yet to release; awaiting PAAR confirmation."},
+  {jobRef:"ZELO000019", customer:"Tolaram Group", serviceId:"VA-AF-EXPORT", route:"Lagos → Singapore", mode:"Air Export", serviceType:"Air Freight", status:"Active", ownerId:"u5", supportingOwnerIds:["u6"], done:3, lead:2, quoteRef:"OP-QT-9010", bl:"MAWB-618-220415", incoterm:"FCA", origin:"Lagos, Nigeria", destination:"Singapore", pol:"Murtala Muhammed Airport", pod:"Singapore Changi Airport"},
+  {jobRef:"ZELO000020", customer:"Afrigold Cashew", serviceId:"VA-H-EXPORT", route:"Lagos → Dubai", mode:"Air Export", serviceType:"Air Freight", status:"Active", ownerId:"u2", supportingOwnerIds:["u1"], done:3, lead:3, quoteRef:"OP-QT-9015", bl:"MAWB-176-902317", incoterm:"FCA", origin:"Lagos, Nigeria", destination:"Dubai, UAE", pol:"Murtala Muhammed Airport", pod:"Dubai International Airport"},
+  {jobRef:"ZELO000021", customer:"Sahel Leather Works", serviceId:"VA-CBT-EXPORT", route:"Kano → Milan", mode:"Air Export", serviceType:"Air Freight", status:"Active", ownerId:"u3", supportingOwnerIds:["u5"], done:4, lead:-1, quoteRef:"OP-QT-9021", bl:"MAWB-055-310877", incoterm:"FCA", origin:"Kano, Nigeria", destination:"Milan, Italy", pol:"Mallam Aminu Kano International Airport", pod:"Milan Malpensa Airport"},
+  {jobRef:"ZELO000022", customer:"Unilever Nigeria", serviceId:"VA-AFH-EXPORT", route:"Lagos → London", mode:"Air Export", serviceType:"Air Freight", status:"Active", ownerId:"u2", supportingOwnerIds:["u5", "u6"], done:5, lead:1, quoteRef:"OP-QT-8952", bl:"MAWB-125-903311", incoterm:"FCA", origin:"Lagos, Nigeria", destination:"London, United Kingdom", pol:"Murtala Muhammed Airport", pod:"London Heathrow Airport", openFlag:"Airline offloaded the cargo to the next flight for lack of space."},
+  {jobRef:"ZELO000023", customer:"House of Adire", serviceId:"VA-AFCBT-EXPORT", route:"Lagos → Paris", mode:"Air Export", serviceType:"Air Freight", status:"Active", ownerId:"u6", supportingOwnerIds:["u4"], done:6, lead:2.5, quoteRef:"OP-QT-9030", bl:"MAWB-057-661204", incoterm:"DAP", origin:"Lagos, Nigeria", destination:"Paris, France", pol:"Murtala Muhammed Airport", pod:"Paris Charles de Gaulle Airport"},
+  {jobRef:"ZELO000024", customer:"Nigeria LNG", serviceId:"VA-HCBT-EXPORT", route:"Port Harcourt → Aberdeen", mode:"Air Export", serviceType:"Air Freight", status:"Active", ownerId:"u1", supportingOwnerIds:["u3"], done:5, lead:1, quoteRef:"OP-QT-9036", bl:"MAWB-125-118830", incoterm:"FCA", origin:"Port Harcourt, Nigeria", destination:"Aberdeen, United Kingdom", pol:"Port Harcourt International Airport", pod:"Aberdeen Airport"},
+  {jobRef:"ZELO000025", customer:"Valency Agro", serviceId:"VA-FULL-EXPORT", route:"Lagos → Amsterdam", mode:"Air Export", serviceType:"Air Freight", status:"Active", ownerId:"u4", supportingOwnerIds:["u6"], done:6, lead:3, quoteRef:"OP-QT-9041", bl:"MAWB-074-552019", incoterm:"FCA", origin:"Lagos, Nigeria", destination:"Amsterdam, Netherlands", pol:"Murtala Muhammed Airport", pod:"Amsterdam Schiphol Airport"},
+  {jobRef:"ZELO000026", customer:"Lafarge Africa", serviceId:"VA-OTHER", route:"Lomé → Cotonou", mode:"Haulage", serviceType:"Break Bulk", status:"Active", ownerId:"u1", supportingOwnerIds:["u4"], done:3, lead:1.2, quoteRef:"OP-QT-8911", bl:"CMR-LFW-20931", incoterm:"DAP", origin:"Lomé, Togo", destination:"Cotonou, Benin", pol:"Port of Lom\u00e9", pod:"Port of Cotonou"},
+  {jobRef:"ZELO000027", customer:"Coscharis Motors", serviceId:"AI-OF-AUTO", route:"Baltimore → Lagos", mode:"Ocean Import", serviceType:"Ro-Ro", status:"Active", ownerId:"u5", supportingOwnerIds:["u2"], done:4, lead:2, quoteRef:"OP-QT-9048", bl:"GRIMBAL771045", incoterm:"CIF", origin:"Baltimore, USA", destination:"Lagos, Nigeria", pol:"Port of Baltimore", pod:"Tin Can Island Port, Lagos"},
 ];
 
 const SHIPMENTS = {};
@@ -2068,7 +2063,8 @@ function renderShipmentsList(){
   const list = Object.values(SHIPMENTS).filter(s=>{
     if(!q) return true;
     const names = ownersOf(s).all.map(o=>o.name.toLowerCase()).join(' ');
-    return s.jobRef.toLowerCase().includes(q) || names.includes(q);
+    const p = productOf(s);
+    return [s.jobRef, s.customer, p.tier1, p.tier2, s.serviceId].some(v=>String(v).toLowerCase().includes(q)) || names.includes(q);
   });
   el('shipments-count-label').textContent = `${list.length} shipment${list.length!==1?'s':''}${q ? ' matching "'+state.searchQuery.trim()+'"' : ''}`;
 
@@ -2079,6 +2075,7 @@ function renderShipmentsList(){
     <tr class="clickable" data-jobref="${s.jobRef}">
       <td><b style="color:var(--green-dark);font-family:var(--font-display);font-weight:600">${s.jobRef}</b></td>
       <td>${s.customer}</td>
+      <td><div class="list-tier1">${productOf(s).tier1}</div><div class="list-tier2">${productOf(s).tier2}</div></td>
       <td>${locodeOf(s.pol)}</td>
       <td>${locodeOf(s.pod)}</td>
       <td><span class="chip chip-neutral">${transportLabelOf(s)}</span></td>
@@ -2091,7 +2088,7 @@ function renderShipmentsList(){
         </div>
       </td>
     </tr>`;
-  }).join('') || `<tr><td colspan="8" style="text-align:center;color:var(--silver-light);padding:40px">No shipments match your search.</td></tr>`;
+  }).join('') || `<tr><td colspan="9" style="text-align:center;color:var(--silver-light);padding:40px">No shipments match your search.</td></tr>`;
 }
 
 /* ==========================================================================
@@ -2144,6 +2141,8 @@ function renderShipHeader(){
         <div class="v">${s.customer}</div>
       </div>
       <span class="strip-divider"></span>
+      <div class="strip-cell"><div class="k">Product</div><div class="v">${productOf(s).tier1}<span class="strip-sub">${productOf(s).tier2}</span></div></div>
+      <span class="strip-divider"></span>
       <div class="strip-cell"><div class="k">Transport Mode</div><div class="v">${transportLabelOf(s)}</div></div>
       <span class="strip-divider"></span>
       <div class="strip-cell"><div class="k">POL</div><div class="v">${locodeOf(s.pol)}</div></div>
@@ -2163,6 +2162,8 @@ function renderShipDetailFields(){
     [`${ICON_BUILDING}<span>Customer</span>`, s.customer],
     ['Quote Reference', `<a href="#" class="quote-link" data-quote-link>${s.quoteRef}</a>`],
     ['Bill of Lading (B/L)', s.bl],
+    ['Product (Tier 1)', productOf(s).tier1],
+    ['Service Combination (Tier 2)', `${productOf(s).tier2}<div class="v-sub">${s.serviceId} · ${escapeHtml(productOf(s).sourceStatus)}</div>`],
     ['Transport Mode', s.mode],
     ['Shipment Type', shipmentTypeOf(s)],
     ['Service Type', s.serviceType],
@@ -2222,8 +2223,20 @@ function resolveTaskOwners(s, responsibility){
 
 function renderServiceDelivery(){
   const s = currentShipment();
-  el('service-delivery-template-pill').textContent = templateLabelOf(s);
-  el('service-delivery-tbody').innerHTML = s.milestones.map(m=>{
+  const p = productOf(s);
+  el('service-delivery-template-pill').textContent = `${p.tier1} · ${p.tier2}`;
+  const rows = [];
+  PROGRESS_STAGES.forEach(stage=>{
+    const ms = s.milestones.filter(m=>m.stage===stage);
+    if(!ms.length) return;
+    const done = ms.filter(m=>m.status==='Completed').length;
+    rows.push(`<tr class="sd-stage-row"><td colspan="5"><span class="sd-stage-name">${stage}</span><span class="sd-stage-count">${done} of ${ms.length} done</span></td></tr>`);
+    ms.forEach(m=>rows.push(renderServiceDeliveryRow(s, m)));
+  });
+  el('service-delivery-tbody').innerHTML = rows.join('');
+}
+
+function renderServiceDeliveryRow(s, m){
     const owners = resolveTaskOwners(s, m.responsibility);
     const isDone = m.status==='Completed';
     const liveHealth = isDone ? null : computeLiveSlaHealth(m.dueDate);
@@ -2232,17 +2245,22 @@ function renderServiceDelivery(){
     let historyNote = '';
     if(isDone && m.completedSlaHealth==='Breached') historyNote = '<div class="sla-history-note breach">⚠ After Breach</div>';
     else if(isDone && m.completedSlaHealth==='At-Risk') historyNote = '<div class="sla-history-note at-risk">⚠ Completed While At-Risk</div>';
-    const ownerCell = owners.length
-      ? `<div class="task-owner-cell">${owners.map(o=>`<div class="owner-pill"><div class="avatar avatar-sm" style="${avatarFillStyle(o.fill)}">${o.initials}</div><span>${o.name.split(' ')[0]}</span></div>`).join('')}</div>`
-      : `<span class="task-owner-unassigned">Unassigned</span>`;
+    const ownerCell = (isExternalOwner(m.responsibility)
+      ? `<span class="task-owner-external">External</span>`
+      : owners.length
+        ? `<div class="task-owner-cell">${owners.map(o=>`<div class="owner-pill"><div class="avatar avatar-sm" style="${avatarFillStyle(o.fill)}">${o.initials}</div><span>${o.name.split(' ')[0]}</span></div>`).join('')}</div>`
+        : `<span class="task-owner-unassigned">Unassigned</span>`)
+      + `<div class="task-owner-role">${escapeHtml(m.responsibility)}</div>`;
+    const draftBadge = m.draft ? `<span class="task-draft-badge" title="Not yet in an SOP: written from the nearest SOP for the team to check">Draft</span>` : '';
+    const condLine = m.condition ? `<div class="task-cond">Only if: ${escapeHtml(m.condition)}</div>` : '';
     const flagCount = (m.flagHistory||[]).length;
     const flagBadge = m.flagged ? `<span class="task-flag-badge">${ICON_FLAG} ${flagCount} Flag${flagCount===1?'':'s'}</span>` : '';
     const viewBtn = `<button class="btn btn-ghost btn-icon" data-view-ms="${m.id}" title="View task details">${ICON_EYE}</button>`;
     return `
     <tr class="${rowClass}">
-      <td><b class="task-name">${m.name}</b>${flagBadge}</td>
+      <td><div class="task-title"><span class="task-no">${m.no}</span><b class="task-name">${escapeHtml(m.name)}</b>${draftBadge}${flagBadge}</div>${condLine}</td>
       <td>${ownerCell}</td>
-      <td class="due-cell">${dueLabel}</td>
+      <td class="due-cell">${dueLabel}<div class="task-sla">${m.slaLabel ? escapeHtml(m.slaLabel) : 'SLA not set'}</div></td>
       <td>
         <span class="chip ${isDone?'chip-success':'chip-neutral'}">${m.status}</span>
         ${historyNote}
@@ -2254,7 +2272,6 @@ function renderServiceDelivery(){
         </div>
       </td>
     </tr>`;
-  }).join('');
 }
 
 function renderShipmentTracking(){
@@ -2583,7 +2600,7 @@ el('save-update-status').addEventListener('click', ()=>{
 
 /* --- Edit Shipment --- */
 const TRANSPORT_MODE_OPTIONS = ['Ocean Import','Ocean Export','Air Import','Air Export','Haulage'];
-const SERVICE_TYPE_OPTIONS = ['FCL','LCL','Break Bulk','Air Freight'];
+const SERVICE_TYPE_OPTIONS = ['FCL','LCL','Break Bulk','Ro-Ro','Air Freight'];
 const INCOTERM_OPTIONS = ['EXW','FCA','FOB','CFR','CIF','DAP','DDP'];
 
 const EDIT_SHIPMENT_FIELDS = [
@@ -2746,7 +2763,7 @@ function renderMilestoneModal(){
   el('ms-history-chip').innerHTML = historyChip;
   const flagCount = (m.flagHistory||[]).length;
   el('ms-flag-chip').innerHTML = m.flagged ? `<span class="chip chip-error">${ICON_FLAG} ${flagCount} Flag${flagCount===1?'':'s'}</span>` : '';
-  el('ms-sla-label').textContent = m.slaLabel ? `SLA: ${m.slaLabel}` : (m.slaDays ? `SLA: ${m.slaDays} working day${m.slaDays===1?'':'s'}` : '');
+  el('ms-sla-label').textContent = m.slaLabel ? `SLA: ${m.slaLabel}` : `SLA not set${m.slaNotSetReason ? ' ('+m.slaNotSetReason+')' : ''}`;
 
   const ownerTeam = isDone ? TEAM.find(t=>t.name===m.completedBy) : null;
   el('ms-info-grid').innerHTML = `
@@ -2764,8 +2781,18 @@ function renderMilestoneModal(){
     </div>
     <div>
       <div class="k">Required Role</div>
-      <div class="v">${escapeHtml(m.responsibility)}</div>
+      <div class="v">${escapeHtml(m.responsibility)}${isExternalOwner(m.responsibility) ? ' (external)' : ''}</div>
     </div>`;
+  const listOf = a => a && a.length ? a.map(escapeHtml).join(', ') : '—';
+  el('ms-workbook').innerHTML = `
+    <div class="k">Stage</div><div class="v">${escapeHtml(m.stage)} · task ${m.no} · ${escapeHtml(m.module||'')}</div>
+    <div class="k">Expected outcome</div><div class="v">${escapeHtml(m.expectedOutcome||'—')}</div>
+    <div class="k">Documents</div><div class="v">${listOf(m.documents)}</div>
+    <div class="k">Works with</div><div class="v">${listOf(m.worksWith)}</div>
+    <div class="k">Hands off to</div><div class="v">${listOf(m.handsOffTo)}</div>
+    ${m.condition ? `<div class="k">Only if</div><div class="v">${escapeHtml(m.condition)}</div>` : ''}
+    ${m.lekkiVariant ? `<div class="k">At Lekki</div><div class="v">${escapeHtml(m.lekkiVariant)}</div>` : ''}
+    ${m.draft ? `<div class="draft">Draft task: not yet in any SOP. It was written from the nearest SOP and needs the team to check it.</div>` : ''}`;
 
   el('input-milestone-comment').value = m.comment || '';
 
@@ -3340,63 +3367,11 @@ el('comm-search-input').addEventListener('input', (e)=>{
    render rolls the live milestone list up into the key milestones leadership
    has chosen, so a Mark Complete or a Flag in Progress shows up here.
    ========================================================================== */
-const LD_TPL = {
-  oi:{label:'Ocean Import', tasks:OCEAN_IMPORT_TEMPLATE},
-  oe:{label:'Ocean Export', tasks:OCEAN_EXPORT_TEMPLATE},
-  ai:{label:'Air Import', tasks:AIR_IMPORT_TEMPLATE},
-  ae:{label:'Air Export', tasks:AIR_EXPORT_TEMPLATE},
-};
-const LD_ORDER = ['oi','oe','ai','ae'];
-function ldTplOf(s){
-  const air = s.mode.includes('Air'), exp = s.mode.includes('Export');
-  return air ? (exp?'ae':'ai') : (exp?'oe':'oi');
-}
-// Leadership sees four lifecycle phases for every shipment. Each Service
-// Delivery task (the same ones Ops completes in the Progress tab) belongs to
-// one phase; a phase completes when all of its tasks are completed.
+// Leadership phases are the Service Workbook stages of each task
 const LD_PHASES = ['Prospect','Pre-Booking','Booking','Post Booking'];
-const LD_DEFAULT_MAP = (()=>{
-  const m = {};
-  const assign = (tpl, groups) => { m[tpl] = {}; groups.forEach((names,p)=>names.forEach(n=>{ m[tpl][n] = p; })); };
-  assign('oi', [
-    ['Pre-Arrival'],
-    ['Documentation','Compliance','Rotation No.','D/F Assessment'],
-    ['Duty Payment','Arrival','Shipping Payment','Terminal','Examination','Customs Release','TDO'],
-    ['Haulage','Delivery','Empty Return','Closure'],
-  ]);
-  assign('oe', [
-    [],
-    ['Booking'],
-    ['Empty Deployment','Stuffing','Gate-In','Terminal','Customs','Shipping Line','Submit Export Docs'],
-    ['Vessel','Post-Shipment','Closure'],
-  ]);
-  assign('ai', [
-    ['Receive Pre-Alert'],
-    ['Review AWB & Shipment Documents','Track Cargo Arrival'],
-    ['Sight Shipment','Coordinate Terminal Handling','Customs Clearance & Release','Confirm Shipment Out of Shed'],
-    ['Delivery','Waybill','Reconcile Shipment Costs','Update & Upload Docs','Close Shipment'],
-  ]);
-  assign('ae', [
-    ['Receive Client Booking'],
-    ['Validate Commercial Documents','Confirm Cargo Details','Confirm Airline Schedule & Space'],
-    ['Obtain Booking Confirmation','Coordinate Cargo Pickup','Complete Export Documentation','Coordinate Customs Processing','Deliver Cargo to Airline/Terminal','Confirm AWB Issuance'],
-    ['Monitor Flight Departure','Send Pre-Alert / Shipping Documents','Update & Upload Docs','Close Shipment'],
-  ]);
-  return m;
-})();
-const LD_STORE = 'oneport-leadership-phases-v1';
-function ldClone(o){ return JSON.parse(JSON.stringify(o)); }
-function ldLoadMap(){
-  try{ const raw = localStorage.getItem(LD_STORE); if(raw){ const k = JSON.parse(raw); if(LD_ORDER.every(t=>k[t])) return k; } }catch(e){}
-  return ldClone(LD_DEFAULT_MAP);
-}
-let LD_MAP = ldLoadMap();
-function ldPhaseOf(tpl, name){ const p = LD_MAP[tpl] && LD_MAP[tpl][name]; return (p===undefined || p===null) ? 3 : p; }
-// Product tiers: Tier 1 is the OnePort product, Tier 2 the freight service within it
-function ldProduct(s){
-  return { tier1: templateLabelOf(s), tier2: s.mode.includes('Air') ? 'Air Freight' : `Ocean ${s.serviceType||'Freight'}` };
-}
-const ldState = { q:'', open:null, cfgTpl:'oi', draft:null };
+const LD_STAGE_INDEX = {'Prospecting':0, 'Pre-Booking':1, 'Booking':2, 'Post-Booking':3};
+function ldProduct(s){ const p = productOf(s); return { tier1:p.tier1, tier2:p.tier2 }; }
+const ldState = { q:'', open:null };
 const ldHas = (o,k) => Object.prototype.hasOwnProperty.call(o,k);
 const ldDone = m => m.status === 'Completed';
 const LD_SEV = {breached:4, atrisk:3, ontrack:2, upcoming:1, late:0, done:0, na:0};
@@ -3427,9 +3402,8 @@ function ldLastFlag(m){ const h = m.flagHistory||[]; return h.length ? h[h.lengt
 function ldOwnerOf(s, m){ return resolveTaskOwners(s, m.responsibility)[0] || null; }
 
 function ldStages(s){
-  const tpl = ldTplOf(s);
   return LD_PHASES.map((label,p)=>{
-    const tasks = s.milestones.filter(m=>ldPhaseOf(tpl, m.name)===p);
+    const tasks = s.milestones.filter(m=>LD_STAGE_INDEX[m.stage]===p);
     return {label, phase:p, tasks, trigger: tasks.length ? tasks[tasks.length-1] : null};
   });
 }
@@ -3460,7 +3434,8 @@ function ldAnalyse(s){
   const tracked = keys.filter(k=>k.trigger);
   const worst = tracked.reduce((w,k)=> LD_SEV[k.ev.state] > LD_SEV[w] ? k.ev.state : w, 'done');
   const health = worst==='breached' ? 'breached' : worst==='atrisk' ? 'atrisk' : tracked.every(k=>k.tasks.every(ldDone)) ? 'complete' : 'ontrack';
-  return {stages, keys, health, done: s.milestones.filter(ldDone).length, total: s.milestones.length};
+  const team = progressMilestones(s);
+  return {stages, keys, health, done: team.filter(ldDone).length, total: team.length};
 }
 
 function ldGlyph(state, flagged){
@@ -3547,7 +3522,7 @@ function renderLeadershipDrawer(){
                 return `<div class="ld-task">
                   <span class="tick ${done?'on':''}">${done ? LD_ICON.check : ''}</span>
                   <div><div class="tn">${escapeHtml(m.name)}</div>
-                    <div class="tm">${owner ? escapeHtml(owner.name) : 'Unassigned'} · ${escapeHtml(m.responsibility)}</div>
+                    <div class="tm">${owner ? escapeHtml(owner.name)+' · ' : (isProgressStage(m.stage) && !isExternalOwner(m.responsibility) ? 'Unassigned · ' : '')}${escapeHtml(m.responsibility)}</div>
                     ${!done && m.flagged && flag ? `<div class="tf">⚑ ${escapeHtml(flag.note)} <span style="color:var(--silver-light)">— ${escapeHtml(flag.by)}, ${formatDateTime(new Date(flag.at))}</span></div>` : ''}
                   </div>${right}</div>`;
               }).join('')}
@@ -3563,20 +3538,6 @@ function renderLeadershipDrawer(){
 function ldOpenDrawer(ref){ ldState.open = ref; renderLeadershipDrawer(); el('ld-overlay').hidden = false; el('ld-drawer').hidden = false; }
 function ldCloseDrawer(){ ldState.open = null; el('ld-overlay').hidden = true; el('ld-drawer').hidden = true; }
 
-function renderLeadershipConfig(){
-  const t = ldState.cfgTpl, d = ldState.draft[t], tasks = LD_TPL[t].tasks;
-  el('ld-config-body').innerHTML = `
-    <div class="ld-cfg-tabs">${LD_ORDER.map(x=>`<button type="button" class="${x===t?'on':''}" data-ld-cfg-tpl="${x}">${LD_TPL[x].label}</button>`).join('')}</div>
-    <div class="ld-cfg-sum">${LD_PHASES.map((p,i)=>{ const n = tasks.filter(x=>(d[x.name] ?? 3)===i).length; return `<span><b>${p}</b> ${n} task${n===1?'':'s'}</span>`; }).join('')}</div>
-    ${tasks.map((task,i)=>`<div class="ld-cfg-row">
-        <span class="n">${i+1}</span>
-        <div class="nm">${escapeHtml(task.name)}<small>${escapeHtml(task.responsibility)}${task.slaLabel ? ' · '+escapeHtml(task.slaLabel) : ''}</small></div>
-        <select class="field-control" id="ld-cfg-${t}-${i}" data-ld-cfg-phase="${escapeHtml(task.name)}" aria-label="Phase for ${escapeHtml(task.name)}">
-          ${LD_PHASES.map((p,pi)=>`<option value="${pi}" ${(d[task.name] ?? 3)===pi?'selected':''}>${p}</option>`).join('')}
-        </select>
-      </div>`).join('')}`;
-}
-
 document.addEventListener('click', (e)=>{
   const t = e.target;
   if(t.closest('[data-ld-close]') || t.id==='ld-overlay'){ ldCloseDrawer(); return; }
@@ -3584,24 +3545,6 @@ document.addEventListener('click', (e)=>{
   if(go){ ldCloseDrawer(); openShipment(go.dataset.ldGoto); switchTab('progress'); return; }
   const row = t.closest('[data-ld-ref]');
   if(row){ ldOpenDrawer(row.dataset.ldRef); return; }
-  if(t.closest('#ld-btn-config')){
-    ldState.draft = ldClone(LD_MAP);
-    ldState.cfgTpl = 'oi';
-    renderLeadershipConfig(); openModal('modal-ld-config'); return;
-  }
-  const tab = t.closest('[data-ld-cfg-tpl]');
-  if(tab){ ldState.cfgTpl = tab.dataset.ldCfgTpl; renderLeadershipConfig(); return; }
-  if(t.closest('#ld-config-reset')){ ldState.draft = ldClone(LD_DEFAULT_MAP); renderLeadershipConfig(); return; }
-  if(t.closest('#ld-config-save')){
-    LD_MAP = ldState.draft;
-    try{ localStorage.setItem(LD_STORE, JSON.stringify(LD_MAP)); }catch(err){}
-    closeModal('modal-ld-config'); renderLeadership(); showToast('Phase mapping saved'); return;
-  }
-});
-document.addEventListener('change', (e)=>{
-  const sel = e.target.closest('[data-ld-cfg-phase]'); if(!sel) return;
-  ldState.draft[ldState.cfgTpl][sel.dataset.ldCfgPhase] = +sel.value;
-  renderLeadershipConfig();
 });
 document.addEventListener('input', (e)=>{
   if(e.target.id==='ld-search'){ ldState.q = e.target.value; renderLeadership(); }
