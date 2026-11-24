@@ -613,19 +613,19 @@ details.ld-team summary::-webkit-details-marker{display:none}
       </div>
     </div>
 
-    <div class="nav-section-label">Operations</div>
+    <div class="nav-section-label">Leadership</div>
     <ul class="nav-list">
-      <li><a href="#" class="nav-item active" data-nav="shipments">
-        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="7" width="15" height="11" rx="1.5"></rect><path d="M16 10h3.5L22 13.5V18h-6"></path><circle cx="6" cy="20" r="2"></circle><circle cx="17.5" cy="20" r="2"></circle></svg>
-        Shipments
+      <li><a href="#" class="nav-item active" data-nav="leadership">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke-linecap="round"></path></svg>
+        SLA Milestones
       </a></li>
     </ul>
 
-    <div class="nav-section-label" style="margin-top:22px">Leadership</div>
+    <div class="nav-section-label" style="margin-top:22px">Operations</div>
     <ul class="nav-list">
-      <li><a href="#" class="nav-item" data-nav="leadership">
-        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke-linecap="round"></path></svg>
-        SLA Milestones
+      <li><a href="#" class="nav-item" data-nav="shipments">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="7" width="15" height="11" rx="1.5"></rect><path d="M16 10h3.5L22 13.5V18h-6"></path><circle cx="6" cy="20" r="2"></circle><circle cx="17.5" cy="20" r="2"></circle></svg>
+        Shipments
       </a></li>
     </ul>
 
@@ -681,7 +681,7 @@ details.ld-team summary::-webkit-details-marker{display:none}
       </section>
 
       <!-- ===================== LEADERSHIP: KEY SLA MILESTONES ===================== -->
-      <section class="view" id="view-leadership">
+      <section class="view active" id="view-leadership">
         <div class="page-head">
           <div>
             <h1>Key SLA Milestones</h1>
@@ -695,7 +695,7 @@ details.ld-team summary::-webkit-details-marker{display:none}
       </section>
 
       <!-- ===================== SHIPMENTS LIST ===================== -->
-      <section class="view active" id="view-shipments">
+      <section class="view" id="view-shipments">
         <div class="page-head">
           <div>
             <h1>Shipments</h1>
@@ -1992,7 +1992,7 @@ COMMUNICATIONS_MOCK.forEach(ingestCommunication);
    App state & routing
    ========================================================================== */
 const state = {
-  currentView: 'shipments',
+  currentView: 'leadership',
   currentShipmentRef: null,
   searchQuery: '',
   pendingFiles: [],
@@ -3693,8 +3693,12 @@ setInterval(()=>{ if(state.currentView==='leadership'){ renderLeadership(); if(l
    ========================================================================== */
 renderShipmentsList();
 renderBreadcrumbs();
-if(location.hash === '#leadership') navTo('leadership');
-window.addEventListener('hashchange', ()=>{ if(location.hash === '#leadership') navTo('leadership'); });
+// Leadership > SLA Milestones is the landing page; #shipments opens Operations instead
+navTo(location.hash === '#shipments' ? 'shipments' : 'leadership');
+window.addEventListener('hashchange', ()=>{
+  if(location.hash === '#leadership') navTo('leadership');
+  else if(location.hash === '#shipments') navTo('shipments');
+});
 </script>
 </body>
 </html>
